@@ -1,0 +1,105 @@
+html, body, #root {
+  height: 100%;
+  background: #03080f;
+  color: #ffffff;
+}
+
+.navBtn {
+  position: relative;
+  color: rgba(255, 255, 255, 0.63);
+}
+
+.navBtn::before {
+  height: 2px;
+  content: "";
+  position: absolute;
+  bottom: 1px;
+  left: 0px;
+  background-color: #ffffff;
+}
+
+.navBtn:hover{
+  text-shadow: 0px 0px 10px #ffffff;
+}
+
+.navBtnActive {
+  color: #ffffff;
+}
+
+.navBtnActive::before {
+  width: 100%;
+  opacity: 1;
+  bottom: -5px;
+  animation: navItemUnderline 500ms, backgroundChanger 5s infinite;
+}
+
+.colorChanger {
+  animation-duration: 15s;
+  animation-name: colorChanger;
+  animation-iteration-count: infinite;
+}
+
+@keyframes navItemUnderline {
+  from { 
+    opacity: 0;
+    bottom: -15px;
+  }
+  to {
+    opacity: 1;
+    bottom: -5px;
+  }
+}
+
+@keyframes colorChanger {
+    0% {
+      color: #69c46d;
+    }
+    14% {
+      color: #daaa3f;
+    }
+    28% {
+      color: #f59d50;
+    }
+    42% {
+      color: #f47068;
+    }
+    56% {
+      color: #fc8dc7;
+    }
+    70% {
+      color: #b083ef;
+    }
+    84% {
+      color: #6bb6ff;
+    }
+    100% {
+      color: #69c46d;
+    }
+}
+
+@keyframes backgroundChanger {
+  0% {
+    background-color: #69c46d;
+  }
+  14% {
+    background-color: #daaa3f;
+  }
+  28% {
+    background-color: #f59d50;
+  }
+  42% {
+    background-color: #f47068;
+  }
+  56% {
+    background-color: #fc8dc7;
+  }
+  70% {
+    background-color: #b083ef;
+  }
+  84% {
+    background-color: #6bb6ff;
+  }
+  100% {
+    background-color: #69c46d;
+  }
+}
