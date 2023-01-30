@@ -4,6 +4,11 @@ html, body, #root {
   color: #ffffff;
 }
 
+a {
+  text-decoration: none;
+  color: "white"
+}
+
 .navBtn {
   position: relative;
   color: rgba(255, 255, 255, 0.63);
@@ -16,6 +21,7 @@ html, body, #root {
   bottom: 1px;
   left: 0px;
   background-color: #ffffff;
+  animation: backgroundChanger 15s infinite;
 }
 
 .navBtn:hover{
@@ -30,13 +36,40 @@ html, body, #root {
   width: 100%;
   opacity: 1;
   bottom: -5px;
-  animation: navItemUnderline 500ms, backgroundChanger 5s infinite;
+  animation: navItemUnderline 500ms, backgroundChanger 15s infinite;
 }
 
 .colorChanger {
   animation-duration: 15s;
   animation-name: colorChanger;
   animation-iteration-count: infinite;
+}
+
+.connectBtnBgd {
+  animation-duration: 15s;
+  animation-iteration-count: infinite;
+  animation-name: backgroundDarkChanger;
+}
+
+.connectBtn:active .connectBtnBgd {
+  bottom: -4px;
+}
+
+.connectBtn::after {
+  content: '';
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  width: 0%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.connectBtn:hover::after {
+  width: 100%;
+  transition: all 0.4s ease-in-out;
 }
 
 @keyframes navItemUnderline {
@@ -103,3 +136,31 @@ html, body, #root {
     background-color: #69c46d;
   }
 }
+
+@keyframes backgroundDarkChanger {
+  0% {
+    background-color: #469549;
+  }
+  14% {
+    background-color: #ae7c12;
+  }
+  28% {
+    background-color: #cb6b2c;
+  }
+  42% {
+    background-color: #e5534b;
+  }
+  56% {
+    background-color: #c96198;
+  }
+  70% {
+    background-color: #8256d0;
+  }
+  84% {
+    background-color: #316dca;
+  }
+  100% {
+    background-color: #469549;
+  }
+}
+
