@@ -1,10 +1,23 @@
 import { Box, Typography } from "@mui/material";
 import { height } from "@mui/system";
-import  '../index.css';
+import "../index.css";
 export default function logo(props) {
   return (
-    <Box sx={{ height: "100%", width: "fit-content", position: "relative" }}>
-      <Typography variant="h2" sx={{ fontFamily:'\'Carter One\', cursive'}} className="colorChanger">F</Typography>
+    <Box
+      sx={{
+        height: "100%",
+        width: "fit-content",
+        position: "relative",
+        cursor: "pointer",
+      }}
+    >
+      <Typography
+        variant="h2"
+        sx={{ fontFamily: "'Carter One', cursive" }}
+        className="colorChanger"
+      >
+        F
+      </Typography>
       <Typography
         variant="subtitle1"
         sx={{
@@ -12,10 +25,10 @@ export default function logo(props) {
           top: " 28px",
           left: "-10px",
           background: "#03080f",
-          fontFamily:'\'Carter One\', cursive',
-          height:'20px',
-          display: 'flex',
-          alignItems: 'center',
+          fontFamily: "'Carter One', cursive",
+          height: "20px",
+          display: "flex",
+          alignItems: "center",
         }}
       >
         FracNL
