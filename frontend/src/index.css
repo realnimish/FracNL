@@ -185,17 +185,17 @@ a {
   }
 }
 
-#twitterIcon:hover {
+#twitterIcon {
   color: rgb(29, 155, 240);
 }
 
-#githubIcon:hover {
+#githubIcon {
   color: white;
 }
 
-#instagramIcon:hover {
+#instagramIcon {
   color: white;
-  border-radius: 5px;
+  border-radius: 8px;
   background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
   background: -webkit-radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
 }

@@ -20,7 +20,7 @@ export default function Footer(props) {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          marginBottom: "15px",
+          marginBottom: "35px",
         }}
       >
         <a href="https://github.com/realnimish/FracNL">
@@ -72,7 +72,7 @@ export default function Footer(props) {
           variant="body1"
           sx={{
             fontWeight: "400",
-            fontFamily: "'Fredoka One', cursive",
+            fontFamily: "'Ubuntu Condensed', sans-serif",
           }}
         >
           FracNL allows you to fractionalize your NFT,
@@ -90,7 +90,7 @@ export default function Footer(props) {
         <Typography
           variant="body1"
           sx={{
-            fontFamily: "'Fredoka One', cursive",
+            fontFamily: "'Ubuntu Condensed', sans-serif",
             fontWeight: "400",
           }}
         >
@@ -100,7 +100,7 @@ export default function Footer(props) {
       <Box
        component="div"
        sx={{
-        marginBottom: "30px",
+        margin: "30px 0",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
