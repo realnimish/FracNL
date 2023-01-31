@@ -35,7 +35,7 @@ export default function Footer(props) {
           />
         </a>
 
-        <a href="https://github.com/SayanKar/gencom-nft">
+        <a href="https://github.com/realnimish/FracNL">
           <GitHubIcon
             id="githubIcon"
             sx={{
@@ -47,7 +47,7 @@ export default function Footer(props) {
           />
         </a>
 
-        <a href="https://github.com/SayanKar/gencom-nft">
+        <a href="https://github.com/realnimish/FracNL">
           <InstagramIcon
             id="instagramIcon"
             sx={{
@@ -75,7 +75,7 @@ export default function Footer(props) {
             fontFamily: "'Fredoka One', cursive",
           }}
         >
-          Gencom is a platform for creating art together as a community,
+          FracNL allows you to fractionalize your NFT,
         </Typography>
       </Box>
       <Box
@@ -94,7 +94,7 @@ export default function Footer(props) {
             fontWeight: "400",
           }}
         >
-          owning art together as a community.
+          and use that as a collateral for borrowing assets.
         </Typography>
       </Box>
       <Box
