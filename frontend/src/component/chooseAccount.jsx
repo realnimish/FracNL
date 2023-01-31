@@ -22,7 +22,7 @@ export default function ChooseAccount(props) {
       const allAcc = await getAllAccounts();
       setAllAccounts(allAcc);
     }
-    tmp();
+    props.open && tmp();
   }, [props.open]);
   const handleSelectAccount = (acc) => {
     props.setActiveAccount(acc);
@@ -34,7 +34,7 @@ export default function ChooseAccount(props) {
       open={props.open}
       PaperProps={{
         sx: {
-            backgroundColor: "#03080f",
+            backgroundImage: "linear-gradient(to bottom right, #232323, #0a0a0a)",
             color: "#ffffff",
             border: "1px solid white",
         }

@@ -2,11 +2,17 @@ html, body, #root {
   height: 100%;
   background: #03080f;
   color: #ffffff;
+  margin: 0;
 }
 
 a {
   text-decoration: none;
   color: "white"
+}
+
+.app {
+  height: 100%;
+  margin: 0;
 }
 
 .navBtn {
@@ -70,6 +76,21 @@ a {
 .connectBtn:hover::after {
   width: 100%;
   transition: all 0.4s ease-in-out;
+}
+
+.card {
+  position: relative;
+  background-color: #1a1a1a69;
+  background-color: yellow;
+}
+
+.cardShadow {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  bottom: -5px;
+  right: -5px;
+  background-color: white;
 }
 
 @keyframes navItemUnderline {

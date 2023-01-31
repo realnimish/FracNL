@@ -4,7 +4,7 @@ import NavBar from './component/Navbar';
 import { useState, useEffect } from 'react';
 import { web3FromSource } from "@polkadot/extension-dapp";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-
+import Homepage from './component/HomePage';
 
 function App() {
 
@@ -33,7 +33,17 @@ function App() {
           setActiveAccount={(acc) => setActiveAccount(acc)}
         />
         <Routes >
-          <Route exact path="/" element={<>Home</>} />
+          <Route
+            exact
+            path="/"
+            element={
+              <Homepage
+                activeAccount={activeAccount}
+                contract={contract}
+                api={api}
+                signer={signer} />
+            }
+          />
           <Route exact path="/mint" element={<>Mint</>} />
           <Route exact path="/list" element={<></>} />
           <Route exact path="/fractionalise" element={<></>} />

@@ -16,7 +16,7 @@ import { cutAddress } from "../commons.js";
 import Identicon from "@polkadot/react-identicon";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import ChooseAccount from "./chooseAccount.jsx";
+import ChooseAccount from "./ChooseAccount.jsx";
 import { Link } from "react-router-dom";
 import zIndex from "@mui/material/styles/zIndex.js";
 function ConnectButton(props) {
