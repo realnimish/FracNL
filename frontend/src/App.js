@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { web3FromSource } from "@polkadot/extension-dapp";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Homepage from './component/HomePage';
+import Footer from './component/Footer';
 
 function App() {
 
@@ -51,6 +52,7 @@ function App() {
           <Route exact path="/ad" element={<></>} />
         </Routes>
       </BrowserRouter>
+      <Footer />
     </Box>
   );
 }
