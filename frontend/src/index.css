@@ -1,4 +1,6 @@
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   background: #03080f;
   color: #ffffff;
@@ -30,7 +32,7 @@ a {
   animation: backgroundChanger 15s infinite;
 }
 
-.navBtn:hover{
+.navBtn:hover {
   text-shadow: 0px 0px 10px #ffffff;
 }
 
@@ -80,79 +82,172 @@ a {
 
 .card {
   position: relative;
-  background-color: #1a1a1a69;
-  background-color: yellow;
+  background-color: #1c1d20;
+  animation: boxShadowChange 15s infinite;
 }
 
-.cardShadow {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  bottom: -5px;
-  right: -5px;
-  background-color: white;
+.cardClone {
+  opacity: 0;
+  animation: boxShadowHoverChange 15s infinite;
 }
+
+.card:hover .cardClone {
+  opacity: 1;  
+}
+
+.card:active {
+  background-color: #212224;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 10px 20px 2px inherit;
+}
+
 
 @keyframes navItemUnderline {
-  from { 
+  from {
     opacity: 0;
     bottom: -15px;
   }
+
   to {
     opacity: 1;
     bottom: -5px;
   }
 }
 
+@keyframes boxShadowHoverChange {
+  0% {
+    box-shadow: 0px 10px 20px 2px #69c46d;
+  }
+
+  14% {
+    box-shadow: 0px 10px 20px 2px #daaa3f;
+  }
+
+  28% {
+    box-shadow: 0px 10px 20px 2px #f59d50;
+  }
+
+  42% {
+    box-shadow: 0px 10px 20px 2px #f47068;
+  }
+
+  56% {
+    box-shadow: 0px 10px 20px 2px #fc8dc7;
+  }
+
+  70% {
+    box-shadow: 0px 10px 20px 2px #b083ef;
+  }
+
+  84% {
+    box-shadow: 0px 10px 20px 2px #6bb6ff;
+  }
+
+  100% {
+    box-shadow: 0px 10px 20px 2px #69c46d;
+  }
+}
+
+@keyframes boxShadowChange {
+  0% {
+    box-shadow: 0px 5px 10px 0px #69c46d;
+  }
+
+  14% {
+    box-shadow: 0px 5px 10px 0px #daaa3f;
+  }
+
+  28% {
+    box-shadow: 0px 5px 10px 0px #f59d50;
+  }
+
+  42% {
+    box-shadow: 0px 5px 10px 0px #f47068;
+  }
+
+  56% {
+    box-shadow: 0px 5px 10px 0px #fc8dc7;
+  }
+
+  70% {
+    box-shadow: 0px 5px 10px 0px #b083ef;
+  }
+
+  84% {
+    box-shadow: 0px 5px 10px 0px #6bb6ff;
+  }
+
+  100% {
+    box-shadow: 0px 5px 10px 0px #69c46d;
+  }
+}
+
 @keyframes colorChanger {
-    0% {
-      color: #69c46d;
-    }
-    14% {
-      color: #daaa3f;
-    }
-    28% {
-      color: #f59d50;
-    }
-    42% {
-      color: #f47068;
-    }
-    56% {
-      color: #fc8dc7;
-    }
-    70% {
-      color: #b083ef;
-    }
-    84% {
-      color: #6bb6ff;
-    }
-    100% {
-      color: #69c46d;
-    }
+  0% {
+    color: #69c46d;
+  }
+
+  14% {
+    color: #daaa3f;
+  }
+
+  28% {
+    color: #f59d50;
+  }
+
+  42% {
+    color: #f47068;
+  }
+
+  56% {
+    color: #fc8dc7;
+  }
+
+  70% {
+    color: #b083ef;
+  }
+
+  84% {
+    color: #6bb6ff;
+  }
+
+  100% {
+    color: #69c46d;
+  }
 }
 
 @keyframes backgroundChanger {
   0% {
     background-color: #69c46d;
   }
+
   14% {
     background-color: #daaa3f;
   }
+
   28% {
     background-color: #f59d50;
   }
+
   42% {
     background-color: #f47068;
   }
+
   56% {
     background-color: #fc8dc7;
   }
+
   70% {
     background-color: #b083ef;
   }
+
   84% {
     background-color: #6bb6ff;
   }
+
   100% {
     background-color: #69c46d;
   }
@@ -162,24 +257,31 @@ a {
   0% {
     background-color: #469549;
   }
+
   14% {
     background-color: #ae7c12;
   }
+
   28% {
     background-color: #cb6b2c;
   }
+
   42% {
     background-color: #e5534b;
   }
+
   56% {
     background-color: #c96198;
   }
+
   70% {
     background-color: #8256d0;
   }
+
   84% {
     background-color: #316dca;
   }
+
   100% {
     background-color: #469549;
   }

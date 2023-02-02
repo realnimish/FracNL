@@ -50,6 +50,7 @@ function App() {
           <Route exact path="/fractionalise" element={<></>} />
           <Route exact path="/profile" element={<></>} />
           <Route exact path="/ad" element={<></>} />
+          <Route exact path="/error" element={<>Error</>}/>
         </Routes>
       </BrowserRouter>
       <Footer />

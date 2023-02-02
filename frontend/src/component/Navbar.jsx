@@ -18,7 +18,8 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ChooseAccount from "./ChooseAccount.jsx";
 import { Link } from "react-router-dom";
-import zIndex from "@mui/material/styles/zIndex.js";
+import { useLocation } from "react-router-dom";
+
 function ConnectButton(props) {
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
@@ -28,40 +29,39 @@ function ConnectButton(props) {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  return !props.activeAccount ? (
-    <>
+  return (<>
+    <Box
+      className="connectBtn"
+      sx={{
+        fontFamily: "'Ubuntu Condensed', sans-serif",
+        backgroundColor: "rgb(255 255 255 / 44%)",
+        padding: "10px 20px",
+        cursor: "pointer",
+        width: "fit-content",
+        margin: "0 11.8px",
+        position: !props.activeAccount ? "relative":"absolute",
+        opacity: !props.activeAccount ? 1 : 0,
+        zIndex: !props.activeAccount ? "auto": -1,
+      }}
+      onClick={() => !props.activeAccount && props.handleOpen()}
+    >
+      Connect Wallet
       <Box
-        className="connectBtn"
+        className="connectBtnBgd"
         sx={{
-          fontFamily: "'Ubuntu Condensed', sans-serif",
-          backgroundColor: "rgb(255 255 255 / 44%)",
-          padding: "10px 20px",
-          cursor: "pointer",
-          position: "relative",
-          width: "fit-content",
-          margin: "0 11.8px",
+          position: "absolute",
+          bottom: "-6px",
+          right: "-5px",
+          backgroundColor: "#c93a37",
+          height: "110%",
+          width: "107%",
+          zIndex: "-1",
+          filter: "blur(3px)",
         }}
-        onClick={() => props.handleOpen()}
-      >
-        Connect Wallet
-        <Box
-          className="connectBtnBgd"
-          sx={{
-            position: "absolute",
-            bottom: "-6px",
-            right: "-5px",
-            backgroundColor: "#c93a37",
-            height: "110%",
-            width: "107%",
-            zIndex: "-1",
-            filter: "blur(3px)",
-          }}
-          tabIndex={"2"}
-        ></Box>
-      </Box>
-    </>
-  ) : (
-    <>
+        tabIndex={"2"}
+      ></Box>
+    </Box>
+  
       <Box
         className="connectedBtn"
         sx={{
@@ -74,6 +74,7 @@ function ConnectButton(props) {
           alignItems: "center",
           justifyContent: "center",
           color: "white",
+          display: !props.activeAccount ? "none": "flex",
         }}
         id="profile"
         aria-controls={openMenu ? "profile-menu" : undefined}
@@ -148,16 +149,16 @@ function ConnectButton(props) {
 }
 
 export default function NavBar(props) {
+  const location = useLocation();
   const navItems = [
     { text: "Home", link: "/" },
     { text: "Fractionalise", link: "/fractionalise" },
     { text: "Mint", link: "/mint" },
     { text: "Create an Ad", link: "/list" },
   ];
-  const [activeTab, setActiveTab] = useState("Home");
+  const [activeTab, setActiveTab] = useState(navItems.filter(item => { return location.pathname === item.link})[0]?.text);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [openChooseAccount, setOpenChooseAccount] = useState(false);
-
   const setSelectedAccount = (acc) => {
     props.setActiveAccount(acc);
   };

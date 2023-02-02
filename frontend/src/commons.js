@@ -9,7 +9,7 @@ export async function getAllAccounts() {
     return allAccounts;
 }
 
-export function cutAddress(addr) {
+export function cutAddress(addr, front = 5, back = 4) {
     if(!addr) return "";
-    return addr.substring(0,5) + "..." + addr.substring(addr.length - 4);
+    return addr.substring(0,front) + "..." + addr.substring(addr.length - back);
 } 
