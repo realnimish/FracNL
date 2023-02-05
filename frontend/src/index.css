@@ -1,7 +1,8 @@
 html,
 body,
 #root {
-  height: 100%;
+  min-height: 100%;
+  height: fit-content;
   background: #03080f;
   color: #ffffff;
   margin: 0;
@@ -92,7 +93,7 @@ a {
 }
 
 .card:hover .cardClone {
-  opacity: 1;  
+  opacity: 1;
 }
 
 .card:active {
@@ -102,6 +103,176 @@ a {
 .card:hover {
   transform: translateY(-5px);
   box-shadow: 0px 10px 20px 2px inherit;
+}
+
+.listingDetail {
+  padding-top: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.detailBox {
+  min-width: 300px;
+  max-width: 700px;
+  width: 80%;
+  background-color: #212224;
+  min-height: 400px;
+  height: fit-content;
+  margin-top: 30px;
+  border-radius: 40px;
+  flex-wrap: wrap;
+  display: flex;
+  justify-content: space-around;
+  animation: boxShadowDetailsChange 15s infinite;
+  padding: 20px;
+}
+
+.detailBoxLeft {
+  
+}
+
+.detailBoxRight {
+  width: 300px;
+  margin: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  height: fit-content;
+}
+
+.detailImage {
+  width: 300px;
+  height: 300px;
+  border-radius: 30px;
+}
+
+.btn {
+  padding: 10px;
+  border: 2px solid;
+  width: fit-content;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  top: 120%;
+  left: 22%;
+  pointer-events: none;
+  width: 60%;
+  height: 60%;
+  transform: perspective(1em) rotateX(40deg) scale(1, 0.35);
+  filter: blur(1em);
+  opacity: 0.7;
+}
+
+.btn-red {
+  border-color: #f47068;
+  color: #f47068;
+  text-shadow: 0px 0px 3px #f47068;
+  box-shadow: inset 0px 0px 7px 0px #f47068, 0px 0px 7px 0px #f47068;
+  position: relative;
+}
+
+.btn-red::before{
+  background-color: #f47068;
+}
+
+.btn-red:hover {
+  background-color: #f47068;
+  color: #03080f;
+}
+
+.btn-red:active {
+  box-shadow: inset 0px 0px 7px 0px #f47068, 0px 0px 15px 0px #f47068;
+}
+
+.btn-green {
+  border-color: #69c46d;
+  color: #69c46d;
+  text-shadow: 0px 0px 3px #69c46d;
+  box-shadow: inset 0px 0px 7px 0px #69c46d, 0px 0px 7px 0px #69c46d;
+  position: relative;
+}
+
+.btn-green:hover {
+  background-color: #69c46d;
+  color: #03080f;
+}
+
+.btn-green:active {
+  box-shadow: inset 0px 0px 7px 0px #69c46d, 0px 0px 15px 0px #69c46d;
+}
+
+.btn-green::before{
+  background-color: #69c46d;
+}
+
+.buttonContainer {
+  margin-top: 20px;
+  display: flex;
+  justify-content: end;
+}
+
+
+.title {
+  animation: colorChanger 15s infinite;
+  text-shadow: 0px 0px 10px;
+  position: relative;
+  width: fit-content;
+  text-align: left;
+  height: fit-content;
+}
+
+.title::before {
+  content: "";
+  position: absolute;
+  top: 120%;
+  left: 22%;
+  pointer-events: none;
+  width: 60%;
+  height: 60%;
+  transform: perspective(1em) rotateX(40deg) scale(1, 0.35);
+  filter: blur(1em);
+  opacity: 0.7;
+  animation: backgroundChanger 15s infinite;
+}
+
+.offers {
+  min-width: 300px;
+  max-width: 700px;
+  width: 80%;
+  min-height: 400px;
+  height: fit-content;
+  margin-top: 80px;
+  border-radius: 30px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  
+}
+
+.offer {
+  width: 100%;
+  background-color: #212224;
+  height: 70px;
+  margin-top: 60px;
+  padding: 20px;
+  animation: boxShadowDetailsChange 15s infinite;
+  border-radius: 40px;
+}
+
+.offerDetail {
+  min-width: 300px;
+  width: 75%;
+}
+
+.offerDetailItem {
+  
 }
 
 
@@ -148,6 +319,40 @@ a {
 
   100% {
     box-shadow: 0px 10px 20px 2px #69c46d;
+  }
+}
+
+@keyframes boxShadowDetailsChange {
+  0% {
+    box-shadow: 0px 5px 37px 1px #69c46d;
+  }
+
+  14% {
+    box-shadow: 0px 5px 37px 1px #daaa3f;
+  }
+
+  28% {
+    box-shadow: 0px 5px 37px 1px #f59d50;
+  }
+
+  42% {
+    box-shadow: 0px 5px 37px 1px #f47068;
+  }
+
+  56% {
+    box-shadow: 0px 5px 37px 1px #fc8dc7;
+  }
+
+  70% {
+    box-shadow: 0px 5px 37px 1px #b083ef;
+  }
+
+  84% {
+    box-shadow: 0px 5px 37px 1px #6bb6ff;
+  }
+
+  100% {
+    box-shadow: 0px 5px 37px 1px #69c46d;
   }
 }
 

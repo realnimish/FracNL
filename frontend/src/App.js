@@ -1,11 +1,13 @@
 import './App.css';
-import { Box } from "@mui/material";
+import { Box, List } from "@mui/material";
 import NavBar from './component/Navbar';
 import { useState, useEffect } from 'react';
 import { web3FromSource } from "@polkadot/extension-dapp";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Homepage from './component/HomePage';
 import Footer from './component/Footer';
+import ListNFT from './component/ListNFT';
+import ListingDetail from './component/ListingDetail';
 
 function App() {
 
@@ -46,10 +48,10 @@ function App() {
             }
           />
           <Route exact path="/mint" element={<>Mint</>} />
-          <Route exact path="/list" element={<></>} />
+          <Route exact path="/list" element={<ListNFT/>} />
           <Route exact path="/fractionalise" element={<></>} />
           <Route exact path="/profile" element={<></>} />
-          <Route exact path="/ad" element={<></>} />
+          <Route exact path="/listing" element={<ListingDetail/>} />
           <Route exact path="/error" element={<>Error</>}/>
         </Routes>
       </BrowserRouter>
