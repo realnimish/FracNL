@@ -1,9 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use ink::{
-    prelude::vec::Vec,
-    primitives::AccountId,
-};
+use ink::{prelude::vec::Vec, primitives::AccountId};
 
 // This is the return value that we expect if a smart contract supports receiving ERC-1155
 // tokens.
@@ -54,7 +51,7 @@ pub type Result<T> = core::result::Result<T, Error>;
 macro_rules! ensure {
     ( $condition:expr, $error:expr $(,)? ) => {{
         if !$condition {
-            return ::core::result::Result::Err(::core::convert::Into::into($error))
+            return ::core::result::Result::Err(::core::convert::Into::into($error));
         }
     }};
 }
@@ -116,17 +113,12 @@ pub trait Erc1155 {
     ///
     /// [Alice Balance of Token ID 1, Alice Balance of Token ID 2, Bob Balance of Token ID 1, Bob Balance of Token ID 2]
     #[ink(message)]
-    fn balance_of_batch(
-        &self,
-        owners: Vec<AccountId>,
-        token_ids: Vec<TokenId>,
-    ) -> Vec<Balance>;
+    fn balance_of_batch(&self, owners: Vec<AccountId>, token_ids: Vec<TokenId>) -> Vec<Balance>;
 
     /// Enable or disable a third party, known as an `operator`, to control all tokens on behalf of
     /// the caller.
     #[ink(message)]
-    fn set_approval_for_all(&mut self, operator: AccountId, approved: bool)
-        -> Result<()>;
+    fn set_approval_for_all(&mut self, operator: AccountId, approved: bool) -> Result<()>;
 
     /// Query if the given `operator` is allowed to control all of `owner`'s tokens.
     #[ink(message)]
@@ -356,11 +348,7 @@ mod erc1155 {
             // supported (tests end up panicking).
             #[cfg(not(test))]
             {
-                use ink::env::call::{
-                    build_call,
-                    ExecutionInput,
-                    Selector,
-                };
+                use ink::env::call::{build_call, ExecutionInput, Selector};
 
                 // If our recipient is a smart contract we need to see if they accept or
                 // reject this transfer. If they reject it we need to revert the call.
@@ -383,13 +371,13 @@ mod erc1155 {
                     Ok(v) => {
                         ink::env::debug_println!(
                             "Received return value \"{:?}\" from contract {:?}",
-                            v.clone().expect(
-                                "Call should be valid, don't expect a `LangError`."
-                            ),
+                            v.clone()
+                                .expect("Call should be valid, don't expect a `LangError`."),
                             from
                         );
                         assert_eq!(
-                            v.clone().expect("Call should be valid, don't expect a `LangError`."),
+                            v.clone()
+                                .expect("Call should be valid, don't expect a `LangError`."),
                             &ON_ERC_1155_RECEIVED_SELECTOR[..],
                             "The recipient contract at {to:?} does not accept token transfers.\n
                             Expected: {ON_ERC_1155_RECEIVED_SELECTOR:?}, Got {v:?}"
@@ -397,18 +385,19 @@ mod erc1155 {
                     }
                     Err(e) => {
                         match e {
-                            ink::env::Error::CodeNotFound
-                            | ink::env::Error::NotCallable => {
+                            ink::env::Error::CodeNotFound | ink::env::Error::NotCallable => {
                                 // Our recipient wasn't a smart contract, so there's nothing more for
                                 // us to do
-                                ink::env::debug_println!("Recipient at {:?} from is not a smart contract ({:?})", from, e);
+                                ink::env::debug_println!(
+                                    "Recipient at {:?} from is not a smart contract ({:?})",
+                                    from,
+                                    e
+                                );
                             }
                             _ => {
                                 // We got some sort of error from the call to our recipient smart
                                 // contract, and as such we must revert this call
-                                panic!(
-                                    "Got error \"{e:?}\" while trying to call {from:?}"
-                                )
+                                panic!("Got error \"{e:?}\" while trying to call {from:?}")
                             }
                         }
                     }
@@ -476,14 +465,7 @@ mod erc1155 {
 
             // Can use the any token ID/value here, we really just care about knowing if `to` is a
             // smart contract which accepts transfers
-            self.transfer_acceptance_check(
-                caller,
-                from,
-                to,
-                token_ids[0],
-                values[0],
-                data,
-            );
+            self.transfer_acceptance_check(caller, from, to, token_ids[0], values[0], data);
 
             Ok(())
         }
@@ -510,11 +492,7 @@ mod erc1155 {
         }
 
         #[ink(message)]
-        fn set_approval_for_all(
-            &mut self,
-            operator: AccountId,
-            approved: bool,
-        ) -> Result<()> {
+        fn set_approval_for_all(&mut self, operator: AccountId, approved: bool) -> Result<()> {
             let caller = self.env().caller();
             ensure!(operator != caller, Error::SelfApproval);
 
@@ -695,21 +673,14 @@ mod erc1155 {
         #[ink::test]
         fn rejects_batch_if_lengths_dont_match() {
             let mut erc = init_contract();
-            let res = erc.safe_batch_transfer_from(
-                alice(),
-                bob(),
-                vec![1, 2, 3],
-                vec![5],
-                vec![],
-            );
+            let res = erc.safe_batch_transfer_from(alice(), bob(), vec![1, 2, 3], vec![5], vec![]);
             assert_eq!(res.unwrap_err(), Error::BatchTransferMismatch);
         }
 
         #[ink::test]
         fn batch_transfers_fail_if_len_is_zero() {
             let mut erc = init_contract();
-            let res =
-                erc.safe_batch_transfer_from(alice(), bob(), vec![], vec![], vec![]);
+            let res = erc.safe_batch_transfer_from(alice(), bob(), vec![], vec![], vec![]);
             assert_eq!(res.unwrap_err(), Error::BatchTransferMismatch);
         }
 
