@@ -8,6 +8,7 @@ import Homepage from './component/HomePage';
 import Footer from './component/Footer';
 import ListNFT from './component/ListNFT';
 import ListingDetail from './component/ListingDetail';
+import MintNFT from './component/MintNFT';
 
 function App() {
 
@@ -47,7 +48,7 @@ function App() {
                 signer={signer} />
             }
           />
-          <Route exact path="/mint" element={<>Mint</>} />
+          <Route exact path="/mint" element={<MintNFT/>} />
           <Route exact path="/list" element={<ListNFT/>} />
           <Route exact path="/fractionalise" element={<></>} />
           <Route exact path="/profile" element={<></>} />
