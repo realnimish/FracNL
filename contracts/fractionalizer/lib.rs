@@ -20,7 +20,7 @@ const ON_ERC_1155_RECEIVED_SELECTOR: [u8; 4] = [0xF2, 0x3A, 0x6E, 0x61];
 const _ON_ERC_1155_BATCH_RECEIVED_SELECTOR: [u8; 4] = [0xBC, 0x19, 0x7C, 0x81];
 
 /// A type representing the unique IDs of tokens managed by this contract.
-pub type TokenId = u128;
+pub type TokenId = u32;
 
 type Balance = <ink::env::DefaultEnvironment as ink::env::Environment>::Balance;
 
@@ -28,8 +28,12 @@ type Balance = <ink::env::DefaultEnvironment as ink::env::Environment>::Balance;
 #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
 #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
 pub enum Error {
-    /// This token ID has not yet been created by the contract.
+    /// This token ID has already been fractionalized.
+    AlreadyFractionalized,
+    /// This token ID has not yet been fractionalized.
     UnexistentToken,
+    /// Value should be greater than zero
+    ZeroShares,
     /// The caller tried to sending tokens to the zero-address (`0x00`).
     ZeroAddressTransfer,
     /// The caller is not approved to transfer tokens on behalf of the account.
@@ -40,6 +44,7 @@ pub enum Error {
     SelfApproval,
     /// The number of tokens being transferred does not match the specified number of transfers.
     BatchTransferMismatch,
+    NftTransferFailed,
 }
 
 // The ERC-1155 result types.
@@ -177,13 +182,23 @@ pub trait Erc1155TokenReceiver {
 }
 
 #[ink::contract]
-mod erc1155 {
+mod fractionalizer {
     use super::*;
 
     use ink::storage::Mapping;
 
     type Owner = AccountId;
     type Operator = AccountId;
+
+    /// Indicate that a NFT has been fractionalized
+    #[ink(event)]
+    pub struct Fractionalized {
+        #[ink(topic)]
+        token_id: TokenId,
+        #[ink(topic)]
+        minter: AccountId,
+        shares: Balance,
+    }
 
     /// Indicate that a token transfer has occured.
     ///
@@ -220,50 +235,76 @@ mod erc1155 {
 
     /// An ERC-1155 contract.
     #[ink(storage)]
-    #[derive(Default)]
     pub struct Contract {
+        /// NFT contract address whose tokens can be fractionalised
+        /// @NOTE Future version would support arbitrary NFT contracts
+        nft_contract: AccountId,
         /// Tracks the balances of accounts across the different tokens that they might be holding.
         balances: Mapping<(AccountId, TokenId), Balance>,
         /// Which accounts (called operators) have been approved to spend funds on behalf of an owner.
         approvals: Mapping<(Owner, Operator), ()>,
-        /// A unique identifier for the tokens which have been minted (and are therefore supported)
-        /// by this contract.
-        token_id_nonce: TokenId,
+        /// Stores the number of shares issued for a given token id
+        token_supply: Mapping<TokenId, Balance>,
     }
 
     impl Contract {
         /// Initialize a default instance of this ERC-1155 implementation.
         #[ink(constructor)]
-        pub fn new() -> Self {
-            Default::default()
+        pub fn new(nft_contract: AccountId) -> Self {
+            Self {
+                nft_contract,
+                balances: Default::default(),
+                approvals: Default::default(),
+                token_supply: Default::default(),
+            }
         }
 
-        /// Create the initial supply for a token.
-        ///
-        /// The initial supply will be provided to the caller (a.k.a the minter), and the
-        /// `token_id` will be assigned by the smart contract.
-        ///
-        /// Note that as implemented anyone can create tokens. If you were to instantiate
-        /// this contract in a production environment you'd probably want to lock down
-        /// the addresses that are allowed to create tokens.
         #[ink(message)]
-        pub fn create(&mut self, value: Balance) -> TokenId {
+        pub fn fractionlize(&mut self, nft_id: u32, shares: Balance) -> Result<()> {
             let caller = self.env().caller();
+            let token_id = nft_id;
 
-            // Given that TokenId is a `u128` the likelihood of this overflowing is pretty slim.
-            self.token_id_nonce += 1;
-            self.balances.insert((caller, self.token_id_nonce), &value);
+            // Verify the given token is not fractionalized yet
+            ensure!(
+                !self.is_fractionalized(token_id),
+                Error::AlreadyFractionalized
+            );
 
-            // Emit transfer event but with mint semantics
-            self.env().emit_event(TransferSingle {
-                operator: Some(caller),
-                from: None,
-                to: if value == 0 { None } else { Some(caller) },
-                token_id: self.token_id_nonce,
-                value,
+            // Verify the shares are non-zero
+            ensure!(shares > 0, Error::ZeroShares);
+
+            // Transfer the token to self (transfer_from)
+            // @dev This is disabled during tests due to the use of `invoke_contract()` not being
+            // supported (tests end up panicking).
+            #[cfg(not(test))]
+            {
+                use ink::env::call::{build_call, ExecutionInput, Selector};
+
+                const TRANSFER_FROM_SELECTOR: [u8; 4] = [0x0B, 0x39, 0x6F, 0x18];
+                let result = build_call::<Environment>()
+                    .call(self.nft_contract)
+                    .exec_input(
+                        ExecutionInput::new(Selector::new(TRANSFER_FROM_SELECTOR))
+                            .push_arg(caller)
+                            .push_arg(self.env().account_id())
+                            .push_arg(nft_id),
+                    )
+                    .returns::<core::result::Result<(), u32>>()
+                    .params()
+                    .invoke();
+
+                ensure!(result.is_ok(), Error::NftTransferFailed);
+            }
+
+            self.balances.insert((caller, token_id), &shares);
+            self.token_supply.insert(&token_id, &shares);
+
+            self.env().emit_event(Fractionalized {
+                token_id,
+                minter: caller,
+                shares,
             });
-
-            self.token_id_nonce
+            Ok(())
         }
 
         /// Mint a `value` amount of `token_id` tokens.
@@ -291,6 +332,16 @@ mod erc1155 {
             });
 
             Ok(())
+        }
+
+        #[ink(message)]
+        pub fn is_fractionalized(&self, token_id: TokenId) -> bool {
+            self.token_supply.contains(&token_id)
+        }
+
+        #[ink(message)]
+        pub fn token_supply(&self, token_id: TokenId) -> Option<Balance> {
+            self.token_supply.get(token_id)
         }
 
         // Helper function for performing single token transfers.
@@ -593,7 +644,7 @@ mod erc1155 {
         }
 
         fn init_contract() -> Contract {
-            let mut erc = Contract::new();
+            let mut erc = Contract::new([0u8; 32].into());
             erc.balances.insert((alice(), 1), &10);
             erc.balances.insert((alice(), 2), &20);
             erc.balances.insert((bob(), 1), &10);
@@ -722,26 +773,6 @@ mod erc1155 {
 
             assert!(erc.set_approval_for_all(operator, false).is_ok());
             assert!(!erc.is_approved_for_all(owner, operator));
-        }
-
-        #[ink::test]
-        fn minting_tokens_works() {
-            let mut erc = Contract::new();
-
-            set_sender(alice());
-            assert_eq!(erc.create(0), 1);
-            assert_eq!(erc.balance_of(alice(), 1), 0);
-
-            assert!(erc.mint(1, 123).is_ok());
-            assert_eq!(erc.balance_of(alice(), 1), 123);
-        }
-
-        #[ink::test]
-        fn minting_not_allowed_for_nonexistent_tokens() {
-            let mut erc = Contract::new();
-
-            let res = erc.mint(1, 123);
-            assert_eq!(res.unwrap_err(), Error::UnexistentToken);
         }
     }
 }
