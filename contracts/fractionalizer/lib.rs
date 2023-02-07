@@ -200,6 +200,17 @@ mod fractionalizer {
         shares: Balance,
     }
 
+    /// Indicate that a NFT has been de-fractionalized
+    #[ink(event)]
+    pub struct Defractionalized {
+        #[ink(topic)]
+        token_id: TokenId,
+        #[ink(topic)]
+        caller: AccountId,
+        #[ink(topic)]
+        withdraw_address: AccountId,
+    }
+
     /// Indicate that a token transfer has occured.
     ///
     /// This must be emitted even if a zero value transfer occurs.
@@ -307,28 +318,51 @@ mod fractionalizer {
             Ok(())
         }
 
-        /// Mint a `value` amount of `token_id` tokens.
-        ///
-        /// It is assumed that the token has already been `create`-ed. The newly minted supply will
-        /// be assigned to the caller (a.k.a the minter).
-        ///
-        /// Note that as implemented anyone can mint tokens. If you were to instantiate
-        /// this contract in a production environment you'd probably want to lock down
-        /// the addresses that are allowed to mint tokens.
         #[ink(message)]
-        pub fn mint(&mut self, token_id: TokenId, value: Balance) -> Result<()> {
-            ensure!(token_id <= self.token_id_nonce, Error::UnexistentToken);
-
+        pub fn defractionlize(&mut self, token_id: TokenId, to: AccountId) -> Result<()> {
             let caller = self.env().caller();
-            self.balances.insert((caller, token_id), &value);
 
-            // Emit transfer event but with mint semantics
-            self.env().emit_event(TransferSingle {
-                operator: Some(caller),
-                from: None,
-                to: Some(caller),
+            // Ensure token is fractionlized
+            ensure!(self.is_fractionalized(token_id), Error::UnexistentToken);
+
+            // Ensure caller has all the shares of the given token
+            let user_balance = self.balances.get(&(caller, token_id));
+            let total_supply = self.token_supply(token_id);
+            ensure!(user_balance == total_supply, Error::InsufficientBalance);
+
+            // Remove all states related to this token
+            self.token_supply.remove(&token_id);
+            self.balances.remove(&(caller, token_id));
+
+            // Transfer the NFT to account `to`
+            // @dev This is disabled during tests due to the use of `invoke_contract()` not being
+            // supported (tests end up panicking).
+            #[cfg(not(test))]
+            {
+                use ink::env::call::{build_call, ExecutionInput, Selector};
+
+                const TRANSFER_FROM_SELECTOR: [u8; 4] = [0x0B, 0x39, 0x6F, 0x18];
+                let nft_id = token_id;
+
+                let result = build_call::<Environment>()
+                    .call(self.nft_contract)
+                    .exec_input(
+                        ExecutionInput::new(Selector::new(TRANSFER_FROM_SELECTOR))
+                            .push_arg(self.env().account_id())
+                            .push_arg(to)
+                            .push_arg(nft_id),
+                    )
+                    .returns::<core::result::Result<(), u32>>()
+                    .params()
+                    .invoke();
+
+                ensure!(result.is_ok(), Error::NftTransferFailed);
+            }
+
+            self.env().emit_event(Defractionalized {
                 token_id,
-                value,
+                caller,
+                withdraw_address: to,
             });
 
             Ok(())
