@@ -98,4 +98,73 @@ mod nft_lending {
             }
         }
 
+        #[ink(message, payable)]
+        pub fn list_advertisement(
+            &mut self,
+            token_id: TokenId,
+            shares_to_lock: Balance,
+            amount_asked: Balance,
+            loan_period: u128,
+        ) -> Result<ListingId> {
+            let caller = self.env().caller();
+
+            // Ensure sufficient security-deposit is transferred
+            let required_deposit = self.get_collateral_required(caller, amount_asked, loan_period);
+
+            let transferred_value = self.env().transferred_value();
+            ensure!(
+                transferred_value >= required_deposit,
+                Error::InsufficientSecurityDeposit
+            );
+
+            // Lock the shares of the token (safe_transfer_from)
+            // @dev This is disabled during tests due to the use of `invoke_contract()` not being
+            // supported (tests end up panicking).
+            #[cfg(not(test))]
+            {
+                use ink::env::call::{build_call, ExecutionInput, Selector};
+
+                const SAFE_TRANSFER_FROM_SELECTOR: [u8; 4] = [0x0B, 0x39, 0x6F, 0x18];
+                let result = build_call::<Environment>()
+                    .call(self.fractionalizer)
+                    .exec_input(
+                        ExecutionInput::new(Selector::new(SAFE_TRANSFER_FROM_SELECTOR))
+                            .push_arg(caller)
+                            .push_arg(self.env().account_id())
+                            .push_arg(token_id)
+                            .push_arg(shares_to_lock)
+                            .push_arg::<Vec<u8>>(vec![]),
+                    )
+                    .returns::<core::result::Result<(), u32>>()
+                    .params()
+                    .invoke();
+
+                ensure!(result.is_ok(), Error::FractionalNftTransferFailed);
+            }
+
+            let listing_metadata = ListingMetadata {
+                borrower: caller,
+                token_id,
+                shares_locked: shares_to_lock,
+                amount_asked,
+                loan_period,
+                listing_timestamp: self.env().block_timestamp(),
+            };
+
+            self.listing_nonce += 1;
+            self.listing.insert(&self.listing_nonce, &listing_metadata);
+
+            Ok(self.listing_nonce)
+        }
+
+        #[ink(message)]
+        pub fn get_collateral_required(
+            &self,
+            _account: AccountId,
+            _borrow_amount: Balance,
+            _loan_period: u128,
+        ) -> Balance {
+            unimplemented!()
+        }
+    }
 }
