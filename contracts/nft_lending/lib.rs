@@ -80,6 +80,9 @@ mod nft_lending {
     pub enum Error {
         InsufficientSecurityDeposit,
         FractionalNftTransferFailed,
+        NotAcceptingNewOffer,
+        ActiveOfferAlreadyExists,
+        ExcessiveLendingAmountSent,
     }
 
     impl Contract {
@@ -157,6 +160,44 @@ mod nft_lending {
             Ok(self.listing_nonce)
         }
 
+        #[ink(message, payable)]
+        pub fn make_offer(&mut self, listing_id: ListingId, interest: u16) -> Result<OfferId> {
+            let caller = self.env().caller();
+            let amount = self.env().transferred_value();
+
+            ensure!(
+                self.is_accepting_offer(listing_id),
+                Error::NotAcceptingNewOffer
+            );
+            ensure!(
+                !self.active_offer.contains((listing_id, caller)),
+                Error::ActiveOfferAlreadyExists
+            );
+            ensure!(
+                amount <= self.get_max_lend_amt(listing_id),
+                Error::ExcessiveLendingAmountSent,
+            );
+
+            let offer_id = self.get_offer_nonce(listing_id);
+            let offer = OfferMetadata {
+                lender: caller,
+                amount,
+                interest,
+                status: OfferStatus::PENDING,
+            };
+
+            self.active_offer.insert(&(listing_id, caller), &offer_id);
+            self.offers.insert(&(listing_id, offer_id), &offer);
+            self.offers_nonce.insert(&listing_id, &(offer_id + 1));
+
+            Ok(offer_id)
+        }
+
+        #[ink(message)]
+        pub fn get_offer_nonce(&self, listing_id: ListingId) -> OfferId {
+            self.offers_nonce.get(&listing_id).unwrap_or(0)
+        }
+
         #[ink(message)]
         pub fn get_collateral_required(
             &self,
@@ -164,6 +205,16 @@ mod nft_lending {
             _borrow_amount: Balance,
             _loan_period: u128,
         ) -> Balance {
+            unimplemented!()
+        }
+
+        #[ink(message)]
+        pub fn is_accepting_offer(&self, _listing_id: ListingId) -> bool {
+            unimplemented!()
+        }
+
+        #[ink(message)]
+        pub fn get_max_lend_amt(&self, _listing_id: ListingId) -> Balance {
             unimplemented!()
         }
     }
