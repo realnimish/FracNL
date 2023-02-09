@@ -21,6 +21,7 @@ mod nft_lending {
     pub type TokenId = u32;
     pub type LoanId = u128;
     pub type OfferId = u128;
+    pub type Time = u64;
 
     #[derive(scale::Encode, scale::Decode)]
     #[cfg_attr(
@@ -33,7 +34,7 @@ mod nft_lending {
         shares_locked: Balance,
         amount_asked: Balance,
         loan_period: u128,
-        listing_timestamp: u64,
+        listing_timestamp: Time,
     }
 
     #[derive(scale::Encode, scale::Decode)]
@@ -66,6 +67,8 @@ mod nft_lending {
         admin: AccountId,
         fractionalizer: AccountId,
         loan_nonce: LoanId,
+        offer_phase_duration: Time,
+        cooldown_phase_duration: Time,
 
         credit_score: Mapping<AccountId, u16>,
         loans: Mapping<LoanId, LoanMetadata>,
@@ -80,22 +83,29 @@ mod nft_lending {
     pub enum Error {
         InsufficientSecurityDeposit,
         FractionalNftTransferFailed,
-        NotAcceptingNewOffer,
         ActiveOfferAlreadyExists,
         ExcessiveLendingAmountSent,
         NotOfferPhase,
+        NotCooldownPhase,
         NoOfferExists,
         WithdrawFailed,
+        InvalidLoanId,
     }
 
     impl Contract {
         /// Constructor that initializes the `bool` value to the given `init_value`.
         #[ink(constructor)]
-        pub fn new(fractionalizer: AccountId) -> Self {
+        pub fn new(
+            fractionalizer: AccountId,
+            offer_phase_duration: Time,
+            cooldown_phase_duration: Time,
+        ) -> Self {
             Self {
                 admin: Self::env().caller(),
                 fractionalizer,
                 loan_nonce: Default::default(),
+                offer_phase_duration,
+                cooldown_phase_duration,
                 credit_score: Default::default(),
                 loans: Default::default(),
                 offers_nonce: Default::default(),
@@ -188,10 +198,8 @@ mod nft_lending {
             let caller = self.env().caller();
             let amount = self.env().transferred_value();
 
-            ensure!(
-                self.is_accepting_offer(loan_id),
-                Error::NotAcceptingNewOffer
-            );
+            self.is_offer_phase(loan_id)?;
+
             ensure!(
                 !self.active_offer.contains((loan_id, caller)),
                 Error::ActiveOfferAlreadyExists
@@ -220,7 +228,7 @@ mod nft_lending {
         pub fn withdraw_offer(&mut self, loan_id: LoanId) -> Result<OfferId> {
             let caller = self.env().caller();
 
-            ensure!(self.is_accepting_offer(loan_id), Error::NotOfferPhase);
+            self.is_offer_phase(loan_id)?;
 
             let offer_id = self
                 .active_offer
@@ -261,8 +269,34 @@ mod nft_lending {
         }
 
         #[ink(message)]
-        pub fn is_accepting_offer(&self, _loan_id: LoanId) -> bool {
-            unimplemented!()
+        pub fn is_offer_phase(&self, loan_id: LoanId) -> Result<()> {
+            let loan = self.loans.get(&loan_id).ok_or(Error::InvalidLoanId)?;
+
+            // TODO check the loan is open
+
+            let current_time = self.env().block_timestamp();
+            ensure!(
+                current_time <= loan.listing_timestamp + self.offer_phase_duration,
+                Error::NotOfferPhase
+            );
+            Ok(())
+        }
+
+        #[ink(message)]
+        pub fn is_cooldown_phase(&self, loan_id: LoanId) -> Result<()> {
+            let loan = self.loans.get(&loan_id).ok_or(Error::InvalidLoanId)?;
+
+            // TODO check the loan is open
+
+            let current_time = self.env().block_timestamp();
+            let offer_duration = loan.listing_timestamp + self.offer_phase_duration;
+            let cooldown_duration = offer_duration + self.cooldown_phase_duration;
+
+            ensure!(
+                offer_duration < current_time && current_time <= cooldown_duration,
+                Error::NotCooldownPhase
+            );
+            Ok(())
         }
 
         #[ink(message)]
