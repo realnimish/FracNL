@@ -44,7 +44,7 @@ mod nft_lending {
     pub struct OfferMetadata {
         lender: AccountId,
         amount: Balance,
-        interest: u16,
+        interest: Balance,
         status: OfferStatus,
     }
 
@@ -161,7 +161,7 @@ mod nft_lending {
         }
 
         #[ink(message, payable)]
-        pub fn make_offer(&mut self, listing_id: ListingId, interest: u16) -> Result<OfferId> {
+        pub fn make_offer(&mut self, listing_id: ListingId, interest: Balance) -> Result<OfferId> {
             let caller = self.env().caller();
             let amount = self.env().transferred_value();
 
