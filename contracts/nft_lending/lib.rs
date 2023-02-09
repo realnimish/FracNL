@@ -19,7 +19,7 @@ mod nft_lending {
 
     pub type Result<T> = core::result::Result<T, Error>;
     pub type TokenId = u32;
-    pub type ListingId = u128;
+    pub type LoanId = u128;
     pub type OfferId = u128;
 
     #[derive(scale::Encode, scale::Decode)]
@@ -27,7 +27,7 @@ mod nft_lending {
         feature = "std",
         derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
     )]
-    struct ListingMetadata {
+    struct LoanMetadata {
         borrower: AccountId,
         token_id: TokenId,
         shares_locked: Balance,
@@ -65,14 +65,14 @@ mod nft_lending {
         // Global state variables
         admin: AccountId,
         fractionalizer: AccountId,
-        listing_nonce: ListingId,
+        loan_nonce: LoanId,
 
         credit_score: Mapping<AccountId, u16>,
-        listing: Mapping<ListingId, ListingMetadata>,
+        loans: Mapping<LoanId, LoanMetadata>,
 
-        offers_nonce: Mapping<ListingId, OfferId>,
-        offers: Mapping<(ListingId, OfferId), OfferMetadata>,
-        active_offer: Mapping<(ListingId, AccountId), OfferId>,
+        offers_nonce: Mapping<LoanId, OfferId>,
+        offers: Mapping<(LoanId, OfferId), OfferMetadata>,
+        active_offer: Mapping<(LoanId, AccountId), OfferId>,
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -92,9 +92,9 @@ mod nft_lending {
             Self {
                 admin: Self::env().caller(),
                 fractionalizer,
-                listing_nonce: Default::default(),
+                loan_nonce: Default::default(),
                 credit_score: Default::default(),
-                listing: Default::default(),
+                loans: Default::default(),
                 offers_nonce: Default::default(),
                 offers: Default::default(),
                 active_offer: Default::default(),
@@ -108,7 +108,7 @@ mod nft_lending {
             shares_to_lock: Balance,
             amount_asked: Balance,
             loan_period: u128,
-        ) -> Result<ListingId> {
+        ) -> Result<LoanId> {
             let caller = self.env().caller();
 
             // Ensure sufficient security-deposit is transferred
@@ -145,7 +145,7 @@ mod nft_lending {
                 ensure!(result.is_ok(), Error::FractionalNftTransferFailed);
             }
 
-            let listing_metadata = ListingMetadata {
+            let loan_metadata = LoanMetadata {
                 borrower: caller,
                 token_id,
                 shares_locked: shares_to_lock,
@@ -154,31 +154,31 @@ mod nft_lending {
                 listing_timestamp: self.env().block_timestamp(),
             };
 
-            self.listing_nonce += 1;
-            self.listing.insert(&self.listing_nonce, &listing_metadata);
+            self.loan_nonce += 1;
+            self.loans.insert(&self.loan_nonce, &loan_metadata);
 
             Ok(self.listing_nonce)
         }
 
         #[ink(message, payable)]
-        pub fn make_offer(&mut self, listing_id: ListingId, interest: Balance) -> Result<OfferId> {
+        pub fn make_offer(&mut self, loan_id: LoanId, interest: Balance) -> Result<OfferId> {
             let caller = self.env().caller();
             let amount = self.env().transferred_value();
 
             ensure!(
-                self.is_accepting_offer(listing_id),
+                self.is_accepting_offer(loan_id),
                 Error::NotAcceptingNewOffer
             );
             ensure!(
-                !self.active_offer.contains((listing_id, caller)),
+                !self.active_offer.contains((loan_id, caller)),
                 Error::ActiveOfferAlreadyExists
             );
             ensure!(
-                amount <= self.get_max_lend_amt(listing_id),
+                amount <= self.get_max_lend_amt(loan_id),
                 Error::ExcessiveLendingAmountSent,
             );
 
-            let offer_id = self.get_offer_nonce(listing_id);
+            let offer_id = self.get_offer_nonce(loan_id);
             let offer = OfferMetadata {
                 lender: caller,
                 amount,
@@ -186,16 +186,16 @@ mod nft_lending {
                 status: OfferStatus::PENDING,
             };
 
-            self.active_offer.insert(&(listing_id, caller), &offer_id);
-            self.offers.insert(&(listing_id, offer_id), &offer);
-            self.offers_nonce.insert(&listing_id, &(offer_id + 1));
+            self.active_offer.insert(&(loan_id, caller), &offer_id);
+            self.offers.insert(&(loan_id, offer_id), &offer);
+            self.offers_nonce.insert(&loan_id, &(offer_id + 1));
 
             Ok(offer_id)
         }
 
         #[ink(message)]
-        pub fn get_offer_nonce(&self, listing_id: ListingId) -> OfferId {
-            self.offers_nonce.get(&listing_id).unwrap_or(0)
+        pub fn get_offer_nonce(&self, loan_id: LoanId) -> OfferId {
+            self.offers_nonce.get(&loan_id).unwrap_or(0)
         }
 
         #[ink(message)]
@@ -209,12 +209,12 @@ mod nft_lending {
         }
 
         #[ink(message)]
-        pub fn is_accepting_offer(&self, _listing_id: ListingId) -> bool {
+        pub fn is_accepting_offer(&self, _loan_id: LoanId) -> bool {
             unimplemented!()
         }
 
         #[ink(message)]
-        pub fn get_max_lend_amt(&self, _listing_id: ListingId) -> Balance {
+        pub fn get_max_lend_amt(&self, _loan_id: LoanId) -> Balance {
             unimplemented!()
         }
     }
