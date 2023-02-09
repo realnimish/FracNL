@@ -8,7 +8,7 @@ import Homepage from './component/HomePage';
 import Footer from './component/Footer';
 import ListNFT from './component/ListNFT';
 import ListingDetail from './component/ListingDetails/ListingDetail';
-import MintNFT from './component/MintNFT';
+import MintNFT from './component/Mint/MintNFT';
 
 function App() {
 

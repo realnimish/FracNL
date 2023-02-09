@@ -1,7 +1,4 @@
-import { Box, Typography } from "@mui/material";
-import nft from "../assets/nft.avif";
-import { cutAddress } from "../commons";
-import CircleIcon from "@mui/icons-material/Circle";
+import { Box } from "@mui/material";
 export default function ImagePreview(props) {
 
   return (
@@ -12,7 +9,6 @@ export default function ImagePreview(props) {
         padding: "20px",
         cursor: "pointer",
         borderRadius: "50px",
-        marginRight: "30px",
       }}
       tabIndex={1}
       className="card"

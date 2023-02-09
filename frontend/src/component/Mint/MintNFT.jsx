@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import "../App.css";
+import "../../App.css";
 import { useState, useEffect } from "react";
 import ImagePreview from "./ImagePreview";
 import { Web3Storage } from "web3.storage";
