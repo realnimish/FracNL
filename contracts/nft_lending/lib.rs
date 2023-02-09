@@ -157,7 +157,27 @@ mod nft_lending {
             self.loan_nonce += 1;
             self.loans.insert(&self.loan_nonce, &loan_metadata);
 
-            Ok(self.listing_nonce)
+            Ok(self.loan_nonce)
+        }
+
+        #[ink(message)]
+        pub fn start_loan(&mut self, _loan_id: LoanId) -> Result<()> {
+            unimplemented!()
+        }
+
+        #[ink(message)]
+        pub fn cancel_loan(&mut self, _loan_id: LoanId) -> Result<()> {
+            unimplemented!()
+        }
+
+        #[ink(message)]
+        pub fn repay_loan(&mut self, _loan_id: LoanId) -> Result<()> {
+            unimplemented!()
+        }
+
+        #[ink(message)]
+        pub fn default_loan(&mut self, _loan_id: LoanId) -> Result<()> {
+            unimplemented!()
         }
 
         #[ink(message, payable)]
@@ -191,6 +211,16 @@ mod nft_lending {
             self.offers_nonce.insert(&loan_id, &(offer_id + 1));
 
             Ok(offer_id)
+        }
+
+        #[ink(message)]
+        pub fn withdraw_offer(&mut self, _loan_id: LoanId) -> Result<OfferId> {
+            unimplemented!()
+        }
+
+        #[ink(message)]
+        pub fn respond_to_offer(&mut self, _loan_id: LoanId, _offer_id: OfferId) -> Result<()> {
+            unimplemented!()
         }
 
         #[ink(message)]
