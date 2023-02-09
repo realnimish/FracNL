@@ -182,7 +182,7 @@ export default function NavBar(props) {
     <AppBar
       component="nav"
       sx={{
-        height: "60px",
+        height: "70px",
         padding: "0 7%",
         background: "#03080f",
         zIndex: "99999",

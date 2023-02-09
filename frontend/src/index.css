@@ -377,19 +377,6 @@ a {
   box-shadow: inset 0px 0px 7px 0px #f47068, 0px 0px 7px 0px #f47068;
 }
 
-.offerRepayBtn:hover {
-  background-color: #6bb6ff;
-}
-
-.offerRejectBtn:active {
-  background-color: #6bb6ff;
-  box-shadow: inset 0px 0px 7px 0px #6bb6ff, 0px 0px 15px 0px #6bb6ff;
-}
-
-.offerRejectBtn:hover .blueColor {
-  color: rgb(0, 0, 0)
-}
-
 .createOffer {
   min-width: 300px;
   max-width: 700px;
@@ -454,6 +441,7 @@ a {
 
 .input:focus-within {
   border: none;
+  height: 34px;
   outline: #6bb6ff solid 2px;  
   box-shadow: inset 0px 0px 7px 0px  #6bb6ff, 0px 0px 15px 0px  #6bb6ff;
 }
@@ -499,6 +487,11 @@ a {
   flex-wrap: wrap;
   justify-content: space-around;
   align-items: start;
+}
+
+.returns {
+  
+  animation: colorChanger 15s infinite;
 }
 
 @keyframes navItemUnderline {
