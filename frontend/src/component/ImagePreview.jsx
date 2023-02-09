@@ -7,7 +7,7 @@ export default function ImagePreview(props) {
   return (
     <Box
       sx={{
-        height: "500px",
+        height: "400px",
         width: "400px",
         padding: "20px",
         cursor: "pointer",
@@ -20,7 +20,7 @@ export default function ImagePreview(props) {
       <Box
         sx={{
           height: "400px",
-          width: "200px",
+          width: "400px",
           borderRadius: "50px",
           position: "absolute",
           top: "0",
