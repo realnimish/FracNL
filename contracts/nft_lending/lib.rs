@@ -83,6 +83,9 @@ mod nft_lending {
         NotAcceptingNewOffer,
         ActiveOfferAlreadyExists,
         ExcessiveLendingAmountSent,
+        NotOfferPhase,
+        NoOfferExists,
+        WithdrawFailed,
     }
 
     impl Contract {
@@ -214,8 +217,27 @@ mod nft_lending {
         }
 
         #[ink(message)]
-        pub fn withdraw_offer(&mut self, _loan_id: LoanId) -> Result<OfferId> {
-            unimplemented!()
+        pub fn withdraw_offer(&mut self, loan_id: LoanId) -> Result<OfferId> {
+            let caller = self.env().caller();
+
+            ensure!(self.is_accepting_offer(loan_id), Error::NotOfferPhase);
+
+            let offer_id = self
+                .active_offer
+                .get(&(loan_id, caller))
+                .ok_or(Error::NoOfferExists)?;
+            let mut offer = self.offers.get(&(loan_id, offer_id)).expect("Infallible");
+
+            // @discuss: Should we deduct some handling fee to avoid spam
+            if self.env().transfer(caller, offer.amount).is_err() {
+                return Err(Error::WithdrawFailed);
+            }
+
+            offer.status = OfferStatus::WITHDRAWN;
+            self.offers.insert(&(loan_id, offer_id), &offer);
+            self.active_offer.remove(&(loan_id, caller));
+
+            Ok(offer_id)
         }
 
         #[ink(message)]
