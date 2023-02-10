@@ -724,3 +724,77 @@ a {
   background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
   background: -webkit-radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
 }
+
+/* Fractionalize page */
+.wrapper {
+  width: 500px;
+  height: auto;
+  margin-top: 200px;
+  margin-left: 33%;
+  position: relative;
+  background-color: #1c1d20;
+  margin-bottom: 200px;
+  animation: boxShadowChange 15s infinite;
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+}
+
+.tabs {
+  width: 100%;
+  height: 45px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  top: -45px;
+  left: 0;
+  z-index: 0;
+}
+
+.navTab {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+  width: 50%;
+  border-bottom: 0;
+  outline: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  background: #1c1d20;
+  color: hsl(0, 0%, 100%);
+  border-radius: 30px 30px 0 0;
+  cursor: pointer;
+}
+
+.navTab.active {
+  background: #ffffff;
+  color: hsl(0, 0%, 10%);
+  animation: boxShadowChange 15s infinite;
+}
+
+.contentWrapper {
+  width: 100%;
+  border-radius: 30px;
+  background-color: #1c1d20;
+  box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+}
+
+.content {
+  display: none;
+  overflow: hidden;
+  z-index: 1000;
+  animation: fadeIn 1s ease-in-out;
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.content.active {
+  display: block;
+}
