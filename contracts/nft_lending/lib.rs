@@ -34,7 +34,7 @@ mod nft_lending {
         shares_locked: Balance,
         amount_asked: Balance,
         security_deposit: Balance,
-        loan_period: u128,
+        loan_period: Time,
         listing_timestamp: Time,
     }
 
@@ -122,6 +122,7 @@ mod nft_lending {
         LoanIsNotOpen,
         LoanIsNotActive,
         LoanHasExpired,
+        LoanRepaymentPeriodAlreadyOver,
         NotAuthorized,
         ZeroValue,
         OfferNotInPendingState,
@@ -157,7 +158,7 @@ mod nft_lending {
             token_id: TokenId,
             shares_to_lock: Balance,
             amount_asked: Balance,
-            loan_period: u128,
+            loan_period: Time,
         ) -> Result<LoanId> {
             let caller = self.env().caller();
 
@@ -173,29 +174,12 @@ mod nft_lending {
             );
 
             // Lock the shares of the token (safe_transfer_from)
-            // @dev This is disabled during tests due to the use of `invoke_contract()` not being
-            // supported (tests end up panicking).
-            #[cfg(not(test))]
-            {
-                use ink::env::call::{build_call, ExecutionInput, Selector};
-
-                const SAFE_TRANSFER_FROM_SELECTOR: [u8; 4] = [0x0B, 0x39, 0x6F, 0x18];
-                let result = build_call::<Environment>()
-                    .call(self.fractionalizer)
-                    .exec_input(
-                        ExecutionInput::new(Selector::new(SAFE_TRANSFER_FROM_SELECTOR))
-                            .push_arg(caller)
-                            .push_arg(self.env().account_id())
-                            .push_arg(token_id)
-                            .push_arg(shares_to_lock)
-                            .push_arg::<Vec<u8>>(vec![]),
-                    )
-                    .returns::<core::result::Result<(), u32>>()
-                    .params()
-                    .invoke();
-
-                ensure!(result.is_ok(), Error::FractionalNftTransferFailed);
-            }
+            self.transfer_fractional_nft(
+                &caller,
+                &self.env().account_id(),
+                &token_id,
+                &shares_to_lock,
+            )?;
 
             let loan_metadata = LoanMetadata {
                 borrower: caller,
@@ -296,9 +280,38 @@ mod nft_lending {
             Ok(())
         }
 
-        #[ink(message)]
-        pub fn repay_loan(&mut self, _loan_id: LoanId) -> Result<()> {
-            unimplemented!()
+        #[ink(message, payable)]
+        pub fn repay_loan(&mut self, loan_id: LoanId) -> Result<()> {
+            let loan_metadata = self.ref_get_loan_metadata(&loan_id)?;
+            let mut loan_stats = self.ref_get_loan_stats(&loan_id)?;
+
+            ensure!(
+                loan_stats.loan_status == LoanStatus::ACTIVE,
+                Error::LoanIsNotActive
+            );
+
+            let time = self.env().block_timestamp();
+            let loan_expiry = loan_stats.start_timestamp.unwrap() + loan_metadata.loan_period;
+            ensure!(time <= loan_expiry, Error::LoanRepaymentPeriodAlreadyOver);
+
+            loan_stats.repayed += self.env().transferred_value();
+
+            if loan_stats.repayed >= loan_stats.raised + loan_stats.interest {
+                // TODO Transfer the amount to lenders
+
+                // Unlock the fractional NFT
+                self.transfer_fractional_nft(
+                    &self.env().account_id(),
+                    &loan_metadata.borrower,
+                    &loan_metadata.token_id,
+                    &loan_metadata.shares_locked,
+                )?;
+
+                loan_stats.loan_status = LoanStatus::CLOSED;
+            }
+
+            self.loan_stats.insert(&loan_id, &loan_stats);
+            Ok(())
         }
 
         #[ink(message)]
@@ -437,7 +450,7 @@ mod nft_lending {
             &self,
             _account: AccountId,
             _borrow_amount: Balance,
-            _loan_period: u128,
+            _loan_period: Time,
         ) -> Balance {
             unimplemented!()
         }
@@ -554,6 +567,39 @@ mod nft_lending {
 
         fn ref_reject_all_offers(&mut self, _loan_id: &LoanId) -> Result<()> {
             unimplemented!()
+        }
+
+        fn transfer_fractional_nft(
+            &mut self,
+            from: &AccountId,
+            to: &AccountId,
+            token_id: &TokenId,
+            amount: &Balance,
+        ) -> Result<()> {
+            // @dev This is disabled during tests due to the use of `invoke_contract()` not being
+            // supported (tests end up panicking).
+            #[cfg(not(test))]
+            {
+                use ink::env::call::{build_call, ExecutionInput, Selector};
+
+                const SAFE_TRANSFER_FROM_SELECTOR: [u8; 4] = [0x0B, 0x39, 0x6F, 0x18];
+                let result = build_call::<Environment>()
+                    .call(self.fractionalizer)
+                    .exec_input(
+                        ExecutionInput::new(Selector::new(SAFE_TRANSFER_FROM_SELECTOR))
+                            .push_arg(from)
+                            .push_arg(to)
+                            .push_arg(token_id)
+                            .push_arg(amount)
+                            .push_arg::<Vec<u8>>(vec![]),
+                    )
+                    .returns::<core::result::Result<(), u32>>()
+                    .params()
+                    .invoke();
+
+                ensure!(result.is_ok(), Error::FractionalNftTransferFailed);
+            }
+            Ok(())
         }
     }
 }
