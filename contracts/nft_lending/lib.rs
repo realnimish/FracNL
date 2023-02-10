@@ -121,6 +121,7 @@ mod nft_lending {
         InvalidOfferId,
         LoanIsNotOpen,
         NotAuthorized,
+        ZeroValue,
     }
 
     impl Contract {
@@ -155,6 +156,8 @@ mod nft_lending {
             loan_period: u128,
         ) -> Result<LoanId> {
             let caller = self.env().caller();
+
+            ensure!(amount_asked > 0, Error::ZeroValue);
 
             // Ensure sufficient security-deposit is transferred
             let required_deposit = self.get_collateral_required(caller, amount_asked, loan_period);
