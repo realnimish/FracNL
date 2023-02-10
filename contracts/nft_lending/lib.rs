@@ -33,8 +33,22 @@ mod nft_lending {
         token_id: TokenId,
         shares_locked: Balance,
         amount_asked: Balance,
+        security_deposit: Balance,
         loan_period: u128,
         listing_timestamp: Time,
+    }
+
+    #[derive(scale::Encode, scale::Decode)]
+    #[cfg_attr(
+        feature = "std",
+        derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
+    )]
+    pub struct LoanStats {
+        raised: Balance,
+        limit_left: Balance,
+        interest: Balance,
+        repayed: Balance,
+        loan_status: LoanStatus,
     }
 
     #[derive(scale::Encode, scale::Decode)]
@@ -47,6 +61,18 @@ mod nft_lending {
         amount: Balance,
         interest: Balance,
         status: OfferStatus,
+    }
+
+    #[derive(scale::Encode, scale::Decode, PartialEq)]
+    #[cfg_attr(
+        feature = "std",
+        derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
+    )]
+    pub enum LoanStatus {
+        OPEN,
+        ACTIVE,
+        CLOSED,
+        CANCELLED,
     }
 
     #[derive(scale::Encode, scale::Decode)]
@@ -72,6 +98,7 @@ mod nft_lending {
 
         credit_score: Mapping<AccountId, u16>,
         loans: Mapping<LoanId, LoanMetadata>,
+        loan_stats: Mapping<LoanId, LoanStats>,
 
         offers_nonce: Mapping<LoanId, OfferId>,
         offers: Mapping<(LoanId, OfferId), OfferMetadata>,
@@ -108,6 +135,7 @@ mod nft_lending {
                 cooldown_phase_duration,
                 credit_score: Default::default(),
                 loans: Default::default(),
+                loan_stats: Default::default(),
                 offers_nonce: Default::default(),
                 offers: Default::default(),
                 active_offer: Default::default(),
@@ -163,12 +191,22 @@ mod nft_lending {
                 token_id,
                 shares_locked: shares_to_lock,
                 amount_asked,
+                security_deposit: transferred_value,
                 loan_period,
                 listing_timestamp: self.env().block_timestamp(),
             };
 
+            let loan_stats = LoanStats {
+                raised: 0,
+                limit_left: amount_asked,
+                interest: 0,
+                repayed: 0,
+                loan_status: LoanStatus::OPEN,
+            };
+
             self.loan_nonce += 1;
             self.loans.insert(&self.loan_nonce, &loan_metadata);
+            self.loan_stats.insert(&self.loan_nonce, &loan_stats);
 
             Ok(self.loan_nonce)
         }
@@ -199,13 +237,14 @@ mod nft_lending {
             let amount = self.env().transferred_value();
 
             self.is_offer_phase(loan_id)?;
+            let mut loan_stats = self.get_loan_stats(loan_id)?;
 
             ensure!(
                 !self.active_offer.contains((loan_id, caller)),
                 Error::ActiveOfferAlreadyExists
             );
             ensure!(
-                amount <= self.get_max_lend_amt(loan_id),
+                amount <= loan_stats.limit_left,
                 Error::ExcessiveLendingAmountSent,
             );
 
@@ -220,6 +259,14 @@ mod nft_lending {
             self.active_offer.insert(&(loan_id, caller), &offer_id);
             self.offers.insert(&(loan_id, offer_id), &offer);
             self.offers_nonce.insert(&loan_id, &(offer_id + 1));
+
+            loan_stats.raised += amount;
+            loan_stats.limit_left -= amount;
+            loan_stats.interest += interest;
+
+            // TODO if limit_left becomes 0 => start the loan
+
+            self.loan_stats.insert(&loan_id, &loan_stats);
 
             Ok(offer_id)
         }
@@ -272,7 +319,9 @@ mod nft_lending {
         pub fn is_offer_phase(&self, loan_id: LoanId) -> Result<()> {
             let loan = self.loans.get(&loan_id).ok_or(Error::InvalidLoanId)?;
 
-            // TODO check the loan is open
+            // Check the loan is open
+            let stats = self.loan_stats.get(&loan_id).expect("Infallible");
+            ensure!(stats.loan_status == LoanStatus::OPEN, Error::NotOfferPhase);
 
             let current_time = self.env().block_timestamp();
             ensure!(
@@ -286,7 +335,9 @@ mod nft_lending {
         pub fn is_cooldown_phase(&self, loan_id: LoanId) -> Result<()> {
             let loan = self.loans.get(&loan_id).ok_or(Error::InvalidLoanId)?;
 
-            // TODO check the loan is open
+            // Check the loan is open
+            let stats = self.loan_stats.get(&loan_id).expect("Infallible");
+            ensure!(stats.loan_status == LoanStatus::OPEN, Error::NotOfferPhase);
 
             let current_time = self.env().block_timestamp();
             let offer_duration = loan.listing_timestamp + self.offer_phase_duration;
@@ -300,8 +351,14 @@ mod nft_lending {
         }
 
         #[ink(message)]
-        pub fn get_max_lend_amt(&self, _loan_id: LoanId) -> Balance {
-            unimplemented!()
+        pub fn get_max_lend_amt(&self, loan_id: LoanId) -> Result<Balance> {
+            let stats = self.loan_stats.get(&loan_id).ok_or(Error::InvalidLoanId)?;
+            Ok(stats.limit_left)
+        }
+
+        #[ink(message)]
+        pub fn get_loan_stats(&self, loan_id: LoanId) -> Result<LoanStats> {
+            self.loan_stats.get(&loan_id).ok_or(Error::InvalidLoanId)
         }
     }
 }
