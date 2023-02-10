@@ -28,7 +28,7 @@ mod nft_lending {
         feature = "std",
         derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
     )]
-    struct LoanMetadata {
+    pub struct LoanMetadata {
         borrower: AccountId,
         token_id: TokenId,
         shares_locked: Balance,
@@ -102,7 +102,7 @@ mod nft_lending {
 
         offers_nonce: Mapping<LoanId, OfferId>,
         offers: Mapping<(LoanId, OfferId), OfferMetadata>,
-        active_offer: Mapping<(LoanId, AccountId), OfferId>,
+        active_offer_id: Mapping<(LoanId, AccountId), OfferId>,
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -117,6 +117,7 @@ mod nft_lending {
         NoOfferExists,
         WithdrawFailed,
         InvalidLoanId,
+        InvalidOfferId,
     }
 
     impl Contract {
@@ -138,7 +139,7 @@ mod nft_lending {
                 loan_stats: Default::default(),
                 offers_nonce: Default::default(),
                 offers: Default::default(),
-                active_offer: Default::default(),
+                active_offer_id: Default::default(),
             }
         }
 
@@ -236,11 +237,13 @@ mod nft_lending {
             let caller = self.env().caller();
             let amount = self.env().transferred_value();
 
-            self.is_offer_phase(loan_id)?;
-            let mut loan_stats = self.get_loan_stats(loan_id)?;
+            let loan_metadata = self.ref_get_loan_metadata(&loan_id)?;
+            let mut loan_stats = self.ref_get_loan_stats(&loan_id)?;
+
+            self.ref_is_offer_phase(&loan_metadata, &loan_stats)?;
 
             ensure!(
-                !self.active_offer.contains((loan_id, caller)),
+                !self.active_offer_id.contains((loan_id, caller)),
                 Error::ActiveOfferAlreadyExists
             );
             ensure!(
@@ -248,7 +251,7 @@ mod nft_lending {
                 Error::ExcessiveLendingAmountSent,
             );
 
-            let offer_id = self.get_offer_nonce(loan_id);
+            let offer_id = self.get_offer_nonce_or_default(&loan_id);
             let offer = OfferMetadata {
                 lender: caller,
                 amount,
@@ -256,7 +259,7 @@ mod nft_lending {
                 status: OfferStatus::PENDING,
             };
 
-            self.active_offer.insert(&(loan_id, caller), &offer_id);
+            self.active_offer_id.insert(&(loan_id, caller), &offer_id);
             self.offers.insert(&(loan_id, offer_id), &offer);
             self.offers_nonce.insert(&loan_id, &(offer_id + 1));
 
@@ -274,14 +277,13 @@ mod nft_lending {
         #[ink(message)]
         pub fn withdraw_offer(&mut self, loan_id: LoanId) -> Result<OfferId> {
             let caller = self.env().caller();
+            let loan_metadata = self.ref_get_loan_metadata(&loan_id)?;
+            let loan_stats = self.ref_get_loan_stats(&loan_id)?;
 
-            self.is_offer_phase(loan_id)?;
+            self.ref_is_offer_phase(&loan_metadata, &loan_stats)?;
 
-            let offer_id = self
-                .active_offer
-                .get(&(loan_id, caller))
-                .ok_or(Error::NoOfferExists)?;
-            let mut offer = self.offers.get(&(loan_id, offer_id)).expect("Infallible");
+            let offer_id = self.ref_get_active_offer_id(&loan_id, &caller)?;
+            let mut offer = self.ref_get_offer_details(&loan_id, &offer_id)?;
 
             // @discuss: Should we deduct some handling fee to avoid spam
             if self.env().transfer(caller, offer.amount).is_err() {
@@ -290,7 +292,7 @@ mod nft_lending {
 
             offer.status = OfferStatus::WITHDRAWN;
             self.offers.insert(&(loan_id, offer_id), &offer);
-            self.active_offer.remove(&(loan_id, caller));
+            self.active_offer_id.remove(&(loan_id, caller));
 
             Ok(offer_id)
         }
@@ -302,7 +304,7 @@ mod nft_lending {
 
         #[ink(message)]
         pub fn get_offer_nonce(&self, loan_id: LoanId) -> OfferId {
-            self.offers_nonce.get(&loan_id).unwrap_or(0)
+            self.get_offer_nonce_or_default(&loan_id)
         }
 
         #[ink(message)]
@@ -317,30 +319,79 @@ mod nft_lending {
 
         #[ink(message)]
         pub fn is_offer_phase(&self, loan_id: LoanId) -> Result<()> {
-            let loan = self.loans.get(&loan_id).ok_or(Error::InvalidLoanId)?;
+            let loan_metadata = self.ref_get_loan_metadata(&loan_id)?;
+            let loan_stats = self.ref_get_loan_stats(&loan_id)?;
+            self.ref_is_offer_phase(&loan_metadata, &loan_stats)
+        }
 
-            // Check the loan is open
-            let stats = self.loan_stats.get(&loan_id).expect("Infallible");
-            ensure!(stats.loan_status == LoanStatus::OPEN, Error::NotOfferPhase);
+        #[ink(message)]
+        pub fn is_cooldown_phase(&self, loan_id: LoanId) -> Result<()> {
+            let loan_metadata = self.ref_get_loan_metadata(&loan_id)?;
+            let loan_stats = self.ref_get_loan_stats(&loan_id)?;
+            self.ref_is_cooldown_phase(&loan_metadata, &loan_stats)
+        }
+
+        #[ink(message)]
+        pub fn get_max_lend_amt(&self, loan_id: LoanId) -> Result<Balance> {
+            let stats = self.ref_get_loan_stats(&loan_id)?;
+            Ok(stats.limit_left)
+        }
+
+        #[ink(message)]
+        pub fn get_loan_metadata(&self, loan_id: LoanId) -> Result<LoanMetadata> {
+            self.ref_get_loan_metadata(&loan_id)
+        }
+
+        #[ink(message)]
+        pub fn get_loan_stats(&self, loan_id: LoanId) -> Result<LoanStats> {
+            self.ref_get_loan_stats(&loan_id)
+        }
+
+        // HELPER FUNCTIONS
+
+        fn get_offer_nonce_or_default(&self, loan_id: &LoanId) -> OfferId {
+            self.offers_nonce.get(loan_id).unwrap_or(0)
+        }
+
+        fn ref_get_loan_metadata(&self, loan_id: &LoanId) -> Result<LoanMetadata> {
+            self.loans.get(loan_id).ok_or(Error::InvalidLoanId)
+        }
+
+        fn ref_get_loan_stats(&self, loan_id: &LoanId) -> Result<LoanStats> {
+            self.loan_stats.get(loan_id).ok_or(Error::InvalidLoanId)
+        }
+
+        fn ref_is_offer_phase(
+            &self,
+            loan_metadata: &LoanMetadata,
+            loan_stats: &LoanStats,
+        ) -> Result<()> {
+            ensure!(
+                loan_stats.loan_status == LoanStatus::OPEN,
+                Error::NotOfferPhase
+            );
 
             let current_time = self.env().block_timestamp();
+
             ensure!(
-                current_time <= loan.listing_timestamp + self.offer_phase_duration,
+                current_time <= loan_metadata.listing_timestamp + self.offer_phase_duration,
                 Error::NotOfferPhase
             );
             Ok(())
         }
 
-        #[ink(message)]
-        pub fn is_cooldown_phase(&self, loan_id: LoanId) -> Result<()> {
-            let loan = self.loans.get(&loan_id).ok_or(Error::InvalidLoanId)?;
-
-            // Check the loan is open
-            let stats = self.loan_stats.get(&loan_id).expect("Infallible");
-            ensure!(stats.loan_status == LoanStatus::OPEN, Error::NotOfferPhase);
+        fn ref_is_cooldown_phase(
+            &self,
+            loan_metadata: &LoanMetadata,
+            loan_stats: &LoanStats,
+        ) -> Result<()> {
+            ensure!(
+                loan_stats.loan_status == LoanStatus::OPEN,
+                Error::NotOfferPhase
+            );
 
             let current_time = self.env().block_timestamp();
-            let offer_duration = loan.listing_timestamp + self.offer_phase_duration;
+            let offer_duration = loan_metadata.listing_timestamp + self.offer_phase_duration;
             let cooldown_duration = offer_duration + self.cooldown_phase_duration;
 
             ensure!(
@@ -350,15 +401,20 @@ mod nft_lending {
             Ok(())
         }
 
-        #[ink(message)]
-        pub fn get_max_lend_amt(&self, loan_id: LoanId) -> Result<Balance> {
-            let stats = self.loan_stats.get(&loan_id).ok_or(Error::InvalidLoanId)?;
-            Ok(stats.limit_left)
+        fn ref_get_active_offer_id(&self, loan_id: &LoanId, caller: &AccountId) -> Result<OfferId> {
+            self.active_offer_id
+                .get((loan_id, caller))
+                .ok_or(Error::NoOfferExists)
         }
 
-        #[ink(message)]
-        pub fn get_loan_stats(&self, loan_id: LoanId) -> Result<LoanStats> {
-            self.loan_stats.get(&loan_id).ok_or(Error::InvalidLoanId)
+        fn ref_get_offer_details(
+            &self,
+            loan_id: &LoanId,
+            offer_id: &OfferId,
+        ) -> Result<OfferMetadata> {
+            self.offers
+                .get((loan_id, offer_id))
+                .ok_or(Error::InvalidOfferId)
         }
     }
 }
