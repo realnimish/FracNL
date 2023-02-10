@@ -120,6 +120,8 @@ mod nft_lending {
         InvalidLoanId,
         InvalidOfferId,
         LoanIsNotOpen,
+        LoanIsNotActive,
+        LoanHasExpired,
         NotAuthorized,
         ZeroValue,
     }
@@ -231,6 +233,12 @@ mod nft_lending {
                 Error::LoanIsNotOpen
             );
 
+            let time = self.env().block_timestamp();
+            let cooldown_time = loan_metadata.listing_timestamp
+                + self.offer_phase_duration
+                + self.cooldown_phase_duration;
+            ensure!(time <= cooldown_time, Error::LoanHasExpired);
+
             loan_stats.start_timestamp = Some(self.env().block_timestamp());
             loan_stats.loan_status = LoanStatus::ACTIVE;
             self.loan_stats.insert(&loan_id, &loan_stats);
@@ -251,7 +259,16 @@ mod nft_lending {
             let loan_metadata = self.ref_get_loan_metadata(&loan_id)?;
             let mut loan_stats = self.ref_get_loan_stats(&loan_id)?;
 
-            ensure!(caller == loan_metadata.borrower, Error::NotAuthorized);
+            let time = self.env().block_timestamp();
+            let cooldown_time = loan_metadata.listing_timestamp
+                + self.offer_phase_duration
+                + self.cooldown_phase_duration;
+
+            // If the cooldown_time has not elapsed, only the borrower can cancel the loan
+            ensure!(
+                time <= cooldown_time && caller == loan_metadata.borrower,
+                Error::NotAuthorized
+            );
             ensure!(
                 loan_stats.loan_status == LoanStatus::OPEN,
                 Error::LoanIsNotOpen
@@ -481,7 +498,7 @@ mod nft_lending {
                 .get((loan_id, offer_id))
                 .ok_or(Error::InvalidOfferId)
         }
-    
+
         fn ref_reject_all_offers(&mut self, _loan_id: &LoanId) -> Result<()> {
             unimplemented!()
         }
