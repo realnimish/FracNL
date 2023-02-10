@@ -7,6 +7,7 @@ import { Web3Storage } from "web3.storage";
 export default function MintNFT(props) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
+  const [CID, setCID] = useState("");
   const client = new Web3Storage({
     token:
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweEI5MzJjM2FmOWE4QUI1NzlFOEI1NUZBNjNEYUVmZjQ4MDliM0I4NmUiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2NzU3NjU4NjA1MDIsIm5hbWUiOiJoYWNrYXRob24ifQ.uwT-Wz-HsXrOK-Q_bpa07jbe_BF_Wbv5uP-sJU26Cp4",
@@ -19,8 +20,8 @@ export default function MintNFT(props) {
       name: "nft image",
       maxRetries: 3,
     });
-
-    console.log(rootCid);
+    setCID(rootCid);
+    console.log("CID of uploaded file", rootCid);
   };
 
   useEffect(() => {
@@ -42,6 +43,7 @@ export default function MintNFT(props) {
         backgroundColor: "#03080f",
         marginTop: "70px",
         paddingTop: "30px",
+        minHeight: "500px",
       }}
     >
       <Box
@@ -127,14 +129,27 @@ export default function MintNFT(props) {
       >
         {imageUrl && selectedImage && <ImagePreview image={imageUrl} />}
       </Box>
-      <Box
-        component="div"
-        sx={{
-          marginTop: "50px",
-          display: "flex",
-          justifyContent: "center",
-        }}
-      ></Box>
+      {CID !== "" && (
+        <Box
+          component="div"
+          sx={{
+            margin: "50px 0",
+            display: "flex",
+            justifyContent: "center",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography
+            variant="subtitle2"
+            sx={{ width: "400px", color: "gray" }}
+            textAlign={"center"}
+          >
+            {"Image uploaded to IPFS with CID: "}
+          </Typography>
+          <Typography sx={{ fontSize: "12px" }}>{CID}</Typography>
+        </Box>
+      )}
     </Box>
   );
 }
