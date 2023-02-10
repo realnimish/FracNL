@@ -246,8 +246,35 @@ mod nft_lending {
         }
 
         #[ink(message)]
-        pub fn cancel_loan(&mut self, _loan_id: LoanId) -> Result<()> {
-            unimplemented!()
+        pub fn cancel_loan(&mut self, loan_id: LoanId) -> Result<()> {
+            let caller = self.env().caller();
+            let loan_metadata = self.ref_get_loan_metadata(&loan_id)?;
+            let mut loan_stats = self.ref_get_loan_stats(&loan_id)?;
+
+            ensure!(caller == loan_metadata.borrower, Error::NotAuthorized);
+            ensure!(
+                loan_stats.loan_status == LoanStatus::OPEN,
+                Error::LoanIsNotOpen
+            );
+
+            let loan_metadata = self.ref_get_loan_metadata(&loan_id)?;
+
+            let cancellation_charges = self.get_cancellation_charges();
+            let amount = loan_metadata
+                .security_deposit
+                .saturating_sub(cancellation_charges);
+
+            if amount > 0 && self.env().transfer(caller, amount).is_err() {
+                return Err(Error::WithdrawFailed);
+            }
+
+            // Reject all the offers
+            self.ref_reject_all_offers(&loan_id)?;
+
+            loan_stats.loan_status = LoanStatus::CANCELLED;
+            self.loan_stats.insert(&loan_id, &loan_stats);
+
+            Ok(())
         }
 
         #[ink(message)]
@@ -380,6 +407,11 @@ mod nft_lending {
             unimplemented!()
         }
 
+        #[ink(message)]
+        pub fn get_cancellation_charges(&self) -> Balance {
+            unimplemented!()
+        }
+
         // HELPER FUNCTIONS
 
         fn get_offer_nonce_or_default(&self, loan_id: &LoanId) -> OfferId {
@@ -448,6 +480,10 @@ mod nft_lending {
             self.offers
                 .get((loan_id, offer_id))
                 .ok_or(Error::InvalidOfferId)
+        }
+    
+        fn ref_reject_all_offers(&mut self, _loan_id: &LoanId) -> Result<()> {
+            unimplemented!()
         }
     }
 }
