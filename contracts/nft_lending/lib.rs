@@ -369,8 +369,62 @@ mod nft_lending {
         }
 
         #[ink(message)]
-        pub fn respond_to_offer(&mut self, _loan_id: LoanId, _offer_id: OfferId) -> Result<()> {
-            unimplemented!()
+        pub fn respond_to_offer(
+            &mut self,
+            loan_id: LoanId,
+            offer_id: OfferId,
+            response: bool,
+        ) -> Result<()> {
+            let caller = self.env().caller();
+            let loan_metadata = self.ref_get_loan_metadata(&loan_id)?;
+            let mut loan_stats = self.ref_get_loan_stats(&loan_id)?;
+
+            ensure!(caller == loan_metadata.borrower, Error::NotAuthorized);
+            ensure!(
+                loan_stats.loan_status == LoanStatus::OPEN,
+                Error::LoanIsNotOpen
+            );
+
+            let time = self.env().block_timestamp();
+            let cooldown_time = loan_metadata.listing_timestamp
+                + self.offer_phase_duration
+                + self.cooldown_phase_duration;
+            ensure!(time <= cooldown_time, Error::LoanHasExpired);
+
+            let mut offer = self.ref_get_offer_details(&loan_id, &offer_id)?;
+            ensure!(
+                offer.status == OfferStatus::PENDING,
+                Error::OfferNotInPendingState
+            );
+
+            match response {
+                false => {
+                    if self.env().transfer(offer.lender, offer.amount).is_err() {
+                        return Err(Error::WithdrawFailed);
+                    }
+
+                    offer.status = OfferStatus::REJECTED;
+                    self.active_offer_id.remove(&(loan_id, caller));
+                    self.offers.insert(&(loan_id, offer_id), &offer);
+                }
+                true => {
+                    ensure!(
+                        offer.amount <= loan_stats.limit_left,
+                        Error::LoanLimitExceeding
+                    );
+                    offer.status = OfferStatus::ACCEPTED;
+                    self.offers.insert(&(loan_id, offer_id), &offer);
+
+                    loan_stats.raised += offer.amount;
+                    loan_stats.limit_left -= offer.amount;
+                    loan_stats.interest += offer.interest;
+
+                    // TODO if limit_left becomes 0 => start the loan
+                    self.loan_stats.insert(&loan_id, &loan_stats);
+                }
+            }
+
+            Ok(())
         }
 
         #[ink(message)]
