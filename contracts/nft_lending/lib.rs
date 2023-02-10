@@ -76,7 +76,7 @@ mod nft_lending {
         CANCELLED,
     }
 
-    #[derive(scale::Encode, scale::Decode)]
+    #[derive(scale::Encode, scale::Decode, PartialEq)]
     #[cfg_attr(
         feature = "std",
         derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
@@ -124,6 +124,8 @@ mod nft_lending {
         LoanHasExpired,
         NotAuthorized,
         ZeroValue,
+        OfferNotInPendingState,
+        LoanLimitExceeding,
     }
 
     impl Contract {
@@ -310,7 +312,7 @@ mod nft_lending {
             let amount = self.env().transferred_value();
 
             let loan_metadata = self.ref_get_loan_metadata(&loan_id)?;
-            let mut loan_stats = self.ref_get_loan_stats(&loan_id)?;
+            let loan_stats = self.ref_get_loan_stats(&loan_id)?;
 
             self.ref_is_offer_phase(&loan_metadata, &loan_stats)?;
 
@@ -335,14 +337,6 @@ mod nft_lending {
             self.offers.insert(&(loan_id, offer_id), &offer);
             self.offers_nonce.insert(&loan_id, &(offer_id + 1));
 
-            loan_stats.raised += amount;
-            loan_stats.limit_left -= amount;
-            loan_stats.interest += interest;
-
-            // TODO if limit_left becomes 0 => start the loan
-
-            self.loan_stats.insert(&loan_id, &loan_stats);
-
             Ok(offer_id)
         }
 
@@ -356,6 +350,11 @@ mod nft_lending {
 
             let offer_id = self.ref_get_active_offer_id(&loan_id, &caller)?;
             let mut offer = self.ref_get_offer_details(&loan_id, &offer_id)?;
+
+            ensure!(
+                offer.status == OfferStatus::PENDING,
+                Error::OfferNotInPendingState
+            );
 
             // @discuss: Should we deduct some handling fee to avoid spam
             if self.env().transfer(caller, offer.amount).is_err() {
