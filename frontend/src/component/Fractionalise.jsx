@@ -23,34 +23,19 @@ export default function Fractionalise(props) {
     });
   }, []);
 
+
   return (
     <div class="wrapper">
       <div class="tabs">
-        <button class="navTab active" data-toggle="login">
-          <Typography
-            variant="body1"
-            sx={{
-              fontWeight: "400",
-              fontFamily: "'Ubuntu Condensed', sans-serif",
-            }}
-          >
+        <button class="navTab active" data-toggle="frac">
             Fractionalize
-          </Typography>
         </button>
-        <button class="navTab" data-toggle="register">
-          <Typography
-            variant="body1"
-            sx={{
-              fontWeight: "400",
-              fontFamily: "'Ubuntu Condensed', sans-serif",
-            }}
-          >
+        <button class="navTab" data-toggle="defrac">
             Defractionalize
-          </Typography>
         </button>
       </div>
       <div class="contentWrapper">
-        <div class="content active" id="login">
+        <div class="content active" id="frac">
           <Box sx={{ width: "100%", marginBottom: "40px"}} className="buttonContainer">
             <div
               className="btn btn-green"
@@ -63,7 +48,7 @@ export default function Fractionalise(props) {
             </div>
           </Box>
         </div>
-        <div class="content" id="register">
+        <div class="content" id="defrac">
           <Box sx={{ width: "100%", marginBottom: "40px" }} className="buttonContainer">
             <div
               className="btn btn-red"
