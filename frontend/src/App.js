@@ -10,6 +10,7 @@ import ListNFT from './component/ListNFT';
 import ListingDetail from './component/ListingDetails/ListingDetail';
 import MintNFT from './component/Mint/MintNFT';
 import Fractionalise from './component/Fractionalise';
+import Profile from './component/Profile';
 
 function App() {
 
@@ -52,7 +53,7 @@ function App() {
           <Route exact path="/mint" element={<MintNFT/>} />
           <Route exact path="/list" element={<ListNFT/>} />
           <Route exact path="/fractionalise" element={<Fractionalise />} />
-          <Route exact path="/profile" element={<></>} />
+          <Route exact path="/profile" element={<Profile />} />
           <Route exact path="/listing" element={<ListingDetail/>} />
           <Route exact path="/error" element={<>Error</>}/>
         </Routes>

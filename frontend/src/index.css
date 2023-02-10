@@ -763,14 +763,14 @@ a {
   font-weight: 400;
   background: #1c1d20;
   color: hsl(0, 0%, 100%);
-  border-radius: 30px 30px 0 0;
   cursor: pointer;
   font-family: "'Ubuntu Condensed', sans-serif";
 }
 
 .navTab.active {
-  background: #ffffff;
+  background: #363636;
   color: hsl(0, 0%, 10%);
+  color: hsl(0, 0%, 100%);
   animation: boxShadowChange 15s infinite;
   font-weight: 400;
   font-size: 1rem;
