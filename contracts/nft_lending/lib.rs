@@ -288,16 +288,7 @@ mod nft_lending {
             loan_stats.repaid += self.env().transferred_value();
 
             if loan_stats.repaid >= loan_stats.raised + loan_stats.interest {
-                // TODO Transfer the amount to lenders
-
-                // Unlock the fractional NFT
-                self.transfer_fractional_nft(
-                    &self.env().account_id(),
-                    &loan_metadata.borrower,
-                    &loan_metadata.token_id,
-                    &loan_metadata.shares_locked,
-                )?;
-
+                self.ref_settle_loan(&loan_id, &loan_metadata, &loan_stats)?;
                 loan_stats.loan_status = LoanStatus::CLOSED;
             }
 
@@ -306,8 +297,23 @@ mod nft_lending {
         }
 
         #[ink(message)]
-        pub fn default_loan(&mut self, _loan_id: LoanId) -> Result<()> {
-            unimplemented!()
+        pub fn claim_loan_default(&mut self, loan_id: LoanId) -> Result<()> {
+            let loan_metadata = self.ref_get_loan_metadata(&loan_id)?;
+            let mut loan_stats = self.ref_get_loan_stats(&loan_id)?;
+
+            ensure!(
+                loan_stats.loan_status == LoanStatus::ACTIVE,
+                Error::LoanIsNotActive
+            );
+
+            let time = self.env().block_timestamp();
+            let loan_expiry = loan_stats.start_timestamp.unwrap() + loan_metadata.loan_period;
+            ensure!(time > loan_expiry, Error::LoanHasNotExpired);
+
+            self.ref_settle_loan(&loan_id, &loan_metadata, &loan_stats)?;
+            loan_stats.loan_status = LoanStatus::CLOSED;
+            self.loan_stats.insert(&loan_id, &loan_stats);
+            Ok(())
         }
 
         #[ink(message, payable)]
@@ -721,6 +727,50 @@ mod nft_lending {
             (funds, lenders_share)
         }
 
+        fn ref_settle_loan(
+            &mut self,
+            loan_id: &LoanId,
+            loan_metadata: &LoanMetadata,
+            loan_stats: &LoanStats,
+        ) -> Result<()> {
+            let total_offers = self.get_offer_nonce_or_default(loan_id);
+            let mut remaining_shares = loan_metadata.shares_locked;
+            let borrower_unlocked_shares =
+                self.ref_get_borrower_settlement(&loan_stats, &loan_metadata.shares_locked);
+
+            for offer_id in 0..total_offers {
+                let offer = self.ref_get_offer_details(loan_id, &offer_id)?;
+                if offer.status == OfferStatus::ACCEPTED {
+                    let (funds, nft_shares) = self.ref_get_lender_settlement(
+                        &loan_metadata,
+                        &loan_stats,
+                        &offer,
+                        &borrower_unlocked_shares,
+                    );
+                    remaining_shares -= nft_shares;
+
+                    ensure!(
+                        self.env().transfer(offer.lender, funds).is_ok(),
+                        Error::WithdrawFailed
+                    );
+
+                    self.transfer_fractional_nft(
+                        &self.env().account_id(),
+                        &offer.lender,
+                        &loan_metadata.token_id,
+                        &nft_shares,
+                    )?;
+                }
+            }
+
+            self.transfer_fractional_nft(
+                &self.env().account_id(),
+                &loan_metadata.borrower,
+                &loan_metadata.token_id,
+                &remaining_shares,
+            )
+        }
+
         fn transfer_fractional_nft(
             &mut self,
             from: &AccountId,
@@ -728,6 +778,10 @@ mod nft_lending {
             token_id: &TokenId,
             amount: &Balance,
         ) -> Result<()> {
+            if amount == &0u128 {
+                return Ok(());
+            }
+
             // @dev This is disabled during tests due to the use of `invoke_contract()` not being
             // supported (tests end up panicking).
             #[cfg(not(test))]
