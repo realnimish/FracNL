@@ -39,6 +39,15 @@ export default function Homepage(props) {
       fraction: "30%",
       status: 0,
     },
+    {
+      createAddress: "5Gs5gfzHkBsRt97qgmvBW2qX6M7FPXP8cJkAj7T7kNFbGVvG",
+      image:
+        "https://img.freepik.com/premium-vector/mutant-ape-yacht-club-nft-artwork-collection-set-unique-bored-monkey-character-nfts-variant_361671-259.jpg?w=2000",
+      askValue: "300 ETH",
+      duration: "7d",
+      fraction: "30%",
+      status: 0,
+    },
   ]);
   return (
     <Box sx={{ padding: "80px", minHeight: "100%", height: "fit-content" }}>
@@ -55,15 +64,15 @@ export default function Homepage(props) {
           sx={{
             fontFamily: "'Ubuntu Condensed', sans-serif",
             letterSpacing: "1.5px",
-            marginBottom: "70px",
+            marginBottom: "90px",
           }}
-          variant="h5"
+          variant="h4"
         >
           Listings
         </Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap" }}>
           {listings.map((listing, idx) => (
-            <Box sx={{ margin: "0 20px" }} key={idx}>
+            <Box sx={{ margin: "0 20px 40px 20px" }} key={idx}>
               <Card
                 creatorAddress={listing.createAddress}
                 image={listing.image}

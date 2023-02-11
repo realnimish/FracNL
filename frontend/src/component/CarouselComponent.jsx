@@ -2,52 +2,80 @@ import Card from "./CardComponent";
 import { Box, Typography } from "@mui/material";
 import ArrowCircleRightOutlinedIcon from "@mui/icons-material/ArrowCircleRightOutlined";
 import ArrowCircleLeftOutlinedIcon from "@mui/icons-material/ArrowCircleLeftOutlined";
-import CarouselItem from "./CarouselItem";
+import "../index.css";
 
 export default function CarouselComponent(props) {
+  const scroll = (el, val) => {
+    el = document.getElementsByClassName("carouselWrapper");
+    let targetEl;
+    for(var i = 0; i < el.length; i++) {
+      console.log(el[i].getElementsByClassName("carouselHeaderWrapper")[0].innerText);
+      if(el[i].getElementsByClassName("carouselHeaderWrapper")[0].innerText === props.title) {
+        targetEl = el[i];
+        break;
+      }
+    }
+    console.log("targetEl", targetEl);
+    targetEl = targetEl.getElementsByClassName('carouselBodyContainer')[0];
+    targetEl.scroll({left: targetEl.scrollLeft + val, behavior: 'smooth'})
+  };
   return (
-    <Box component="div" className="carouselWrapper">
+    <Box component="div" className="carouselWrapper" sx={{margin: "30px auto", minWidth: "350px", width: "80%", marginBottom: "100px"}}>
       <Box
         component="div"
         className="carouselHeaderWrapper"
         sx={{
           display: "flex",
-          marginBottom: "20px",
-          marginLeft: "4%"
+          width: "100%",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
         <Box component="div" className="header">
           <Typography
-            variant="h4"
-            className="title"
+            variant="h5"
             sx={{
               fontFamily: "'Ubuntu Condensed', sans-serif",
               letterSpacing: "1.5px",
-              margin: "0px 0px 0px 0px",
             }}
+            className={"carouselTitle"}
           >
-            Created Ads
+            {props.title}
           </Typography>
         </Box>
-        <Box component="div" className="buttonWrapper" sx={{ display: "flex", paddingTop: "15px", marginLeft: "79%" }}>
-          <ArrowCircleLeftOutlinedIcon sx={{ marginRight: "8px", }}/>
-          <ArrowCircleRightOutlinedIcon />
+        <Box
+          component="div"
+          className="buttonWrapper"
+          sx={{ display: "flex", alignItems: "center", height: "100%" }}
+        >
+          <ArrowCircleLeftOutlinedIcon sx={{ marginRight: "16px", fontSize: "30px" }} onClick={() => scroll(props.title, -800)}/>
+          <ArrowCircleRightOutlinedIcon sx={{ fontSize: "30px" }} onClick={() => scroll(this, 800)}/>
         </Box>
       </Box>
       <Box
-       component="div"
-       className="carouselBodyContainer"
-       sx={{
-        minWidth: "350px",
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "#212224",
-        padding: "30px",
-        marginLeft: "3%",
-        marginRight: "3%",
-        borderRadius: "30px"
-       }}>
-        <CarouselItem />
+        component="div"
+        className="carouselBodyContainer"
+        sx={{
+          minWidth: "350px",
+          width: "100%",
+          display: "flex",
+          padding: "20px 0 30px 0 ",
+          marginTop: "45px"
+        }}
+      >
+        {props.items?.map((item, idx) => (
+          <Box sx={{margin: "0 40px"}} key={idx}>
+          <Card
+            creatorAddress={item.createAddress}
+            image={item.image}
+            askValue={item.askValue}
+            duration={item.duration}
+            fraction={item.fraction}
+            status={item.status}
+            key={idx}
+          />
+          </Box>
+        ))}
       </Box>
     </Box>
   );

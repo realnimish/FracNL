@@ -532,6 +532,15 @@ a {
   animation: backgroundChanger 15s infinite, boxShadowDetailsChange 15s infinite;
 }
 
+.carouselTitle {
+  animation: backgroundChanger 15s infinite, boxShadowDetailsChange 15s infinite;
+  color: #03080f;
+  text-shadow: 2px 3px 5px #03080f;
+  padding: 5px 10px;
+  transform: skew(-20deg);
+  border-radius: 2px;
+}
+
 @keyframes navItemUnderline {
   from {
     opacity: 0;
@@ -847,4 +856,15 @@ a {
 
 .profileInfoContainer {
   animation: boxShadowChange 10s infinite;
+}
+
+.carouselBodyContainer::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.carouselBodyContainer {
+  overflow-x: auto;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }

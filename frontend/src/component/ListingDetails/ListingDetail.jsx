@@ -7,8 +7,6 @@ import Repay from "./Repay";
 import StatusAndTimer from "./StatusAndTimer";
 
 export default function ListingDetail(props) {
-  
-
   const [listingDetails, setListingDetails] = useState({
     image:
       "https://img.freepik.com/premium-vector/mutant-ape-yacht-club-nft-artwork-collection-set-unique-bored-monkey-character-nfts-variant_361671-259.jpg?w=2000",
@@ -50,6 +48,8 @@ export default function ListingDetail(props) {
     },
   ]);
 
+  
+
   return (
     <Box
       sx={{
@@ -60,7 +60,7 @@ export default function ListingDetail(props) {
       }}
       className="listingDetail"
     >
-      <StatusAndTimer status="Execution Phase " time={"78393"}/>
+      <StatusAndTimer status="Execution Phase " time={"78393"} />
       <Box className="detailBox">
         <Box className="detailBoxLeft">
           <img src={listingDetails.image} className="detailImage" />
@@ -208,9 +208,9 @@ export default function ListingDetail(props) {
           </Box>
         </Box>
       </Box>
-      <Repay/>
+      <Repay />
       <CreateOffer />
-      <Offers offers={offers}/>
+      <Offers offers={offers} />
     </Box>
   );
 }

@@ -7,14 +7,50 @@ import CarouselComponent from "./CarouselComponent";
 export default function Profile(props) {
   const items=[
     {
-      img: "https://img.freepik.com/premium-vector/mutant-ape-yacht-club-nft-artwork-collection-set-unique-bored-monkey-character-nfts-variant_361671-259.jpg?w=2000",
+      createAddress: "5Gs5gfzHkBsRt97qgmvBW2qX6M7FPXP8cJkAj7T7kNFbGVvG",
+      image:
+        "https://img.freepik.com/premium-vector/mutant-ape-yacht-club-nft-artwork-collection-set-unique-bored-monkey-character-nfts-variant_361671-259.jpg?w=2000",
+      askValue: "300 ETH",
+      duration: "7d",
+      fraction: "30%",
+      status: 0,
     },
     {
-      img: "https://img.freepik.com/premium-vector/mutant-ape-yacht-club-nft-artwork-collection-set-unique-bored-monkey-character-nfts-variant_361671-259.jpg?w=2000",
+      createAddress: "5Gs5gfzHkBsRt97qgmvBW2qX6M7FPXP8cJkAj7T7kNFbGVvG",
+      image:
+        "https://img.freepik.com/premium-vector/mutant-ape-yacht-club-nft-artwork-collection-set-unique-bored-monkey-character-nfts-variant_361671-259.jpg?w=2000",
+      askValue: "300 ETH",
+      duration: "6d",
+      fraction: "30%",
+      status: 0,
     },
     {
-      img: "https://img.freepik.com/premium-vector/mutant-ape-yacht-club-nft-artwork-collection-set-unique-bored-monkey-character-nfts-variant_361671-259.jpg?w=2000",
-    }
+      createAddress: "5Gs5gfzHkBsRt97qgmvBW2qX6M7FPXP8cJkAj7T7kNFbGVvG",
+      image:
+        "https://img.freepik.com/premium-vector/mutant-ape-yacht-club-nft-artwork-collection-set-unique-bored-monkey-character-nfts-variant_361671-259.jpg?w=2000",
+      askValue: "300 ETH",
+      duration: "5d",
+      fraction: "30%",
+      status: 0,
+    },
+    {
+      createAddress: "5Gs5gfzHkBsRt97qgmvBW2qX6M7FPXP8cJkAj7T7kNFbGVvG",
+      image:
+        "https://img.freepik.com/premium-vector/mutant-ape-yacht-club-nft-artwork-collection-set-unique-bored-monkey-character-nfts-variant_361671-259.jpg?w=2000",
+      askValue: "300 ETH",
+      duration: "4d",
+      fraction: "30%",
+      status: 0,
+    },
+    {
+      createAddress: "5Gs5gfzHkBsRt97qgmvBW2qX6M7FPXP8cJkAj7T7kNFbGVvG",
+      image:
+        "https://img.freepik.com/premium-vector/mutant-ape-yacht-club-nft-artwork-collection-set-unique-bored-monkey-character-nfts-variant_361671-259.jpg?w=2000",
+      askValue: "300 ETH",
+      duration: "3d",
+      fraction: "30%",
+      status: 0,
+    },
   ];
   return (
     <Box
@@ -31,7 +67,7 @@ export default function Profile(props) {
         }}
       >
         <Typography
-          variant="h2"
+          variant="h4"
           textAlign={"center"}
           className="title"
           sx={{
@@ -61,10 +97,10 @@ export default function Profile(props) {
           display: "flex",
           marginRight: "150px"
          }}>
-          <Typography variant="h6" sx={{ color: "gray", marginRight: "15px"}}>
+          <Typography variant="body1" sx={{ color: "gray", marginRight: "15px"}}>
             Total Raised: 
           </Typography>
-          <Typography variant="h6" className="returns" sx={{fontFamily: "'Courgette', cursive"}}>24.4 ETH</Typography>
+          <Typography variant="body1" className="returns" sx={{fontFamily: "'Courgette', cursive"}}>24.4 ETH</Typography>
         </Box>
         <Box
          component="div"
@@ -76,10 +112,10 @@ export default function Profile(props) {
           display: "flex",
           marginRight: "150px"
          }}>
-          <Typography variant="h6" sx={{ color: "gray", marginRight: "15px"}}>
+          <Typography variant="body1" sx={{ color: "gray", marginRight: "15px"}}>
             Total Interest: 
           </Typography>
-          <Typography variant="h6" className="returns" sx={{fontFamily: "'Courgette', cursive"}}>24.4 ETH</Typography>
+          <Typography variant="body1" className="returns" sx={{fontFamily: "'Courgette', cursive"}}>24.4 ETH</Typography>
         </Box>
         <Box
          component="div"
@@ -90,14 +126,14 @@ export default function Profile(props) {
           borderRadius: "10px",
           display: "flex",
          }}>
-          <Typography variant="h6" sx={{ color: "gray", marginRight: "15px"}}>
+          <Typography variant="body1" sx={{ color: "gray", marginRight: "15px"}}>
             Total Offered: 
           </Typography>
-          <Typography variant="h6" className="returns" sx={{fontFamily: "'Courgette', cursive"}}>24.4 ETH</Typography>
+          <Typography variant="body1" className="returns" sx={{fontFamily: "'Courgette', cursive"}}>24.4 ETH</Typography>
         </Box>
       </Box>
       <Box>
-        <CarouselComponent />
+        <CarouselComponent items={items} title={"Created Ads"}/>
       </Box>
     </Box>
   );

@@ -53,8 +53,8 @@ function App() {
           <Route exact path="/mint" element={<MintNFT/>} />
           <Route exact path="/list" element={<ListNFT/>} />
           <Route exact path="/fractionalise" element={<Fractionalise />} />
-          <Route exact path="/profile" element={<Profile />} />
-          <Route exact path="/listing" element={<ListingDetail/>} />
+          <Route exact path="/profile/:address" element={<Profile />} />
+          <Route exact path="/listing/:id" element={<ListingDetail/>} />
           <Route exact path="/error" element={<>Error</>}/>
         </Routes>
       </BrowserRouter>

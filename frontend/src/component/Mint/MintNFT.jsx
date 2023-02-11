@@ -189,6 +189,7 @@ export default function MintNFT(props) {
         open={open}
         autoHideDuration={6000}
         onClose={handleClose}
+        anchorOrigin={{vertical: "bottom", horizontal: "right"}}
       >
         <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
           Image succesfully uploaded to IPFS!
