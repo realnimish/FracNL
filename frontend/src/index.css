@@ -844,3 +844,7 @@ a {
 .content.active {
   display: block;
 }
+
+.profileInfoContainer {
+  animation: boxShadowChange 10s infinite;
+}

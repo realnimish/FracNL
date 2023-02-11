@@ -31,49 +31,43 @@ export default function Fractionalise(props) {
         <button
           class="navTab active"
           data-toggle="frac"
-          style={{ fontFamily: "'Ubuntu Condensed', sans-serif", borderTopLeftRadius: "30px" }}
+          style={{
+            fontFamily: "'Ubuntu Condensed', sans-serif",
+            borderTopLeftRadius: "30px",
+          }}
         >
           Fractionalize
         </button>
         <button
           class="navTab"
           data-toggle="defrac"
-          style={{ fontFamily: "'Ubuntu Condensed', sans-serif", borderTopRightRadius: "30px" }}
+          style={{
+            fontFamily: "'Ubuntu Condensed', sans-serif",
+            borderTopRightRadius: "30px",
+          }}
         >
           Defractionalize
         </button>
       </div>
       <div class="contentWrapper">
         <div class="content active" id="frac">
-          <Typography
-            variant="body1"
-            sx={{
-              marginLeft: "65px",
-              fontWeight: "400",
-              color: "#404258",
-            }}
-          >
-            Token ID
-          </Typography>
           <Box
-            component="div"
-            sx={{
-              marginBottom: "30px",
-              display: "flex",
-              justifyContent: "center",
-            }}
+            className="inputContainer"
+            sx={{ width: "45%", marginBottom: "50px" }}
           >
-            <TextField
-              id="filled-number"
-              type="number"
-              InputLabelProps={{
-                shrink: true,
+            <label
+              className="inputLabel"
+              style={{
+                fontFamily: "'Ubuntu Condensed', sans-serif",
+                color: "gray",
               }}
-              variant="outlined"
-              sx={{
-                backgroundColor: "#262626",
-                borderRadius: "20px",
-              }}
+            >
+              {"Amount (TZERO)"}
+            </label>
+            <input
+              type="text"
+              className="input"
+              placeholder="Enter repayment amount"
             />
           </Box>
           <Box
@@ -81,6 +75,7 @@ export default function Fractionalise(props) {
             sx={{
               display: "flex",
               paddingRight: "60px",
+              marginBottom: "50px",
             }}
           >
             <Typography
@@ -101,7 +96,7 @@ export default function Fractionalise(props) {
             </div>
           </Box>
           <Box
-            sx={{ width: "100%", marginBottom: "40px" }}
+            sx={{ width: "100%", marginBottom: "50px" }}
             className="buttonContainer"
           >
             <div
@@ -117,35 +112,23 @@ export default function Fractionalise(props) {
           </Box>
         </div>
         <div class="content" id="defrac">
-          <Typography
-            variant="body1"
-            sx={{
-              marginLeft: "80px",
-              fontWeight: "400",
-              color: "#404258",
-            }}
-          >
-            Token ID
-          </Typography>
           <Box
-            component="div"
-            sx={{
-              marginBottom: "30px",
-              display: "flex",
-              justifyContent: "center",
-            }}
+            className="inputContainer"
+            sx={{ width: "45%", marginBottom: "50px", marginLeft: "30px" }}
           >
-            <TextField
-              id="filled-number"
-              type="number"
-              InputLabelProps={{
-                shrink: true,
+            <label
+              className="inputLabel"
+              style={{
+                fontFamily: "'Ubuntu Condensed', sans-serif",
+                color: "gray",
               }}
-              variant="outlined"
-              sx={{
-                backgroundColor: "#262626",
-                borderRadius: "20px",
-              }}
+            >
+              {"Amount (TZERO)"}
+            </label>
+            <input
+              type="text"
+              className="input"
+              placeholder="Enter repayment amount"
             />
           </Box>
           <Box
@@ -153,6 +136,7 @@ export default function Fractionalise(props) {
             sx={{
               display: "flex",
               paddingRight: "60px",
+              marginBottom: "50px"
             }}
           >
             <Typography
@@ -173,14 +157,16 @@ export default function Fractionalise(props) {
             </div>
           </Box>
           <Box
-            sx={{ width: "100%", marginBottom: "40px" }}
+            sx={{ width: "100%", marginBottom: "50px" }}
             className="buttonContainer"
           >
             <div
               className="btn btn-red"
               tabIndex={1}
-              style={{ fontFamily: "'Ubuntu Condensed', sans-serif",
-                        marginRight: "30%" }}
+              style={{
+                fontFamily: "'Ubuntu Condensed', sans-serif",
+                marginRight: "30%",
+              }}
             >
               Defractionalize your NFT
             </div>
