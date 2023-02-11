@@ -220,6 +220,7 @@ mod nft_lending {
                 loan_stats.loan_status == LoanStatus::OPEN,
                 Error::LoanIsNotOpen
             );
+            ensure!(loan_stats.raised > 0, Error::ZeroValue);
 
             let time = self.env().block_timestamp();
             let cooldown_time = loan_metadata.listing_timestamp
@@ -320,6 +321,7 @@ mod nft_lending {
         pub fn make_offer(&mut self, loan_id: LoanId, interest: Balance) -> Result<OfferId> {
             let caller = self.env().caller();
             let amount = self.env().transferred_value();
+            ensure!(amount > 0, Error::ZeroValue);
 
             let loan_metadata = self.ref_get_loan_metadata(&loan_id)?;
             let loan_stats = self.ref_get_loan_stats(&loan_id)?;
@@ -688,6 +690,10 @@ mod nft_lending {
             loan_stats: &LoanStats,
             shares_locked: &Balance,
         ) -> Balance {
+            if loan_stats.raised == 0u128 {
+                return *shares_locked;
+            }
+
             let mut principal_repaid = loan_stats.repaid.saturating_sub(loan_stats.interest);
 
             // User could have over-paid the loan amount
@@ -706,6 +712,10 @@ mod nft_lending {
             offer: &OfferMetadata,
             borrower_unlocked_shares: &Balance,
         ) -> (Balance, Balance) {
+            if loan_stats.raised == 0u128 {
+                return (offer.amount, 0);
+            }
+
             let principal_repaid = loan_stats.repaid.saturating_sub(loan_stats.interest);
             let interest_repaid = loan_stats.repaid - principal_repaid;
 
@@ -716,7 +726,9 @@ mod nft_lending {
                 principal_repaid = loan_stats.raised;
             }
 
-            let interest = (interest_repaid * offer.interest) / loan_stats.interest;
+            let interest = (interest_repaid * offer.interest)
+                .checked_div(loan_stats.interest)
+                .unwrap_or(0);
             let pricipal = (principal_repaid * offer.amount) / loan_stats.raised;
 
             let funds = pricipal + interest;
