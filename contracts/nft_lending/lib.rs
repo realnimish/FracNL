@@ -121,12 +121,14 @@ mod nft_lending {
         InvalidOfferId,
         LoanIsNotOpen,
         LoanIsNotActive,
+        LoanHasNotExpired,
         LoanHasExpired,
         LoanRepaymentPeriodAlreadyOver,
         NotAuthorized,
         ZeroValue,
         OfferNotInPendingState,
         LoanLimitExceeding,
+        OfferIsNotAccepted,
     }
 
     impl Contract {
@@ -502,6 +504,57 @@ mod nft_lending {
             Ok(())
         }
 
+        #[ink(message)]
+        pub fn get_borrowers_settlement(&self, loan_id: LoanId) -> Result<Balance> {
+            let loan_metadata = self.ref_get_loan_metadata(&loan_id)?;
+            let loan_stats = self.ref_get_loan_stats(&loan_id)?;
+
+            let time = self.env().block_timestamp();
+            let loan_expiry = loan_stats.start_timestamp.unwrap() + loan_metadata.loan_period;
+            match loan_stats.loan_status {
+                LoanStatus::CLOSED => (),
+                LoanStatus::ACTIVE if time > loan_expiry => (),
+                _ => Err(Error::LoanHasNotExpired)?,
+            };
+
+            let res = self.ref_get_borrower_settlement(&loan_stats, &loan_metadata.shares_locked);
+            Ok(res)
+        }
+
+        #[ink(message)]
+        pub fn get_lenders_settlement(
+            &self,
+            loan_id: LoanId,
+            offer_id: OfferId,
+        ) -> Result<(Balance, Balance)> {
+            let loan_metadata = self.ref_get_loan_metadata(&loan_id)?;
+            let loan_stats = self.ref_get_loan_stats(&loan_id)?;
+            let borrower_unlocked_shares =
+                self.ref_get_borrower_settlement(&loan_stats, &loan_metadata.shares_locked);
+
+            let offer = self.ref_get_offer_details(&loan_id, &offer_id)?;
+            ensure!(
+                offer.status == OfferStatus::ACCEPTED,
+                Error::OfferIsNotAccepted
+            );
+
+            let time = self.env().block_timestamp();
+            let loan_expiry = loan_stats.start_timestamp.unwrap() + loan_metadata.loan_period;
+            match loan_stats.loan_status {
+                LoanStatus::CLOSED => (),
+                LoanStatus::ACTIVE if time > loan_expiry => (),
+                _ => Err(Error::LoanHasNotExpired)?,
+            };
+
+            let res = self.ref_get_lender_settlement(
+                &loan_metadata,
+                &loan_stats,
+                &offer,
+                &borrower_unlocked_shares,
+            );
+            Ok(res)
+        }
+
         // HELPER FUNCTIONS
 
         fn get_offer_nonce_or_default(&self, loan_id: &LoanId) -> OfferId {
@@ -622,6 +675,50 @@ mod nft_lending {
             self.reject_all_pending_offers(*loan_id)?;
 
             Ok(())
+        }
+
+        fn ref_get_borrower_settlement(
+            &self,
+            loan_stats: &LoanStats,
+            shares_locked: &Balance,
+        ) -> Balance {
+            let mut principal_repaid = loan_stats.repaid.saturating_sub(loan_stats.interest);
+
+            // User could have over-paid the loan amount
+            if loan_stats.raised < principal_repaid {
+                principal_repaid = loan_stats.raised;
+            }
+
+            let shares_to_unlock = (shares_locked * principal_repaid) / loan_stats.raised;
+            shares_to_unlock
+        }
+
+        fn ref_get_lender_settlement(
+            &self,
+            loan_metadata: &LoanMetadata,
+            loan_stats: &LoanStats,
+            offer: &OfferMetadata,
+            borrower_unlocked_shares: &Balance,
+        ) -> (Balance, Balance) {
+            let principal_repaid = loan_stats.repaid.saturating_sub(loan_stats.interest);
+            let interest_repaid = loan_stats.repaid - principal_repaid;
+
+            // Include security-deposit incase complete principle in not repaid by the borrower
+            let mut principal_repaid =
+                principal_repaid - interest_repaid + loan_metadata.security_deposit;
+            if loan_stats.raised < principal_repaid {
+                principal_repaid = loan_stats.raised;
+            }
+
+            let interest = (interest_repaid * offer.interest) / loan_stats.interest;
+            let pricipal = (principal_repaid * offer.amount) / loan_stats.raised;
+
+            let funds = pricipal + interest;
+            let lenders_share = (loan_metadata.shares_locked - borrower_unlocked_shares)
+                * offer.amount
+                / loan_stats.raised;
+
+            (funds, lenders_share)
         }
 
         fn transfer_fractional_nft(
