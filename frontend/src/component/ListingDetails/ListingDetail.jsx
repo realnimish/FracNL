@@ -4,6 +4,7 @@ import { cutAddress } from "../../commons";
 import CreateOffer from "./CreateOffer";
 import Offers from "./Offers";
 import Repay from "./Repay";
+import StatusAndTimer from "./StatusAndTimer";
 
 export default function ListingDetail(props) {
   
@@ -59,6 +60,7 @@ export default function ListingDetail(props) {
       }}
       className="listingDetail"
     >
+      <StatusAndTimer status="Execution Phase " time={"78393"}/>
       <Box className="detailBox">
         <Box className="detailBoxLeft">
           <img src={listingDetails.image} className="detailImage" />
@@ -74,7 +76,7 @@ export default function ListingDetail(props) {
         </Box>
         <Box className="detailBoxRight">
           <Box
-            sx={{ width: "100%", height: "fit-content" }}
+            sx={{ width: "50%", height: "fit-content" }}
             className="detailItem"
           >
             <Typography
@@ -85,6 +87,20 @@ export default function ListingDetail(props) {
             </Typography>
             <Typography variant="h6" sx={{ marginTop: "5px" }}>
               {listingDetails.askAmount}
+            </Typography>
+          </Box>
+          <Box
+            sx={{ width: "50%", height: "fit-content" }}
+            className="detailItem"
+          >
+            <Typography
+              variant="body2"
+              sx={{ marginTop: "20px", color: "gray" }}
+            >
+              Amount Accepted :{" "}
+            </Typography>
+            <Typography variant="h6" sx={{ marginTop: "5px" }}>
+              {listingDetails.acceptedAmount}
             </Typography>
           </Box>
           <Box
@@ -165,10 +181,10 @@ export default function ListingDetail(props) {
               variant="body2"
               sx={{ marginTop: "20px", color: "gray" }}
             >
-              Amount Accepted :{" "}
+              Listing Date :{" "}
             </Typography>
             <Typography variant="body1" sx={{ marginTop: "5px" }}>
-              {listingDetails.acceptedAmount}
+              {"13/ 03/ 2000"}
             </Typography>
           </Box>
           <Box sx={{ width: "100%" }} className="buttonContainer">

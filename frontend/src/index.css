@@ -231,6 +231,24 @@ a {
   background-color:  #6bb6ff;
 }
 
+.btn-done {
+  border-color: #6f8170;
+  color: #6f8170;
+  text-shadow: 0px 0px 3px #6f8170;
+  box-shadow: inset 0px 0px 7px 0px #6f8170, 0px 0px 7px 0px #6f8170;
+  position: relative;
+  cursor: not-allowed;
+}
+
+.btn-done:hover {
+  background-color: #6f8170;
+  color: #03080f;
+}
+
+.btn-done::before{
+  background-color: #6f8170;
+}
+
 .buttonContainer {
   margin-top: 30px;
   display: flex;
@@ -439,6 +457,20 @@ a {
   outline: none;
 }
 
+.select {
+  height: 40px;
+  min-width: 250px;
+  background-color: #3c3d40;
+  border: 2px solid #3c4248;
+  border-radius: 5px;
+  padding: 5px 20px;
+  color: #6bb6ff;
+  font-size: 19px;
+  position: relative;
+  box-shadow: inset 0px 0px 7px 0px  #6bb6ff, 0px 0px 7px 0px  #6bb6ff;
+  outline: none;
+}
+
 .input:focus-within {
   border: none;
   height: 34px;
@@ -492,6 +524,12 @@ a {
 .returns {
   
   animation: colorChanger 15s infinite;
+}
+
+.statusAndTimer {
+  border-radius: 30px;
+  padding: 5px 20px;
+  animation: backgroundChanger 15s infinite, boxShadowDetailsChange 15s infinite;
 }
 
 @keyframes navItemUnderline {
