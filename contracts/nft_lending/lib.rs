@@ -48,7 +48,7 @@ mod nft_lending {
         raised: Balance,
         limit_left: Balance,
         interest: Balance,
-        repayed: Balance,
+        repaid: Balance,
         loan_status: LoanStatus,
     }
 
@@ -196,7 +196,7 @@ mod nft_lending {
                 raised: 0,
                 limit_left: amount_asked,
                 interest: 0,
-                repayed: 0,
+                repaid: 0,
                 loan_status: LoanStatus::OPEN,
             };
 
@@ -283,9 +283,9 @@ mod nft_lending {
             let loan_expiry = loan_stats.start_timestamp.unwrap() + loan_metadata.loan_period;
             ensure!(time <= loan_expiry, Error::LoanRepaymentPeriodAlreadyOver);
 
-            loan_stats.repayed += self.env().transferred_value();
+            loan_stats.repaid += self.env().transferred_value();
 
-            if loan_stats.repayed >= loan_stats.raised + loan_stats.interest {
+            if loan_stats.repaid >= loan_stats.raised + loan_stats.interest {
                 // TODO Transfer the amount to lenders
 
                 // Unlock the fractional NFT
@@ -484,7 +484,22 @@ mod nft_lending {
 
         #[ink(message)]
         pub fn get_cancellation_charges(&self) -> Balance {
-            unimplemented!()
+            let decimals = 6;
+            let charges = 1;
+
+            charges * 10_u128.pow(decimals)
+        }
+
+        // Just for testing purposes
+        #[ink(message)]
+        pub fn drain_funds(&mut self, to: AccountId, amount: Balance) -> Result<()> {
+            let caller = self.env().caller();
+            ensure!(caller == self.admin, Error::NotAuthorized);
+            ensure!(
+                self.env().transfer(to, amount).is_ok(),
+                Error::WithdrawFailed
+            );
+            Ok(())
         }
 
         // HELPER FUNCTIONS
