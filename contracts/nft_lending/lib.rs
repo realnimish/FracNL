@@ -225,18 +225,7 @@ mod nft_lending {
                 + self.cooldown_phase_duration;
             ensure!(time <= cooldown_time, Error::LoanHasExpired);
 
-            loan_stats.start_timestamp = Some(self.env().block_timestamp());
-            loan_stats.loan_status = LoanStatus::ACTIVE;
-            self.loan_stats.insert(&loan_id, &loan_stats);
-
-            if self.env().transfer(caller, loan_stats.raised).is_err() {
-                return Err(Error::WithdrawFailed);
-            }
-
-            // Reject all the PENDING offers
-            self.reject_all_pending_offers(loan_id)?;
-
-            Ok(())
+            self.ref_start_loan(&loan_id, &mut loan_stats, &caller)
         }
 
         #[ink(message)]
@@ -267,7 +256,7 @@ mod nft_lending {
                 .security_deposit
                 .saturating_sub(cancellation_charges);
 
-            if amount > 0 && self.env().transfer(caller, amount).is_err() {
+            if amount > 0 && self.env().transfer(loan_metadata.borrower, amount).is_err() {
                 return Err(Error::WithdrawFailed);
             }
 
@@ -432,8 +421,11 @@ mod nft_lending {
                     loan_stats.limit_left -= offer.amount;
                     loan_stats.interest += offer.interest;
 
-                    // TODO if limit_left becomes 0 => start the loan
-                    self.loan_stats.insert(&loan_id, &loan_stats);
+                    if loan_stats.limit_left == 0 {
+                        self.ref_start_loan(&loan_id, &mut loan_stats, &caller)?
+                    } else {
+                        self.loan_stats.insert(&loan_id, &loan_stats);
+                    }
                 }
             }
 
@@ -567,6 +559,27 @@ mod nft_lending {
 
         fn ref_reject_all_offers(&mut self, _loan_id: &LoanId) -> Result<()> {
             unimplemented!()
+        }
+
+        // @dev Doesn't do any check
+        fn ref_start_loan(
+            &mut self,
+            loan_id: &LoanId,
+            loan_stats: &mut LoanStats,
+            borrower: &AccountId,
+        ) -> Result<()> {
+            loan_stats.start_timestamp = Some(self.env().block_timestamp());
+            loan_stats.loan_status = LoanStatus::ACTIVE;
+            self.loan_stats.insert(loan_id, loan_stats);
+
+            if self.env().transfer(*borrower, loan_stats.raised).is_err() {
+                return Err(Error::WithdrawFailed);
+            }
+
+            // Reject all the PENDING offers
+            self.reject_all_pending_offers(*loan_id)?;
+
+            Ok(())
         }
 
         fn transfer_fractional_nft(
