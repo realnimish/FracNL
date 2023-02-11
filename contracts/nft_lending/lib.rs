@@ -400,15 +400,7 @@ mod nft_lending {
             );
 
             match response {
-                false => {
-                    if self.env().transfer(offer.lender, offer.amount).is_err() {
-                        return Err(Error::WithdrawFailed);
-                    }
-
-                    offer.status = OfferStatus::REJECTED;
-                    self.active_offer_id.remove(&(loan_id, caller));
-                    self.offers.insert(&(loan_id, offer_id), &offer);
-                }
+                false => self.ref_reject_offer(&loan_id, &offer_id, &mut offer)?,
                 true => {
                     ensure!(
                         offer.amount <= loan_stats.limit_left,
@@ -478,8 +470,16 @@ mod nft_lending {
         }
 
         #[ink(message)]
-        pub fn reject_all_pending_offers(&self, _loan_id: LoanId) -> Result<()> {
-            unimplemented!()
+        pub fn reject_all_pending_offers(&mut self, loan_id: LoanId) -> Result<()> {
+            let total_offers = self.get_offer_nonce_or_default(&loan_id);
+
+            for offer_id in 0..total_offers {
+                let mut offer = self.ref_get_offer_details(&loan_id, &offer_id)?;
+                if offer.status == OfferStatus::PENDING {
+                    self.ref_reject_offer(&loan_id, &offer_id, &mut offer)?;
+                }
+            }
+            Ok(())
         }
 
         #[ink(message)]
@@ -557,8 +557,35 @@ mod nft_lending {
                 .ok_or(Error::InvalidOfferId)
         }
 
-        fn ref_reject_all_offers(&mut self, _loan_id: &LoanId) -> Result<()> {
-            unimplemented!()
+        fn ref_reject_all_offers(&mut self, loan_id: &LoanId) -> Result<()> {
+            let total_offers = self.get_offer_nonce_or_default(loan_id);
+
+            for offer_id in 0..total_offers {
+                let mut offer = self.ref_get_offer_details(loan_id, &offer_id)?;
+                match offer.status {
+                    OfferStatus::PENDING | OfferStatus::ACCEPTED => {
+                        self.ref_reject_offer(&loan_id, &offer_id, &mut offer)?
+                    }
+                    _ => (),
+                };
+            }
+            Ok(())
+        }
+
+        fn ref_reject_offer(
+            &mut self,
+            loan_id: &LoanId,
+            offer_id: &OfferId,
+            offer: &mut OfferMetadata,
+        ) -> Result<()> {
+            if self.env().transfer(offer.lender, offer.amount).is_err() {
+                return Err(Error::WithdrawFailed);
+            }
+
+            offer.status = OfferStatus::REJECTED;
+            self.active_offer_id.remove((loan_id, offer.lender));
+            self.offers.insert((loan_id, offer_id), offer);
+            Ok(())
         }
 
         // @dev Doesn't do any check
