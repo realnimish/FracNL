@@ -5,9 +5,29 @@ import { Paper, Button } from "@mui/material";
 import CarouselComponent from "./CarouselComponent";
 import { useParams } from "react-router-dom";
 import Identicon from "@polkadot/react-identicon";
+import Tooltip from "@mui/material/Tooltip";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
+import Fade from '@mui/material/Fade';
 
 export default function Profile(props) {
   let { address } = useParams();
+  const copyToClipboard = async () => {
+    handleTooltipOpen();
+    if ("clipboard" in navigator) {
+      return await navigator.clipboard.writeText(address);
+    } else {
+      return document.execCommand("copy", true, address);
+    }
+  };
+  const [open, setOpen] = useState(false);
+  const handleTooltipClose = () => {
+    setOpen(false);
+  };
+
+  const handleTooltipOpen = () => {
+    setOpen(true);
+  };
+
   const items = [
     {
       createAddress: "5Gs5gfzHkBsRt97qgmvBW2qX6M7FPXP8cJkAj7T7kNFbGVvG",
@@ -93,25 +113,47 @@ export default function Profile(props) {
         <Identicon
           size={40}
           theme={"polkadot"}
-          value="5G1XZhmuZW1fmcJovTWjEa3XzoBWrHCUU5NrqXTCULZrJ3cD"
+          value={address}
           style={{ marginRight: "20px" }}
         />
-        <button
-        style={{
-          backgroundColor: "black",
-          cursor: "pointer",
-        }}>
-        <Typography
-         variant="h6"
-         className="returns"
-         sx={{
-          fontFamily: "'Ubuntu Condensed', sans-serif",
-          fontWeight: "600"
-         }}
+        <ClickAwayListener onClickAway={handleTooltipClose}>
+        <Tooltip
+          PopperProps={{
+            disablePortal: true,
+          }}
+          onClose={handleTooltipClose}
+          open={open}
+          disableFocusListener
+          disableHoverListener
+          disableTouchListener
+          title="Address Copied"
+          TransitionComponent={Fade}
+          TransitionProps={{ timeout: 600 }}
+          sx={{
+            backgroundColor: "gray",
+            fontFamily: "'Ubuntu Condensed', sans-serif",
+          }}
         >
-          5G1XZhmuZW1fmcJovTWjEa3XzoBWrHCUU5NrqXTCULZrJ3cD
-        </Typography>
-      </button>
+          <button
+            style={{
+              backgroundColor: "black",
+              cursor: "pointer",
+            }}
+            onClick={copyToClipboard}
+          >
+            <Typography
+              variant="h6"
+              className="returns"
+              sx={{
+                fontFamily: "'Ubuntu Condensed', sans-serif",
+                fontWeight: "600",
+              }}
+            >
+              {address}
+            </Typography>
+          </button>
+        </Tooltip>
+      </ClickAwayListener>
       </Box>
       <Box
         component="div"
