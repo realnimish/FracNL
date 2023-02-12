@@ -1,11 +1,14 @@
 import { Box, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
-import Carousel from 'react-material-ui-carousel';
-import { Paper, Button } from '@mui/material';
+import Carousel from "react-material-ui-carousel";
+import { Paper, Button } from "@mui/material";
 import CarouselComponent from "./CarouselComponent";
+import { useParams } from "react-router-dom";
+import Identicon from "@polkadot/react-identicon";
 
 export default function Profile(props) {
-  const items=[
+  let { address } = useParams();
+  const items = [
     {
       createAddress: "5Gs5gfzHkBsRt97qgmvBW2qX6M7FPXP8cJkAj7T7kNFbGVvG",
       image:
@@ -63,7 +66,7 @@ export default function Profile(props) {
         sx={{
           display: "flex",
           justifyContent: "center",
-          marginBottom: "70px",
+          marginBottom: "50px",
         }}
       >
         <Typography
@@ -80,60 +83,121 @@ export default function Profile(props) {
         </Typography>
       </Box>
       <Box
-       component="div"
-       sx={{
-        display: "flex",
-        marginBottom: "100px",
-        justifyContent: "center"
-       }}
+        component="div"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "70px",
+        }}
+      >
+        <Identicon
+          size={40}
+          theme={"polkadot"}
+          value="5G1XZhmuZW1fmcJovTWjEa3XzoBWrHCUU5NrqXTCULZrJ3cD"
+          style={{ marginRight: "20px" }}
+        />
+        <button
+        style={{
+          backgroundColor: "black",
+          cursor: "pointer",
+        }}>
+        <Typography
+         variant="h6"
+         className="returns"
+         sx={{
+          fontFamily: "'Ubuntu Condensed', sans-serif",
+          fontWeight: "600"
+         }}
+        >
+          5G1XZhmuZW1fmcJovTWjEa3XzoBWrHCUU5NrqXTCULZrJ3cD
+        </Typography>
+      </button>
+      </Box>
+      <Box
+        component="div"
+        sx={{
+          display: "flex",
+          marginBottom: "100px",
+          justifyContent: "center",
+        }}
       >
         <Box
-         component="div"
-         className="profileInfoContainer"
-         sx={{
-          backgroundColor: "#212224",
-          padding: "20px",
-          borderRadius: "10px",
-          display: "flex",
-          marginRight: "150px"
-         }}>
-          <Typography variant="body1" sx={{ color: "gray", marginRight: "15px"}}>
-            Total Raised: 
+          component="div"
+          className="profileInfoContainer"
+          sx={{
+            backgroundColor: "#212224",
+            padding: "20px",
+            borderRadius: "10px",
+            display: "flex",
+            marginRight: "150px",
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{ color: "gray", marginRight: "15px" }}
+          >
+            Total Raised:
           </Typography>
-          <Typography variant="body1" className="returns" sx={{fontFamily: "'Courgette', cursive"}}>24.4 ETH</Typography>
+          <Typography
+            variant="body1"
+            className="returns"
+            sx={{ fontFamily: "'Courgette', cursive" }}
+          >
+            24.4 ETH
+          </Typography>
         </Box>
         <Box
-         component="div"
-         className="profileInfoContainer"
-         sx={{
-          backgroundColor: "#212224",
-          padding: "20px",
-          borderRadius: "10px",
-          display: "flex",
-          marginRight: "150px"
-         }}>
-          <Typography variant="body1" sx={{ color: "gray", marginRight: "15px"}}>
-            Total Interest: 
+          component="div"
+          className="profileInfoContainer"
+          sx={{
+            backgroundColor: "#212224",
+            padding: "20px",
+            borderRadius: "10px",
+            display: "flex",
+            marginRight: "150px",
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{ color: "gray", marginRight: "15px" }}
+          >
+            Total Interest:
           </Typography>
-          <Typography variant="body1" className="returns" sx={{fontFamily: "'Courgette', cursive"}}>24.4 ETH</Typography>
+          <Typography
+            variant="body1"
+            className="returns"
+            sx={{ fontFamily: "'Courgette', cursive" }}
+          >
+            24.4 ETH
+          </Typography>
         </Box>
         <Box
-         component="div"
-         className="profileInfoContainer"
-         sx={{
-          backgroundColor: "#212224",
-          padding: "20px",
-          borderRadius: "10px",
-          display: "flex",
-         }}>
-          <Typography variant="body1" sx={{ color: "gray", marginRight: "15px"}}>
-            Total Offered: 
+          component="div"
+          className="profileInfoContainer"
+          sx={{
+            backgroundColor: "#212224",
+            padding: "20px",
+            borderRadius: "10px",
+            display: "flex",
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{ color: "gray", marginRight: "15px" }}
+          >
+            Total Offered:
           </Typography>
-          <Typography variant="body1" className="returns" sx={{fontFamily: "'Courgette', cursive"}}>24.4 ETH</Typography>
+          <Typography
+            variant="body1"
+            className="returns"
+            sx={{ fontFamily: "'Courgette', cursive" }}
+          >
+            24.4 ETH
+          </Typography>
         </Box>
       </Box>
       <Box>
-        <CarouselComponent items={items} title={"Created Ads"}/>
+        <CarouselComponent items={items} title={"Created Ads"} />
       </Box>
     </Box>
   );
