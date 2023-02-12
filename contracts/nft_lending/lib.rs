@@ -21,6 +21,7 @@ mod nft_lending {
     pub type TokenId = u32;
     pub type LoanId = u128;
     pub type OfferId = u128;
+    pub type CreditScore = u16;
     pub type Time = u64;
 
     #[derive(scale::Encode, scale::Decode)]
@@ -97,7 +98,7 @@ mod nft_lending {
         offer_phase_duration: Time,
         cooldown_phase_duration: Time,
 
-        credit_score: Mapping<AccountId, u16>,
+        credit_score: Mapping<AccountId, CreditScore>,
         loans: Mapping<LoanId, LoanMetadata>,
         loan_stats: Mapping<LoanId, LoanStats>,
 
@@ -290,6 +291,7 @@ mod nft_lending {
 
             if loan_stats.repaid >= loan_stats.raised + loan_stats.interest {
                 self.ref_settle_loan(&loan_id, &loan_metadata, &loan_stats)?;
+                self.inc_credit_score(&loan_metadata.borrower);
                 loan_stats.loan_status = LoanStatus::CLOSED;
             }
 
@@ -312,6 +314,7 @@ mod nft_lending {
             ensure!(time > loan_expiry, Error::LoanHasNotExpired);
 
             self.ref_settle_loan(&loan_id, &loan_metadata, &loan_stats)?;
+            self.dec_credit_score(&loan_metadata.borrower);
             loan_stats.loan_status = LoanStatus::CLOSED;
             self.loan_stats.insert(&loan_id, &loan_stats);
             Ok(())
@@ -563,7 +566,31 @@ mod nft_lending {
             Ok(res)
         }
 
+        #[ink(message)]
+        pub fn get_credit_score(&self, account: AccountId) -> CreditScore {
+            self.get_credit_score_or_default(&account)
+        }
+
         // HELPER FUNCTIONS
+
+        fn get_credit_score_or_default(&self, account: &AccountId) -> CreditScore {
+            self.credit_score.get(account).unwrap_or(500)
+        }
+
+        fn inc_credit_score(&mut self, account: &AccountId) {
+            let mut credit_score = self.get_credit_score_or_default(account);
+            credit_score += 20;
+            if credit_score > 1000 {
+                credit_score = 1000;
+            }
+            self.credit_score.insert(&account, &credit_score);
+        }
+
+        fn dec_credit_score(&mut self, account: &AccountId) {
+            let credit_score = self.get_credit_score_or_default(account);
+            let credit_score = credit_score.saturating_sub(100);
+            self.credit_score.insert(&account, &credit_score);
+        }
 
         fn get_offer_nonce_or_default(&self, loan_id: &LoanId) -> OfferId {
             self.offers_nonce.get(loan_id).unwrap_or(0)
