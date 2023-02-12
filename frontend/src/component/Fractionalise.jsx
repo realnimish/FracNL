@@ -52,30 +52,43 @@ export default function Fractionalise(props) {
       <div class="contentWrapper">
         <div class="content active" id="frac">
           <Box
-            className="inputContainer"
-            sx={{ width: "45%", marginBottom: "50px" }}
+            className="selectContainer"
+            sx={{
+              width: "100%",
+              marginTop: "5px",
+              marginBottom: "35px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
           >
             <label
-              className="inputLabel"
+              className="selectLabel"
               style={{
                 fontFamily: "'Ubuntu Condensed', sans-serif",
                 color: "gray",
+                marginRight: "20px",
+                marginBottom: "20px",
               }}
             >
-              {"Amount (TZERO)"}
+              {"Select token Id : "}
             </label>
-            <input
-              type="text"
-              className="input"
-              placeholder="Enter repayment amount"
-            />
+            <select className="select" style={{ marginBottom: "20px" }}>
+              <option value="1">Token Id : 1</option>
+              <option value="2">Token Id: 2</option>
+              <option value="7">Token Id: 7</option>
+              <option value="8">
+                {"Token Id: 8 (Fractionalised)(Ownership 30%)"}
+              </option>
+            </select>
           </Box>
           <Box
             component="div"
             sx={{
               display: "flex",
-              paddingRight: "60px",
               marginBottom: "50px",
+              marginLeft: "15%"
             }}
           >
             <Typography
@@ -96,7 +109,7 @@ export default function Fractionalise(props) {
             </div>
           </Box>
           <Box
-            sx={{ width: "100%", marginBottom: "50px" }}
+            sx={{ width: "100%", marginBottom: "50px", display: "flex", justifyContent: "center" }}
             className="buttonContainer"
           >
             <div
@@ -104,7 +117,6 @@ export default function Fractionalise(props) {
               tabIndex={1}
               style={{
                 fontFamily: "'Ubuntu Condensed', sans-serif",
-                marginRight: "30%",
               }}
             >
               Fractionalize your NFT
@@ -113,30 +125,43 @@ export default function Fractionalise(props) {
         </div>
         <div class="content" id="defrac">
           <Box
-            className="inputContainer"
-            sx={{ width: "45%", marginBottom: "50px", marginLeft: "30px" }}
+            className="selectContainer"
+            sx={{
+              width: "100%",
+              marginTop: "5px",
+              marginBottom: "35px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
           >
             <label
-              className="inputLabel"
+              className="selectLabel"
               style={{
                 fontFamily: "'Ubuntu Condensed', sans-serif",
                 color: "gray",
+                marginRight: "20px",
+                marginBottom: "20px",
               }}
             >
-              {"Amount (TZERO)"}
+              {"Select token Id : "}
             </label>
-            <input
-              type="text"
-              className="input"
-              placeholder="Enter repayment amount"
-            />
+            <select className="select" style={{ marginBottom: "20px" }}>
+              <option value="1">Token Id : 1</option>
+              <option value="2">Token Id: 2</option>
+              <option value="7">Token Id: 7</option>
+              <option value="8">
+                {"Token Id: 8 (Fractionalised)(Ownership 30%)"}
+              </option>
+            </select>
           </Box>
           <Box
             component="div"
             sx={{
               display: "flex",
-              paddingRight: "60px",
-              marginBottom: "50px"
+              marginLeft: "15%",
+              marginBottom: "50px",
             }}
           >
             <Typography
@@ -157,7 +182,7 @@ export default function Fractionalise(props) {
             </div>
           </Box>
           <Box
-            sx={{ width: "100%", marginBottom: "50px" }}
+            sx={{ width: "100%", marginBottom: "50px", display: "flex", justifyContent: "center" }}
             className="buttonContainer"
           >
             <div
@@ -165,7 +190,6 @@ export default function Fractionalise(props) {
               tabIndex={1}
               style={{
                 fontFamily: "'Ubuntu Condensed', sans-serif",
-                marginRight: "30%",
               }}
             >
               Defractionalize your NFT
