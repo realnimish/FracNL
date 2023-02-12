@@ -541,6 +541,7 @@ a {
   border-radius: 2px;
 }
 
+
 @keyframes navItemUnderline {
   from {
     opacity: 0;
@@ -867,4 +868,76 @@ a {
   overflow-x: auto;
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+
+
+.mainContainer {
+  display:flex;
+  --s: 100px;  /* size  */
+  --m: 4px;    /* margin */
+  --f: calc(var(--s) * 1.732 + 4 * var(--m) - 1px); 
+  overflow: hidden;
+  animation: backgroundBannerChanger 15s infinite;
+}
+
+.container {
+  font-size: 0;
+  overflow: hidden;
+  width: 120%;
+  margin-top: -35px;
+}
+
+.container div {
+  width: var(--s);
+  margin: var(--m);
+  height: calc(var(--s) * 1.1547);
+  display: inline-block;
+  font-size:initial;
+  clip-path: polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%);
+  margin-bottom: calc(var(--m) - var(--s) * 0.2885);
+  background-color: #00000085;
+}
+
+
+.container::before {
+  content: "";
+  width: calc(var(--s) / 2 + var(--m));
+  float: left;
+  height: 120%; 
+  shape-outside: repeating-linear-gradient(#0000 0 calc(var(--f) - 3px), #000 0 var(--f));
+}
+
+@keyframes backgroundBannerChanger {
+  0% {
+    background-image: radial-gradient(#69c46d, #303930b8, #000000);
+  }
+
+  14% {
+    background-image: radial-gradient(#daaa3f, #282823, #000000) ;
+  }
+
+  28% {
+    background-image: radial-gradient(#f59d50, #2f2c29,#000000);
+  }
+
+  42% {
+    background-image: radial-gradient(#f47068, #342b2b, #000000);
+  }
+
+  56% {
+    background-image: radial-gradient(#fc8dc7, #2c2628, #000000);
+  }
+
+  70% {
+    background-image: radial-gradient(#b083ef, #29272e, #000000);
+  }
+
+  84% {
+    background-image: radial-gradient(#6bb6ff, #313437, #000000);
+  }
+
+  100% {
+    background-image: radial-gradient(#69c46d, #303930b8, #000000);
+  }
 }

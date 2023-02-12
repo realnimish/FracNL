@@ -1,6 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { useState } from "react";
 import Card from "./CardComponent";
+import Banner from "./Banner";
 export default function Homepage(props) {
   const [listings, setListings] = useState([
     {
@@ -50,13 +51,15 @@ export default function Homepage(props) {
     },
   ]);
   return (
-    <Box sx={{ padding: "80px", minHeight: "100%", height: "fit-content" }}>
+    <Box sx={{ padding: "80px 0px", minHeight: "100%", height: "fit-content" }}>
+      <Banner />
       <Box
         sx={{
           margin: "80px 0",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          padding: "0 80px",
         }}
       >
         <Typography
@@ -72,7 +75,7 @@ export default function Homepage(props) {
         </Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap" }}>
           {listings.map((listing, idx) => (
-            <Box sx={{ margin: "0 20px 40px 20px" }} key={idx}>
+            <Box sx={{ margin: "0 20px 60px 20px" }} key={idx}>
               <Card
                 creatorAddress={listing.createAddress}
                 image={listing.image}
