@@ -253,7 +253,7 @@ mod nft_lending {
 
             // If the cooldown_time has not elapsed, only the borrower can cancel the loan
             ensure!(
-                time <= cooldown_time && caller == loan_metadata.borrower,
+                time > cooldown_time || caller == loan_metadata.borrower,
                 Error::NotAuthorized
             );
             ensure!(
@@ -274,6 +274,14 @@ mod nft_lending {
 
             // Reject all the offers
             self.ref_reject_all_offers(&loan_id)?;
+
+            // Unlock the shares
+            self.transfer_fractional_nft(
+                &self.env().account_id(),
+                &loan_metadata.borrower,
+                &loan_metadata.token_id,
+                &loan_metadata.shares_locked,
+            )?;
 
             loan_stats.loan_status = LoanStatus::CANCELLED;
             self.loan_stats.insert(&loan_id, &loan_stats);
@@ -545,7 +553,8 @@ mod nft_lending {
             let loan_stats = self.ref_get_loan_stats(&loan_id)?;
 
             let time = self.env().block_timestamp();
-            let loan_expiry = loan_stats.start_timestamp.unwrap() + loan_metadata.loan_period;
+            let loan_expiry = loan_stats.start_timestamp.ok_or(Error::LoanIsNotActive)?
+                + loan_metadata.loan_period;
             match loan_stats.loan_status {
                 LoanStatus::CLOSED => (),
                 LoanStatus::ACTIVE if time > loan_expiry => (),
@@ -574,7 +583,8 @@ mod nft_lending {
             );
 
             let time = self.env().block_timestamp();
-            let loan_expiry = loan_stats.start_timestamp.unwrap() + loan_metadata.loan_period;
+            let loan_expiry = loan_stats.start_timestamp.ok_or(Error::LoanIsNotActive)?
+                + loan_metadata.loan_period;
             match loan_stats.loan_status {
                 LoanStatus::CLOSED => (),
                 LoanStatus::ACTIVE if time > loan_expiry => (),
@@ -851,7 +861,7 @@ mod nft_lending {
             {
                 use ink::env::call::{build_call, ExecutionInput, Selector};
 
-                const SAFE_TRANSFER_FROM_SELECTOR: [u8; 4] = [0x0B, 0x39, 0x6F, 0x18];
+                const SAFE_TRANSFER_FROM_SELECTOR: [u8; 4] = [0x53, 0x24, 0xD5, 0x56];
                 let result = build_call::<Environment>()
                     .call(self.fractionalizer)
                     .exec_input(
@@ -862,7 +872,7 @@ mod nft_lending {
                             .push_arg(amount)
                             .push_arg::<Vec<u8>>(vec![]),
                     )
-                    .returns::<core::result::Result<(), u32>>()
+                    .returns::<core::result::Result<(), u8>>()
                     .params()
                     .invoke();
 

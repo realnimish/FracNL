@@ -300,7 +300,7 @@ mod fractionalizer {
                             .push_arg(self.env().account_id())
                             .push_arg(nft_id),
                     )
-                    .returns::<core::result::Result<(), u32>>()
+                    .returns::<core::result::Result<(), u8>>()
                     .params()
                     .invoke();
 
@@ -352,7 +352,7 @@ mod fractionalizer {
                             .push_arg(to)
                             .push_arg(nft_id),
                     )
-                    .returns::<core::result::Result<(), u32>>()
+                    .returns::<core::result::Result<(), u8>>()
                     .params()
                     .invoke();
 

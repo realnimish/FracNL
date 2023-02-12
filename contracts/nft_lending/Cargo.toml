@@ -13,6 +13,9 @@ scale-info = { version = "2.3", default-features = false, features = ["derive"],
 [lib]
 path = "lib.rs"
 
+[profile.release]
+overflow-checks = false
+
 [features]
 default = ["std"]
 std = [
