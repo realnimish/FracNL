@@ -163,6 +163,20 @@ mod nft_lending {
             }
         }
 
+        /// This contract supportz receiving single ERC1155 token transfer
+        #[ink(message, selector = 0xF23A6E61)]
+        pub fn signal_erc1155_support(
+            &mut self,
+            operator: AccountId,
+            _from: AccountId,
+            _token_id: TokenId,
+            _value: Balance,
+            _data: Vec<u8>,
+        ) -> Vec<u8> {
+            assert!(operator == self.env().account_id());
+            [0xF2, 0x3A, 0x6E, 0x61].to_vec()
+        }
+
         #[ink(message, payable)]
         pub fn list_advertisement(
             &mut self,
@@ -864,6 +878,7 @@ mod nft_lending {
                 const SAFE_TRANSFER_FROM_SELECTOR: [u8; 4] = [0x53, 0x24, 0xD5, 0x56];
                 let result = build_call::<Environment>()
                     .call(self.fractionalizer)
+                    .call_flags(ink::env::CallFlags::default().set_allow_reentry(true))
                     .exec_input(
                         ExecutionInput::new(Selector::new(SAFE_TRANSFER_FROM_SELECTOR))
                             .push_arg(from)
