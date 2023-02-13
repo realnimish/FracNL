@@ -1,13 +1,25 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import { SnackbarProvider } from "notistack";
+import SnackbarCloseButton from "./component/SnackbarCloseButton";
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <App />
+    <SnackbarProvider
+      autoHideDuration={5000}
+      maxSnack={5}
+      TransitionProps={{ direction: "left" }}
+      anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+      style={{ maxWidth: "700px", width: "fit-content" }}
+      action={(snackbarKey) => (
+        <SnackbarCloseButton snackbarKey={snackbarKey} />
+      )}
+    >
+      <App />
+    </SnackbarProvider>
   </React.StrictMode>
 );
 

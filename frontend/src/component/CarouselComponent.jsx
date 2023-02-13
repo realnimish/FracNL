@@ -8,19 +8,33 @@ export default function CarouselComponent(props) {
   const scroll = (el, val) => {
     el = document.getElementsByClassName("carouselWrapper");
     let targetEl;
-    for(var i = 0; i < el.length; i++) {
-      console.log(el[i].getElementsByClassName("carouselHeaderWrapper")[0].innerText);
-      if(el[i].getElementsByClassName("carouselHeaderWrapper")[0].innerText === props.title) {
+    for (var i = 0; i < el.length; i++) {
+      console.log(
+        el[i].getElementsByClassName("carouselHeaderWrapper")[0].innerText
+      );
+      if (
+        el[i].getElementsByClassName("carouselHeaderWrapper")[0].innerText ===
+        props.title
+      ) {
         targetEl = el[i];
         break;
       }
     }
     console.log("targetEl", targetEl);
-    targetEl = targetEl.getElementsByClassName('carouselBodyContainer')[0];
-    targetEl.scroll({left: targetEl.scrollLeft + val, behavior: 'smooth'})
+    targetEl = targetEl.getElementsByClassName("carouselBodyContainer")[0];
+    targetEl.scroll({ left: targetEl.scrollLeft + val, behavior: "smooth" });
   };
   return (
-    <Box component="div" className="carouselWrapper" sx={{margin: "30px auto", minWidth: "350px", width: "80%", marginBottom: "100px"}}>
+    <Box
+      component="div"
+      className="carouselWrapper"
+      sx={{
+        margin: "30px auto",
+        minWidth: "350px",
+        width: "80%",
+        marginBottom: "100px",
+      }}
+    >
       <Box
         component="div"
         className="carouselHeaderWrapper"
@@ -48,8 +62,14 @@ export default function CarouselComponent(props) {
           className="buttonWrapper"
           sx={{ display: "flex", alignItems: "center", height: "100%" }}
         >
-          <ArrowCircleLeftOutlinedIcon sx={{ marginRight: "16px", fontSize: "30px" }} onClick={() => scroll(props.title, -800)}/>
-          <ArrowCircleRightOutlinedIcon sx={{ fontSize: "30px" }} onClick={() => scroll(this, 800)}/>
+          <ArrowCircleLeftOutlinedIcon
+            sx={{ marginRight: "16px", fontSize: "30px", cursor: "pointer" }}
+            onClick={() => scroll(props.title, -800)}
+          />
+          <ArrowCircleRightOutlinedIcon
+            sx={{ fontSize: "30px", cursor: "pointer" }}
+            onClick={() => scroll(this, 800)}
+          />
         </Box>
       </Box>
       <Box
@@ -60,20 +80,20 @@ export default function CarouselComponent(props) {
           width: "100%",
           display: "flex",
           padding: "20px 0 30px 0 ",
-          marginTop: "45px"
+          marginTop: "45px",
         }}
       >
         {props.items?.map((item, idx) => (
-          <Box sx={{margin: "0 40px"}} key={idx}>
-          <Card
-            creatorAddress={item.createAddress}
-            image={item.image}
-            askValue={item.askValue}
-            duration={item.duration}
-            fraction={item.fraction}
-            status={item.status}
-            key={idx}
-          />
+          <Box sx={{ margin: "0 40px" }} key={idx}>
+            <Card
+              creatorAddress={item.createAddress}
+              image={item.image}
+              askValue={item.askValue}
+              duration={item.duration}
+              fraction={item.fraction}
+              status={item.status}
+              key={idx}
+            />
           </Box>
         ))}
       </Box>

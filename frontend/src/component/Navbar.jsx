@@ -206,7 +206,7 @@ export default function NavBar(props) {
         }}
       >
         {navItems.map((item) => (
-          <Link to={item.link}>
+          <Link to={item.link} key={item.text}>
             <Box
               component="div"
               key={item.text}
