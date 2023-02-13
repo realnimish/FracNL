@@ -519,6 +519,40 @@ mod nft_lending {
         }
 
         #[ink(message)]
+        pub fn get_user_loans(&self, account: AccountId) -> Vec<LoanId> {
+            (0..=self.loan_nonce)
+                .into_iter()
+                .filter(|id| {
+                    self.ref_get_loan_metadata(id)
+                        .map_or(false, |loan| loan.borrower == account)
+                })
+                .collect()
+        }
+
+        #[ink(message)]
+        pub fn get_loan_offers(&self, loan_id: LoanId, account: AccountId) -> Vec<OfferId> {
+            let offer_nonce = self.get_offer_nonce_or_default(&loan_id);
+            (0..=offer_nonce)
+                .into_iter()
+                .filter(|id| {
+                    self.ref_get_offer_details(&loan_id, id)
+                        .map_or(false, |offer| offer.lender == account)
+                })
+                .collect()
+        }
+
+        #[ink(message)]
+        pub fn get_user_offers(&self, account: AccountId) -> Vec<(LoanId, OfferId)> {
+            (0..=self.loan_nonce)
+                .into_iter()
+                .flat_map(|loan_id| {
+                    let offers = self.get_loan_offers(loan_id, account);
+                    offers.into_iter().map(move |offer_id| (loan_id, offer_id))
+                })
+                .collect()
+        }
+
+        #[ink(message)]
         pub fn get_loan_metadata(&self, loan_id: LoanId) -> Result<LoanMetadata> {
             self.ref_get_loan_metadata(&loan_id)
         }

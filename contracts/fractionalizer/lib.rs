@@ -1,6 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use ink::{prelude::vec::Vec, primitives::AccountId};
+use ink::{prelude::vec, prelude::vec::Vec, primitives::AccountId};
 
 // This is the return value that we expect if a smart contract supports receiving ERC-1155
 // tokens.
@@ -256,6 +256,8 @@ mod fractionalizer {
         approvals: Mapping<(Owner, Operator), ()>,
         /// Stores the number of shares issued for a given token id
         token_supply: Mapping<TokenId, Balance>,
+        /// Stores list of tokens a user holds
+        user_holdings: Mapping<AccountId, Vec<TokenId>>,
     }
 
     impl Contract {
@@ -267,6 +269,7 @@ mod fractionalizer {
                 balances: Default::default(),
                 approvals: Default::default(),
                 token_supply: Default::default(),
+                user_holdings: Default::default(),
             }
         }
 
@@ -309,6 +312,7 @@ mod fractionalizer {
 
             self.balances.insert((caller, token_id), &shares);
             self.token_supply.insert(&token_id, &shares);
+            self.add_to_holding(&caller, token_id);
 
             self.env().emit_event(Fractionalized {
                 token_id,
@@ -333,6 +337,7 @@ mod fractionalizer {
             // Remove all states related to this token
             self.token_supply.remove(&token_id);
             self.balances.remove(&(caller, token_id));
+            self.remove_from_holding(&caller, token_id);
 
             // Transfer the NFT to account `to`
             // @dev This is disabled during tests due to the use of `invoke_contract()` not being
@@ -378,6 +383,31 @@ mod fractionalizer {
             self.token_supply.get(token_id)
         }
 
+        #[ink(message)]
+        pub fn get_user_holdings(&self, account: AccountId) -> Vec<(TokenId, Balance, Balance)> {
+            let holding = self.user_holdings.get(&account).unwrap_or(vec![]);
+            holding
+                .iter()
+                .map(|&id| {
+                    let balance = self.balances.get(&(account, id)).unwrap_or(0);
+                    let supply = self.token_supply(id).expect("Infallible");
+                    (id, balance, supply)
+                })
+                .collect()
+        }
+
+        fn add_to_holding(&mut self, account: &AccountId, token_id: TokenId) {
+            let mut holding = self.user_holdings.get(&account).unwrap_or(vec![]);
+            holding.push(token_id);
+            self.user_holdings.insert(account, &holding);
+        }
+
+        fn remove_from_holding(&mut self, account: &AccountId, token_id: TokenId) {
+            let mut holding = self.user_holdings.get(&account).unwrap_or(vec![]);
+            holding.retain(|&id| id != token_id);
+            self.user_holdings.insert(account, &holding);
+        }
+
         // Helper function for performing single token transfers.
         //
         // Should not be used directly since it's missing certain checks which are important to the
@@ -400,7 +430,14 @@ mod fractionalizer {
             sender_balance -= value;
             self.balances.insert((from, token_id), &sender_balance);
 
+            if sender_balance == 0 {
+                self.remove_from_holding(&from, token_id);
+            }
+
             let mut recipient_balance = self.balances.get((to, token_id)).unwrap_or(0);
+            if recipient_balance == 0 {
+                self.add_to_holding(&to, token_id);
+            }
             recipient_balance += value;
             self.balances.insert((to, token_id), &recipient_balance);
 

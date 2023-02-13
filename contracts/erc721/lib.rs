@@ -54,6 +54,7 @@
 mod erc721 {
     use ink::storage::Mapping;
     use ink::prelude::string::String;
+    use ink::prelude::vec::Vec;
 
     use scale::{
         Decode,
@@ -156,6 +157,14 @@ mod erc721 {
         #[ink(message)]
         pub fn get_token_uri(&self, id: TokenId) -> Option<String> {
             self.token_uri.get(&id)
+        }
+
+        #[ink(message)]
+        pub fn get_user_tokens(&self, account: AccountId) -> Vec<TokenId> {
+            (0..=self.token_nonce)
+                .into_iter()
+                .filter(|&id| self.token_owner.get(id) == Some(account))
+                .collect()
         }
 
         /// Returns `true` if the operator is approved by the owner.
