@@ -50,6 +50,7 @@ export default function Homepage(props) {
       status: 0,
     },
   ]);
+  
   return (
     <Box sx={{ padding: "80px 0px", minHeight: "100%", height: "fit-content" }}>
       <Banner />

@@ -17,6 +17,7 @@
     "@thirdweb-dev/react": "^3.7.4",
     "@thirdweb-dev/sdk": "^3.7.4",
     "@thirdweb-dev/storage": "^1.0.6",
+    "dayjs": "^1.11.7",
     "ethers": "^5.7.2",
     "minimist": "^1.2.7",
     "notistack": "^2.0.8",
