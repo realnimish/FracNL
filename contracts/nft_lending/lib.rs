@@ -89,6 +89,14 @@ mod nft_lending {
         WITHDRAWN,
     }
 
+    #[ink(event)]
+    pub struct NewLoanAd {
+        #[ink(topic)]
+        loan_id: LoanId,
+        #[ink(topic)]
+        borrower: AccountId,
+    }
+
     #[ink(storage)]
     pub struct Contract {
         // Global state variables
@@ -228,6 +236,11 @@ mod nft_lending {
             self.loan_nonce += 1;
             self.loans.insert(&self.loan_nonce, &loan_metadata);
             self.loan_stats.insert(&self.loan_nonce, &loan_stats);
+
+            self.env().emit_event(NewLoanAd {
+                loan_id: self.loan_nonce,
+                borrower: caller,
+            });
 
             Ok(self.loan_nonce)
         }
