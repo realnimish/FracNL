@@ -542,6 +542,20 @@ mod nft_lending {
         }
 
         #[ink(message)]
+        pub fn get_all_offers(&self, loan_id: LoanId) -> Vec<(OfferId, OfferMetadata)> {
+            let offer_nonce = self.get_offer_nonce_or_default(&loan_id);
+            (0..offer_nonce)
+                .into_iter()
+                .map(|offer_id| {
+                    let offer = self
+                        .ref_get_offer_details(&loan_id, &offer_id)
+                        .expect("Infallible");
+                    (offer_id, offer)
+                })
+                .collect()
+        }
+
+        #[ink(message)]
         pub fn get_user_offers(&self, account: AccountId) -> Vec<(LoanId, OfferId)> {
             (0..=self.loan_nonce)
                 .into_iter()
@@ -553,6 +567,11 @@ mod nft_lending {
         }
 
         #[ink(message)]
+        pub fn get_loan_nonce(&self) -> LoanId {
+            self.loan_nonce
+        }
+
+        #[ink(message)]
         pub fn get_loan_metadata(&self, loan_id: LoanId) -> Result<LoanMetadata> {
             self.ref_get_loan_metadata(&loan_id)
         }
@@ -560,6 +579,27 @@ mod nft_lending {
         #[ink(message)]
         pub fn get_loan_stats(&self, loan_id: LoanId) -> Result<LoanStats> {
             self.ref_get_loan_stats(&loan_id)
+        }
+
+        #[ink(message)]
+        pub fn get_loan_details(&self, loan_id: LoanId) -> Result<(LoanMetadata, LoanStats)> {
+            let metadata = self.ref_get_loan_metadata(&loan_id)?;
+            let stats = self.ref_get_loan_stats(&loan_id)?;
+            Ok((metadata, stats))
+        }
+
+        #[ink(message)]
+        pub fn get_offer_details(
+            &self,
+            loan_id: LoanId,
+            offer_id: OfferId,
+        ) -> Result<OfferMetadata> {
+            self.ref_get_offer_details(&loan_id, &offer_id)
+        }
+
+        #[ink(message)]
+        pub fn get_active_offer_id(&self, loan_id: LoanId, account: AccountId) -> Result<OfferId> {
+            self.ref_get_active_offer_id(&loan_id, &account)
         }
 
         #[ink(message)]
@@ -600,14 +640,14 @@ mod nft_lending {
             let loan_metadata = self.ref_get_loan_metadata(&loan_id)?;
             let loan_stats = self.ref_get_loan_stats(&loan_id)?;
 
-            let time = self.env().block_timestamp();
-            let loan_expiry = loan_stats.start_timestamp.ok_or(Error::LoanIsNotActive)?
-                + loan_metadata.loan_period;
-            match loan_stats.loan_status {
-                LoanStatus::CLOSED => (),
-                LoanStatus::ACTIVE if time > loan_expiry => (),
-                _ => Err(Error::LoanHasNotExpired)?,
-            };
+            // let time = self.env().block_timestamp();
+            // let loan_expiry = loan_stats.start_timestamp.ok_or(Error::LoanIsNotActive)?
+            //     + loan_metadata.loan_period;
+            // match loan_stats.loan_status {
+            //     LoanStatus::CLOSED => (),
+            //     LoanStatus::ACTIVE if time > loan_expiry => (),
+            //     _ => Err(Error::LoanHasNotExpired)?,
+            // };
 
             let res = self.ref_get_borrower_settlement(&loan_stats, &loan_metadata.shares_locked);
             Ok(res)
@@ -630,14 +670,14 @@ mod nft_lending {
                 Error::OfferIsNotAccepted
             );
 
-            let time = self.env().block_timestamp();
-            let loan_expiry = loan_stats.start_timestamp.ok_or(Error::LoanIsNotActive)?
-                + loan_metadata.loan_period;
-            match loan_stats.loan_status {
-                LoanStatus::CLOSED => (),
-                LoanStatus::ACTIVE if time > loan_expiry => (),
-                _ => Err(Error::LoanHasNotExpired)?,
-            };
+            // let time = self.env().block_timestamp();
+            // let loan_expiry = loan_stats.start_timestamp.ok_or(Error::LoanIsNotActive)?
+            //     + loan_metadata.loan_period;
+            // match loan_stats.loan_status {
+            //     LoanStatus::CLOSED => (),
+            //     LoanStatus::ACTIVE if time > loan_expiry => (),
+            //     _ => Err(Error::LoanHasNotExpired)?,
+            // };
 
             let res = self.ref_get_lender_settlement(
                 &loan_metadata,
