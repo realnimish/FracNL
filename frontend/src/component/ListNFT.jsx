@@ -8,30 +8,25 @@ import {
 } from "../commons";
 import BN from "bn.js";
 import { useSnackbar } from "notistack";
+import { useNavigate } from "react-router-dom";
 
 export default function ListNFT(props) {
   const { enqueueSnackbar } = useSnackbar();
-  const [isApprovedFractionalizer, setIsApprovedFractionalizer] = useState(false);
+  const [isApprovedFractionalizer, setIsApprovedFractionalizer] =
+    useState(false);
   const [isApprovedNFTLending, setIsApprovedNFTLending] = useState(false);
   const [collateralRequired, setCollateralRequired] = useState(0);
   const [isFractionalized, setIsFractionalized] = useState(false);
   const [tokensList, setTokensList] = useState([
     {
-      tokenId: 0,
-      fractionalized: true,
+      tokenId: null,
+      fractionalized: false,
       ownership: "100%",
     },
-    {
-      tokenId: 1,
-      fractionalized: false,
-      ownership: "",
-    },
-    {
-      tokenId: 2,
-      fractionalized: false,
-      ownership: "",
-    },
   ]);
+  const [ercTokens, setErcTokens] = useState([]);
+  const navigate = useNavigate();
+  const [fracTokens, setFracTokens] = useState([]);
   const [userHolding, setUserHolding] = useState(0);
   const [selectedToken, setSelectedToken] = useState(null);
   const [userInput, setUserInput] = useState({
@@ -45,8 +40,8 @@ export default function ListNFT(props) {
   };
 
   useEffect(() => {
-    getUserTokens();
-  }, []);
+    props.activeAccount && getUserTokens();
+  }, [props.activeAccount]);
 
   useEffect(() => {
     getIsFractionalised();
@@ -56,15 +51,86 @@ export default function ListNFT(props) {
   }, [selectedToken]);
 
   useEffect(() => {
-    if(userInput.duration && userInput.duration !== "" && userInput.amount && userInput.amount !== "") {
+    let erc = ercTokens.map((token) => {
+      return {
+        tokenId: token,
+        fractionalized: false,
+        ownership: "100%",
+      };
+    });
+
+    let frac = fracTokens.map((token) => {
+      return {
+        tokenId: token[0],
+        fractionalized: true,
+        ownership:
+          (token[1].replace(/,/g, "") * 100) / token[2].replace(/,/g, "") + "%",
+      };
+    });
+
+    console.log("List ", erc, frac);
+    setTokensList([
+      {
+        tokenId: null,
+        fractionalized: false,
+        ownership: "100%",
+      },
+      ...erc,
+      ...frac,
+    ]);
+  }, [ercTokens, fracTokens]);
+
+  useEffect(() => {
+    if (
+      userInput.duration &&
+      userInput.duration !== "" &&
+      userInput.amount &&
+      userInput.amount !== ""
+    ) {
       getCollateralRequired();
     }
   }, [userInput]);
 
   const getUserTokens = async () => {
-    // Get from ERC721
-    // Get from fractionalised
-    setSelectedToken(tokensList[0].tokenId);
+    try {
+      // Get from ERC721
+      await makeQuery(
+        props.api,
+        props.contracts,
+        props.activeAccount,
+        "erc721",
+        "getUserTokens",
+        0,
+        [props.activeAccount?.address],
+        (val) => {
+          console.log("getUserTokens erc : ", val);
+          setErcTokens(val.Ok);
+        }
+      ).catch((err) => {
+        console.log("getUserTokens erc", err);
+      });
+      // Get from fractionalised
+      await makeQuery(
+        props.api,
+        props.contracts,
+        props.activeAccount,
+        "fractionalizer",
+        "getUserHoldings",
+        0,
+        [props.activeAccount?.address],
+        (val) => {
+          console.log("getUserTokens frac : ", val);
+          setFracTokens(val.Ok);
+        },
+        (val) => {
+          console.log("Error on getUserTokens frac", val);
+        }
+      ).catch((err) => {
+        console.log("getUserTokens frac", err);
+      });
+    } catch (err) {
+      console.log("getUserTokens", err);
+    }
   };
 
   const approveFractionalised = async () => {
@@ -83,6 +149,7 @@ export default function ListNFT(props) {
           enqueueSnackbar("Transaction Finalized", {
             variant: "success",
           });
+          isApprovedFractionalizer();
         },
         () => {
           enqueueSnackbar("Transaction Submitted", {
@@ -257,7 +324,7 @@ export default function ListNFT(props) {
         [props.activeAccount.address, selectedToken],
         (val) => {
           console.log("getUserFractionHolding : ", val);
-          setUserHolding(val.Ok.replace(/,/g, ''));
+          setUserHolding(val.Ok.replace(/,/g, ""));
         }
       ).catch((err) => {
         console.log("getUserFractionHolding", err);
@@ -280,12 +347,12 @@ export default function ListNFT(props) {
         0,
         [
           props.activeAccount.address,
-          new BN(userInput.amount * 1000_000_000_000),
-          userInput.duration * 86400,
+          new BN(parseInt(userInput.amount * 1000) * 1000_000_000),
+          new BN(parseInt(userInput.duration * 1000) * 86400),
         ],
         (val) => {
           console.log("getCollateralRequired : ", val);
-          setCollateralRequired(val.Ok.replace(/,/g, ''));
+          setCollateralRequired(val.Ok.replace(/,/g, ""));
         }
       ).catch((err) => {
         console.log("getCollateralRequired", err);
@@ -319,23 +386,36 @@ export default function ListNFT(props) {
         "nftLending",
         "listAdvertisement",
         props.signer,
-        collateralRequired,
+        collateralRequired.replace(/,/g, ""),
         [
           selectedToken,
-          new BN(parseInt(userInput.fraction) * 1000_000_000_000),
+          new BN(parseInt(userInput.fraction * 1000) * 1000_000_000),
           new BN(parseInt(userInput.amount) * 1000_000_000_000),
-          userInput.duration * 86400,
+          new BN(parseInt(userInput.duration * 1000) * 86400),
         ],
-        () => {
-          enqueueSnackbar("Transaction Finalized", {
-            variant: "success",
-          });
+        (val) => {
+          // enqueueSnackbar(
+          //   <span
+          //     onClick={() =>
+          //       navigate("/canvas/" + val.contractEvents[0].args[0].toHuman())
+          //     }
+          //     style={{ textDecoration: "none", color: "white" }}
+          //   >
+          //     {" Transaction Finalized, Click to go to ad details #" +
+          //       val.contractEvents[0].args[0].toHuman()}
+          //   </span>,
+          //   {
+          //     variant: "success",
+          //   }
+          // );
+          enqueueSnackbar("Transaction Finalized", {variant: "success"});
           isApprovedForNFT();
           setUserInput({
             amount: "",
             duration: "",
             fraction: "",
           });
+          setSelectedToken(null);
         },
         () => {
           enqueueSnackbar("Transaction Submitted", {
@@ -350,9 +430,15 @@ export default function ListNFT(props) {
     }
   };
 
-  useEffect(() => {
-    console.log("isApproved", isApprovedFractionalizer, isApprovedNFTLending, collateralRequired);
-  });
+  // useEffect(() => {
+  //   console.log(
+  //     "isApproved",
+  //     isApprovedFractionalizer,
+  //     isApprovedNFTLending,
+  //     collateralRequired,
+  //     tokensList
+  //   );
+  // });
 
   return (
     <Box
@@ -364,291 +450,319 @@ export default function ListNFT(props) {
         marginBottom: "200px",
       }}
     >
-      <Box
-        sx={{
-          margin: "90x 0",
-          minWidth: "300px",
-          width: "70%",
-          maxWidth: "700px",
-          minHeight: "600px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Typography
-          className="title"
+      {!props.activeAccount ? (
+        <Box
           sx={{
-            fontFamily: "'Ubuntu Condensed', sans-serif",
-            letterSpacing: "1.5px",
+            marginTop: "200px",
           }}
-          variant="h5"
-          textAlign={"center"}
         >
-          Create a listing
-        </Typography>
-        <Box sx={{ width: "100%", marginTop: "60px" }}>
-          <Box
-            className="selectContainer"
+          <Typography
             sx={{
-              width: "100%",
-              marginTop: "15px",
+              fontFamily: "'Ubuntu Condensed', sans-serif",
+              height: "100px",
+              width: "300px",
+              color: "white",
+              background: "#0d0d0d",
+              boxShadow: "0px 0px 5px #232323",
               display: "flex",
-              justifyContent: "center",
               alignItems: "center",
-              flexWrap: "wrap",
+              justifyContent: "center",
             }}
+            variant={"h6"}
+            textAlign={"center"}
           >
-            <label
-              className="selectLabel"
-              style={{
-                fontFamily: "'Ubuntu Condensed', sans-serif",
-                color: "gray",
-                marginRight: "20px",
-                marginBottom: "20px",
-              }}
-            >
-              {"Select token Id : "}
-            </label>
-            <select
-              className="select"
-              style={{ marginBottom: "20px" }}
-              onChange={(e) => handleTokenChange(e)}
-            >
-              {tokensList.map((token, idx) => (
-                <option value={token.tokenId} key={idx}>
-                  {"Token Id : " +
-                    token.tokenId +
-                    (token.fractionalized
-                      ? " (Fractionalized) (Ownership " + token.ownership + ")"
-                      : "")}
-                </option>
-              ))}
-            </select>
-          </Box>
-          <Box sx={{ marginTop: "50px" }}>
-            <Typography
-              sx={{
-                fontFamily: "'Ubuntu Condensed', sans-serif",
-                color: "gray",
-              }}
-              textAlign={"center"}
-              variant="h6"
-            >
-              Fractionalise NFT
-            </Typography>
+            Connect your wallet
+          </Typography>{" "}
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            margin: "90x 0",
+            minWidth: "300px",
+            width: "70%",
+            maxWidth: "700px",
+            minHeight: "600px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography
+            className="title"
+            sx={{
+              fontFamily: "'Ubuntu Condensed', sans-serif",
+              letterSpacing: "1.5px",
+            }}
+            variant="h5"
+            textAlign={"center"}
+          >
+            Create a listing
+          </Typography>
+          <Box sx={{ width: "100%", marginTop: "60px" }}>
             <Box
+              className="selectContainer"
               sx={{
+                width: "100%",
+                marginTop: "15px",
                 display: "flex",
-                marginTop: "40px",
-                display: "flex",
-                alignItems: "center",
                 justifyContent: "center",
+                alignItems: "center",
+                flexWrap: "wrap",
               }}
             >
+              <label
+                className="selectLabel"
+                style={{
+                  fontFamily: "'Ubuntu Condensed', sans-serif",
+                  color: "gray",
+                  marginRight: "20px",
+                  marginBottom: "20px",
+                }}
+              >
+                {"Select token Id : "}
+              </label>
+              <select
+                className="select"
+                style={{ marginBottom: "20px" }}
+                onChange={(e) => handleTokenChange(e)}
+              >
+                {tokensList.map((token, idx) => (
+                  <option value={token.tokenId} key={idx}>
+                    {"Token Id : " +
+                      token.tokenId +
+                      (token.fractionalized
+                        ? " (Fractionalized) (Ownership " +
+                          token.ownership +
+                          ")"
+                        : "")}
+                  </option>
+                ))}
+              </select>
+            </Box>
+            <Box sx={{ marginTop: "50px" }}>
               <Typography
                 sx={{
                   fontFamily: "'Ubuntu Condensed', sans-serif",
-                  marginRight: "20px",
-                  color: "#d1b473",
+                  color: "gray",
                 }}
-                variant={"subtitle1"}
+                textAlign={"center"}
+                variant="h6"
               >
-                Give contract access to fractionalise your NFT
+                Fractionalise NFT
               </Typography>
-              <div
-                className={
-                  "btn " +
-                  (isFractionalized || isApprovedFractionalizer
-                    ? "btn-done"
-                    : "btn-red")
-                }
-                tabIndex={1}
-                style={{
-                  fontFamily: "'Ubuntu Condensed', sans-serif",
-                }}
-                onClick={() =>
-                  !isFractionalized &&
-                  !isApprovedFractionalizer &&
-                  approveFractionalised()
-                }
-              >
-                {isFractionalized || isApprovedFractionalizer
-                  ? "Approved"
-                  : "Approve"}
-              </div>
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                marginTop: "40px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Typography
+              <Box
                 sx={{
-                  fontFamily: "'Ubuntu Condensed', sans-serif",
-                  marginRight: "20px",
-                  color: "#d1b473",
+                  display: "flex",
+                  marginTop: "40px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
-                variant={"subtitle1"}
               >
-                Fractionalise your selected NFT
-              </Typography>
-              <div
-                className={
-                  "btn " + (isFractionalized ? "btn-done" : "btn-green")
-                }
-                tabIndex={1}
-                style={{
-                  fontFamily: "'Ubuntu Condensed', sans-serif",
-                }}
-                onClick={() => !isFractionalized && fractionaliseNFT()}
-              >
-                {isFractionalized ? "Fractionalised" : "Fractionalise"}
-              </div>
-            </Box>
-          </Box>
-          <Box sx={{ marginTop: "50px" }}>
-            <Typography
-              sx={{
-                fontFamily: "'Ubuntu Condensed', sans-serif",
-                color: "gray",
-                marginBottom: "30px",
-              }}
-              textAlign={"center"}
-              variant="h6"
-            >
-              Fill details
-            </Typography>
-            <Box sx={{ width: "100%", display: "flex", flexWrap: "wrap" }}>
-              <Box
-                className="inputContainer"
-                sx={{ width: "45%", marginTop: "15px", marginRight: "10%" }}
-              >
-                <label
-                  className="inputLabel"
-                  style={{
-                    fontFamily: "'Ubuntu Condensed', sans-serif",
-                    color: "gray",
-                  }}
-                >
-                  {"Ask Amount (AZERO)"}
-                </label>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="Enter ask amount"
-                  value={userInput.amount}
-                  onChange={(e) => handleUserInput(e, "amount")}
-                />
-              </Box>
-              <Box
-                className="inputContainer"
-                sx={{ width: "45%", marginTop: "15px" }}
-              >
-                <label
-                  className="inputLabel"
-                  style={{
-                    fontFamily: "'Ubuntu Condensed', sans-serif",
-                    color: "gray",
-                  }}
-                >
-                  {"Duration (in days)"}
-                </label>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="Enter duration"
-                  value={userInput.duration}
-                  onChange={(e) => handleUserInput(e, "duration")}
-                />
-              </Box>
-              <Box
-                className="inputContainer"
-                sx={{ width: "45%", marginTop: "15px" }}
-              >
-                <label
-                  className="inputLabel"
-                  style={{
-                    fontFamily: "'Ubuntu Condensed', sans-serif",
-                    color: "gray",
-                  }}
-                >
-                  {"Fraction to put as collateral(%)"}
-                </label>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="Enter fraction"
-                  value={userInput.fraction}
-                  onChange={(e) => handleUserInput(e, "fraction")}
-                />
-              </Box>
-              <Box sx={{ width: "100%" }}>
-                <Box
+                <Typography
                   sx={{
-                    display: "flex",
-                    marginTop: "40px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    fontFamily: "'Ubuntu Condensed', sans-serif",
+                    marginRight: "20px",
+                    color: "#d1b473",
                   }}
+                  variant={"subtitle1"}
                 >
-                  <Typography
-                    sx={{
-                      fontFamily: "'Ubuntu Condensed', sans-serif",
-                      marginRight: "20px",
-                      color: "#d1b473",
-                    }}
-                    variant={"subtitle1"}
-                  >
-                    Give contract access to operate on your fractionalised NFT
-                  </Typography>
-                  <div
-                    className={
-                      "btn " + (isApprovedNFTLending ? "btn-done" : "btn-red")
-                    }
-                    tabIndex={1}
+                  Give contract access to fractionalise your NFT
+                </Typography>
+                <div
+                  className={
+                    "btn " +
+                    (isFractionalized || isApprovedFractionalizer
+                      ? "btn-done"
+                      : "btn-red")
+                  }
+                  tabIndex={1}
+                  style={{
+                    fontFamily: "'Ubuntu Condensed', sans-serif",
+                  }}
+                  onClick={() =>
+                    !isFractionalized &&
+                    !isApprovedFractionalizer &&
+                    approveFractionalised()
+                  }
+                >
+                  {isFractionalized || isApprovedFractionalizer
+                    ? "Approved"
+                    : "Approve"}
+                </div>
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  marginTop: "40px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontFamily: "'Ubuntu Condensed', sans-serif",
+                    marginRight: "20px",
+                    color: "#d1b473",
+                  }}
+                  variant={"subtitle1"}
+                >
+                  Fractionalise your selected NFT
+                </Typography>
+                <div
+                  className={
+                    "btn " + (isFractionalized ? "btn-done" : "btn-green")
+                  }
+                  tabIndex={1}
+                  style={{
+                    fontFamily: "'Ubuntu Condensed', sans-serif",
+                  }}
+                  onClick={() => !isFractionalized && fractionaliseNFT()}
+                >
+                  {isFractionalized ? "Fractionalised" : "Fractionalise"}
+                </div>
+              </Box>
+            </Box>
+            <Box sx={{ marginTop: "50px" }}>
+              <Typography
+                sx={{
+                  fontFamily: "'Ubuntu Condensed', sans-serif",
+                  color: "gray",
+                  marginBottom: "30px",
+                }}
+                textAlign={"center"}
+                variant="h6"
+              >
+                Fill details
+              </Typography>
+              <Box sx={{ width: "100%", display: "flex", flexWrap: "wrap" }}>
+                <Box
+                  className="inputContainer"
+                  sx={{ width: "45%", marginTop: "15px", marginRight: "10%" }}
+                >
+                  <label
+                    className="inputLabel"
                     style={{
                       fontFamily: "'Ubuntu Condensed', sans-serif",
-                    }}
-                    onClick={() => {
-                      !isApprovedNFTLending && approveNftLending();
+                      color: "gray",
                     }}
                   >
-                    {isApprovedNFTLending
-                      ? "Approved for all"
-                      : "Approve for all"}
-                  </div>
+                    {"Ask Amount (AZERO)"}
+                  </label>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="Enter ask amount"
+                    value={userInput.amount}
+                    onChange={(e) => handleUserInput(e, "amount")}
+                  />
                 </Box>
                 <Box
-                  sx={{
-                    display: "flex",
-                    marginTop: "40px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
+                  className="inputContainer"
+                  sx={{ width: "45%", marginTop: "15px" }}
                 >
-                  <div
-                    className="btn btn-green"
-                    tabIndex={1}
+                  <label
+                    className="inputLabel"
                     style={{
                       fontFamily: "'Ubuntu Condensed', sans-serif",
+                      color: "gray",
                     }}
-                    onClick={() => create()}
                   >
-                    Create
-                  </div>
+                    {"Duration (in days)"}
+                  </label>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="Enter duration"
+                    value={userInput.duration}
+                    onChange={(e) => handleUserInput(e, "duration")}
+                  />
+                </Box>
+                <Box
+                  className="inputContainer"
+                  sx={{ width: "45%", marginTop: "15px" }}
+                >
+                  <label
+                    className="inputLabel"
+                    style={{
+                      fontFamily: "'Ubuntu Condensed', sans-serif",
+                      color: "gray",
+                    }}
+                  >
+                    {"Fraction to put as collateral(%)"}
+                  </label>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="Enter fraction"
+                    value={userInput.fraction}
+                    onChange={(e) => handleUserInput(e, "fraction")}
+                  />
+                </Box>
+                <Box sx={{ width: "100%" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      marginTop: "40px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontFamily: "'Ubuntu Condensed', sans-serif",
+                        marginRight: "20px",
+                        color: "#d1b473",
+                      }}
+                      variant={"subtitle1"}
+                    >
+                      Give contract access to operate on your fractionalised NFT
+                    </Typography>
+                    <div
+                      className={
+                        "btn " + (isApprovedNFTLending ? "btn-done" : "btn-red")
+                      }
+                      tabIndex={1}
+                      style={{
+                        fontFamily: "'Ubuntu Condensed', sans-serif",
+                      }}
+                      onClick={() => {
+                        !isApprovedNFTLending && approveNftLending();
+                      }}
+                    >
+                      {isApprovedNFTLending
+                        ? "Approved for all"
+                        : "Approve for all"}
+                    </div>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      marginTop: "40px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <div
+                      className="btn btn-green"
+                      tabIndex={1}
+                      style={{
+                        fontFamily: "'Ubuntu Condensed', sans-serif",
+                      }}
+                      onClick={() => create()}
+                    >
+                      Create
+                    </div>
+                  </Box>
                 </Box>
               </Box>
             </Box>
           </Box>
         </Box>
-      </Box>
+      )}
     </Box>
   );
 }

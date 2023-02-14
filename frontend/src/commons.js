@@ -34,8 +34,8 @@ export async function makeTransaction(
   if (contracts && contracts[contract] && callerAddress) {
     try {
       const gasLimit = api.registry.createType("WeightV2", {
-        refTime: new BN("10000000000"),
-        proofSize: new BN("10000000000"),
+        refTime: new BN("100000000000"),
+        proofSize: new BN("100000000000"),
       });
       console.log(contract, funcName);
       await contracts[contract].query[funcName](
@@ -47,7 +47,12 @@ export async function makeTransaction(
         ...parameters
       )
         .then((res) => {
-          console.log(res);
+          console.log(
+            "In transaction",
+            res,
+            res?.result?.toHuman(),
+            res?.output?.toHuman()
+          );
           if (res.result?.toHuman()?.Err?.Module?.error) {
             throw new Error(
               res.result.toHuman().Err.Module.error === "0x04000000"
@@ -66,17 +71,21 @@ export async function makeTransaction(
               ...parameters
             ).signAndSend(callerAddress.address, { signer }, async (res) => {
               if (res.status.isFinalized) {
-                onFinalised();
+                onFinalised(res);
               }
             });
             callAfterTransactionSubmited();
           } else {
+            console.log(res.Err);
             throw new Error(res.Err);
           }
-        }).catch(err => {
-            throw new Error(err);
+        })
+        .catch((err) => {
+          console.log("Caught error", err);
+          throw new Error(err);
         });
     } catch (err) {
+      console.log("Error caught", err);
       throw new Error(err);
     }
   } else {
@@ -104,8 +113,8 @@ export async function makeQuery(
   if (contracts && contracts[contract] && callerAddress) {
     try {
       const gasLimit = api.registry.createType("WeightV2", {
-        refTime: new BN("10000000000"),
-        proofSize: new BN("10000000000"),
+        refTime: new BN("100000000000"),
+        proofSize: new BN("100000000000"),
       });
       await contracts[contract].query[funcName](
         callerAddress.address,
@@ -133,14 +142,15 @@ export async function makeQuery(
 
 export const NETWORK_ENDPOINT = "wss://aleph-zero-testnet-rpc.dwellir.com";
 export const ERC721_ADDRESS =
-  "5EazHknXKL5YogYWSXpsEfbDigjYY6HDXr4vYxbrc1TYPeTE";
+  "5GpZxGUnk5hKfdB8miFL9rCGkbxqoW2J3DTUg1W2MCyb22Th";
 export const FRACTIONALIZER_ADDRESS =
-  "5Ce4BSePmu8UGzXwhj2JDt4iknmEbxwztwcUstWLNPogdSVK";
+  "5ChmsqYB4pVCtEfbwpKFcPNG5KpyrYKV1cTJN12fQ2hcNAgy";
 export const NFT_LENDING_ADDRESS =
-  "5FpwKUoKSDgA9KnrkUST9KKU8LefhU4kQDi3GeyM9jhmPooK";
+  "5HEf74dvPsTQAEixoYs9GpyC6Qgw8spjvUpZByrYL4hxW5Tj";
+
 export const ABI_ERC721 = {
   source: {
-    hash: "0x3beed212d3bc591bbb755e3949ab45e24ee70177e69ed252c3e0862c7ab4a6b8",
+    hash: "0x0d7a94e2cdfaaa5d54d16fa0ef597b09c1288ee597b833c278dcc53a0ff3ce2b",
     language: "ink! 4.0.0-rc",
     compiler: "rustc 1.67.0",
     build_info: {
@@ -167,7 +177,7 @@ export const ABI_ERC721 = {
         payable: false,
         returnType: {
           displayName: ["ink_primitives", "ConstructorResult"],
-          type: 5,
+          type: 6,
         },
         selector: "0x9bae9d5e",
       },
@@ -182,7 +192,7 @@ export const ABI_ERC721 = {
             label: "from",
             type: {
               displayName: ["Option"],
-              type: 9,
+              type: 10,
             },
           },
           {
@@ -191,7 +201,7 @@ export const ABI_ERC721 = {
             label: "to",
             type: {
               displayName: ["Option"],
-              type: 9,
+              type: 10,
             },
           },
           {
@@ -200,7 +210,7 @@ export const ABI_ERC721 = {
             label: "id",
             type: {
               displayName: ["TokenId"],
-              type: 3,
+              type: 0,
             },
           },
         ],
@@ -215,7 +225,7 @@ export const ABI_ERC721 = {
             label: "from",
             type: {
               displayName: ["AccountId"],
-              type: 0,
+              type: 1,
             },
           },
           {
@@ -224,7 +234,7 @@ export const ABI_ERC721 = {
             label: "to",
             type: {
               displayName: ["AccountId"],
-              type: 0,
+              type: 1,
             },
           },
           {
@@ -233,7 +243,7 @@ export const ABI_ERC721 = {
             label: "id",
             type: {
               displayName: ["TokenId"],
-              type: 3,
+              type: 0,
             },
           },
         ],
@@ -248,7 +258,7 @@ export const ABI_ERC721 = {
             label: "owner",
             type: {
               displayName: ["AccountId"],
-              type: 0,
+              type: 1,
             },
           },
           {
@@ -257,7 +267,7 @@ export const ABI_ERC721 = {
             label: "operator",
             type: {
               displayName: ["AccountId"],
-              type: 0,
+              type: 1,
             },
           },
           {
@@ -266,7 +276,7 @@ export const ABI_ERC721 = {
             label: "approved",
             type: {
               displayName: ["bool"],
-              type: 11,
+              type: 16,
             },
           },
         ],
@@ -279,7 +289,7 @@ export const ABI_ERC721 = {
     ],
     lang_error: {
       displayName: ["ink", "LangError"],
-      type: 6,
+      type: 7,
     },
     messages: [
       {
@@ -288,7 +298,7 @@ export const ABI_ERC721 = {
             label: "owner",
             type: {
               displayName: ["AccountId"],
-              type: 0,
+              type: 1,
             },
           },
         ],
@@ -302,7 +312,7 @@ export const ABI_ERC721 = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 7,
+          type: 8,
         },
         selector: "0x0f755a56",
       },
@@ -312,7 +322,7 @@ export const ABI_ERC721 = {
             label: "id",
             type: {
               displayName: ["TokenId"],
-              type: 3,
+              type: 0,
             },
           },
         ],
@@ -322,7 +332,7 @@ export const ABI_ERC721 = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 8,
+          type: 9,
         },
         selector: "0x99720c1e",
       },
@@ -332,7 +342,7 @@ export const ABI_ERC721 = {
             label: "id",
             type: {
               displayName: ["TokenId"],
-              type: 3,
+              type: 0,
             },
           },
         ],
@@ -342,9 +352,49 @@ export const ABI_ERC721 = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 8,
+          type: 9,
         },
         selector: "0x27592dea",
+      },
+      {
+        args: [
+          {
+            label: "id",
+            type: {
+              displayName: ["TokenId"],
+              type: 0,
+            },
+          },
+        ],
+        docs: [" Returns the uri path associated with the token"],
+        label: "get_token_uri",
+        mutates: false,
+        payable: false,
+        returnType: {
+          displayName: ["ink", "MessageResult"],
+          type: 11,
+        },
+        selector: "0x951a9bfa",
+      },
+      {
+        args: [
+          {
+            label: "account",
+            type: {
+              displayName: ["AccountId"],
+              type: 1,
+            },
+          },
+        ],
+        docs: [],
+        label: "get_user_tokens",
+        mutates: false,
+        payable: false,
+        returnType: {
+          displayName: ["ink", "MessageResult"],
+          type: 13,
+        },
+        selector: "0x1855c9a8",
       },
       {
         args: [
@@ -352,14 +402,14 @@ export const ABI_ERC721 = {
             label: "owner",
             type: {
               displayName: ["AccountId"],
-              type: 0,
+              type: 1,
             },
           },
           {
             label: "operator",
             type: {
               displayName: ["AccountId"],
-              type: 0,
+              type: 1,
             },
           },
         ],
@@ -369,7 +419,7 @@ export const ABI_ERC721 = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 10,
+          type: 15,
         },
         selector: "0x0f5922e9",
       },
@@ -379,14 +429,14 @@ export const ABI_ERC721 = {
             label: "to",
             type: {
               displayName: ["AccountId"],
-              type: 0,
+              type: 1,
             },
           },
           {
             label: "approved",
             type: {
               displayName: ["bool"],
-              type: 11,
+              type: 16,
             },
           },
         ],
@@ -398,7 +448,7 @@ export const ABI_ERC721 = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 12,
+          type: 17,
         },
         selector: "0xcfd0c27b",
       },
@@ -408,14 +458,14 @@ export const ABI_ERC721 = {
             label: "to",
             type: {
               displayName: ["AccountId"],
-              type: 0,
+              type: 1,
             },
           },
           {
             label: "id",
             type: {
               displayName: ["TokenId"],
-              type: 3,
+              type: 0,
             },
           },
         ],
@@ -427,7 +477,7 @@ export const ABI_ERC721 = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 12,
+          type: 17,
         },
         selector: "0x681266a0",
       },
@@ -437,14 +487,14 @@ export const ABI_ERC721 = {
             label: "destination",
             type: {
               displayName: ["AccountId"],
-              type: 0,
+              type: 1,
             },
           },
           {
             label: "id",
             type: {
               displayName: ["TokenId"],
-              type: 3,
+              type: 0,
             },
           },
         ],
@@ -456,7 +506,7 @@ export const ABI_ERC721 = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 12,
+          type: 17,
         },
         selector: "0x84a15da1",
       },
@@ -466,21 +516,21 @@ export const ABI_ERC721 = {
             label: "from",
             type: {
               displayName: ["AccountId"],
-              type: 0,
+              type: 1,
             },
           },
           {
             label: "to",
             type: {
               displayName: ["AccountId"],
-              type: 0,
+              type: 1,
             },
           },
           {
             label: "id",
             type: {
               displayName: ["TokenId"],
-              type: 3,
+              type: 0,
             },
           },
         ],
@@ -490,17 +540,17 @@ export const ABI_ERC721 = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 12,
+          type: 17,
         },
         selector: "0x0b396f18",
       },
       {
         args: [
           {
-            label: "id",
+            label: "uri",
             type: {
-              displayName: ["TokenId"],
-              type: 3,
+              displayName: ["String"],
+              type: 4,
             },
           },
         ],
@@ -510,7 +560,7 @@ export const ABI_ERC721 = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 12,
+          type: 20,
         },
         selector: "0xcfdd9aa2",
       },
@@ -520,7 +570,7 @@ export const ABI_ERC721 = {
             label: "id",
             type: {
               displayName: ["TokenId"],
-              type: 3,
+              type: 0,
             },
           },
         ],
@@ -532,7 +582,7 @@ export const ABI_ERC721 = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 12,
+          type: 17,
         },
         selector: "0xb1efc17b",
       },
@@ -545,11 +595,20 @@ export const ABI_ERC721 = {
           fields: [
             {
               layout: {
+                leaf: {
+                  key: "0x00000000",
+                  ty: 0,
+                },
+              },
+              name: "token_nonce",
+            },
+            {
+              layout: {
                 root: {
                   layout: {
                     leaf: {
                       key: "0xed16db9e",
-                      ty: 0,
+                      ty: 1,
                     },
                   },
                   root_key: "0xed16db9e",
@@ -562,8 +621,22 @@ export const ABI_ERC721 = {
                 root: {
                   layout: {
                     leaf: {
+                      key: "0x1f2f81e1",
+                      ty: 4,
+                    },
+                  },
+                  root_key: "0x1f2f81e1",
+                },
+              },
+              name: "token_uri",
+            },
+            {
+              layout: {
+                root: {
+                  layout: {
+                    leaf: {
                       key: "0x4d897660",
-                      ty: 0,
+                      ty: 1,
                     },
                   },
                   root_key: "0x4d897660",
@@ -577,7 +650,7 @@ export const ABI_ERC721 = {
                   layout: {
                     leaf: {
                       key: "0xb5379df2",
-                      ty: 3,
+                      ty: 0,
                     },
                   },
                   root_key: "0xb5379df2",
@@ -591,7 +664,7 @@ export const ABI_ERC721 = {
                   layout: {
                     leaf: {
                       key: "0xad984333",
-                      ty: 4,
+                      ty: 5,
                     },
                   },
                   root_key: "0xad984333",
@@ -611,10 +684,18 @@ export const ABI_ERC721 = {
       id: 0,
       type: {
         def: {
+          primitive: "u32",
+        },
+      },
+    },
+    {
+      id: 1,
+      type: {
+        def: {
           composite: {
             fields: [
               {
-                type: 1,
+                type: 2,
                 typeName: "[u8; 32]",
               },
             ],
@@ -624,21 +705,13 @@ export const ABI_ERC721 = {
       },
     },
     {
-      id: 1,
+      id: 2,
       type: {
         def: {
           array: {
             len: 32,
-            type: 2,
+            type: 3,
           },
-        },
-      },
-    },
-    {
-      id: 2,
-      type: {
-        def: {
-          primitive: "u8",
         },
       },
     },
@@ -646,7 +719,7 @@ export const ABI_ERC721 = {
       id: 3,
       type: {
         def: {
-          primitive: "u32",
+          primitive: "u8",
         },
       },
     },
@@ -654,7 +727,7 @@ export const ABI_ERC721 = {
       id: 4,
       type: {
         def: {
-          tuple: [],
+          primitive: "str",
         },
       },
     },
@@ -662,12 +735,20 @@ export const ABI_ERC721 = {
       id: 5,
       type: {
         def: {
+          tuple: [],
+        },
+      },
+    },
+    {
+      id: 6,
+      type: {
+        def: {
           variant: {
             variants: [
               {
                 fields: [
                   {
-                    type: 4,
+                    type: 5,
                   },
                 ],
                 index: 0,
@@ -676,7 +757,7 @@ export const ABI_ERC721 = {
               {
                 fields: [
                   {
-                    type: 6,
+                    type: 7,
                   },
                 ],
                 index: 1,
@@ -688,18 +769,18 @@ export const ABI_ERC721 = {
         params: [
           {
             name: "T",
-            type: 4,
+            type: 5,
           },
           {
             name: "E",
-            type: 6,
+            type: 7,
           },
         ],
         path: ["Result"],
       },
     },
     {
-      id: 6,
+      id: 7,
       type: {
         def: {
           variant: {
@@ -715,46 +796,6 @@ export const ABI_ERC721 = {
       },
     },
     {
-      id: 7,
-      type: {
-        def: {
-          variant: {
-            variants: [
-              {
-                fields: [
-                  {
-                    type: 3,
-                  },
-                ],
-                index: 0,
-                name: "Ok",
-              },
-              {
-                fields: [
-                  {
-                    type: 6,
-                  },
-                ],
-                index: 1,
-                name: "Err",
-              },
-            ],
-          },
-        },
-        params: [
-          {
-            name: "T",
-            type: 3,
-          },
-          {
-            name: "E",
-            type: 6,
-          },
-        ],
-        path: ["Result"],
-      },
-    },
-    {
       id: 8,
       type: {
         def: {
@@ -763,7 +804,7 @@ export const ABI_ERC721 = {
               {
                 fields: [
                   {
-                    type: 9,
+                    type: 0,
                   },
                 ],
                 index: 0,
@@ -772,7 +813,7 @@ export const ABI_ERC721 = {
               {
                 fields: [
                   {
-                    type: 6,
+                    type: 7,
                   },
                 ],
                 index: 1,
@@ -784,11 +825,11 @@ export const ABI_ERC721 = {
         params: [
           {
             name: "T",
-            type: 9,
+            type: 0,
           },
           {
             name: "E",
-            type: 6,
+            type: 7,
           },
         ],
         path: ["Result"],
@@ -801,13 +842,53 @@ export const ABI_ERC721 = {
           variant: {
             variants: [
               {
+                fields: [
+                  {
+                    type: 10,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 7,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 10,
+          },
+          {
+            name: "E",
+            type: 7,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 10,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
                 index: 0,
                 name: "None",
               },
               {
                 fields: [
                   {
-                    type: 0,
+                    type: 1,
                   },
                 ],
                 index: 1,
@@ -819,14 +900,14 @@ export const ABI_ERC721 = {
         params: [
           {
             name: "T",
-            type: 0,
+            type: 1,
           },
         ],
         path: ["Option"],
       },
     },
     {
-      id: 10,
+      id: 11,
       type: {
         def: {
           variant: {
@@ -834,7 +915,7 @@ export const ABI_ERC721 = {
               {
                 fields: [
                   {
-                    type: 11,
+                    type: 12,
                   },
                 ],
                 index: 0,
@@ -843,7 +924,7 @@ export const ABI_ERC721 = {
               {
                 fields: [
                   {
-                    type: 6,
+                    type: 7,
                   },
                 ],
                 index: 1,
@@ -855,22 +936,14 @@ export const ABI_ERC721 = {
         params: [
           {
             name: "T",
-            type: 11,
+            type: 12,
           },
           {
             name: "E",
-            type: 6,
+            type: 7,
           },
         ],
         path: ["Result"],
-      },
-    },
-    {
-      id: 11,
-      type: {
-        def: {
-          primitive: "bool",
-        },
       },
     },
     {
@@ -880,22 +953,17 @@ export const ABI_ERC721 = {
           variant: {
             variants: [
               {
-                fields: [
-                  {
-                    type: 13,
-                  },
-                ],
                 index: 0,
-                name: "Ok",
+                name: "None",
               },
               {
                 fields: [
                   {
-                    type: 6,
+                    type: 4,
                   },
                 ],
                 index: 1,
-                name: "Err",
+                name: "Some",
               },
             ],
           },
@@ -903,14 +971,10 @@ export const ABI_ERC721 = {
         params: [
           {
             name: "T",
-            type: 13,
-          },
-          {
-            name: "E",
-            type: 6,
+            type: 4,
           },
         ],
-        path: ["Result"],
+        path: ["Option"],
       },
     },
     {
@@ -922,7 +986,7 @@ export const ABI_ERC721 = {
               {
                 fields: [
                   {
-                    type: 4,
+                    type: 14,
                   },
                 ],
                 index: 0,
@@ -931,7 +995,7 @@ export const ABI_ERC721 = {
               {
                 fields: [
                   {
-                    type: 14,
+                    type: 7,
                   },
                 ],
                 index: 1,
@@ -943,11 +1007,11 @@ export const ABI_ERC721 = {
         params: [
           {
             name: "T",
-            type: 4,
+            type: 14,
           },
           {
             name: "E",
-            type: 14,
+            type: 7,
           },
         ],
         path: ["Result"],
@@ -955,6 +1019,144 @@ export const ABI_ERC721 = {
     },
     {
       id: 14,
+      type: {
+        def: {
+          sequence: {
+            type: 0,
+          },
+        },
+      },
+    },
+    {
+      id: 15,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 16,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 7,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 16,
+          },
+          {
+            name: "E",
+            type: 7,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 16,
+      type: {
+        def: {
+          primitive: "bool",
+        },
+      },
+    },
+    {
+      id: 17,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 18,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 7,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 18,
+          },
+          {
+            name: "E",
+            type: 7,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 18,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 5,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 19,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 5,
+          },
+          {
+            name: "E",
+            type: 19,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 19,
       type: {
         def: {
           variant: {
@@ -993,12 +1195,92 @@ export const ABI_ERC721 = {
         path: ["erc721", "erc721", "Error"],
       },
     },
+    {
+      id: 20,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 21,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 7,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 21,
+          },
+          {
+            name: "E",
+            type: 7,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 21,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 0,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 19,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 0,
+          },
+          {
+            name: "E",
+            type: 19,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
   ],
   version: "4",
 };
 export const ABI_FRACTIONALIZER = {
   source: {
-    hash: "0x842b083dbff628d6a481fd2eb8edea980f04ab13f10062348c6c10b10cf1e0b0",
+    hash: "0x80eb22742429a6904aec81c221c4260f0024b3605176538ba12c8441e9880a76",
     language: "ink! 4.0.0-rc",
     compiler: "rustc 1.67.0",
     build_info: {
@@ -1035,7 +1317,7 @@ export const ABI_FRACTIONALIZER = {
         payable: false,
         returnType: {
           displayName: ["ink_primitives", "ConstructorResult"],
-          type: 5,
+          type: 7,
         },
         selector: "0x9bae9d5e",
       },
@@ -1050,7 +1332,7 @@ export const ABI_FRACTIONALIZER = {
             label: "token_id",
             type: {
               displayName: ["TokenId"],
-              type: 7,
+              type: 6,
             },
           },
           {
@@ -1083,7 +1365,7 @@ export const ABI_FRACTIONALIZER = {
             label: "token_id",
             type: {
               displayName: ["TokenId"],
-              type: 7,
+              type: 6,
             },
           },
           {
@@ -1116,7 +1398,7 @@ export const ABI_FRACTIONALIZER = {
             label: "operator",
             type: {
               displayName: ["Option"],
-              type: 22,
+              type: 25,
             },
           },
           {
@@ -1125,7 +1407,7 @@ export const ABI_FRACTIONALIZER = {
             label: "from",
             type: {
               displayName: ["Option"],
-              type: 22,
+              type: 25,
             },
           },
           {
@@ -1134,7 +1416,7 @@ export const ABI_FRACTIONALIZER = {
             label: "to",
             type: {
               displayName: ["Option"],
-              type: 22,
+              type: 25,
             },
           },
           {
@@ -1143,7 +1425,7 @@ export const ABI_FRACTIONALIZER = {
             label: "token_id",
             type: {
               displayName: ["TokenId"],
-              type: 7,
+              type: 6,
             },
           },
           {
@@ -1189,7 +1471,7 @@ export const ABI_FRACTIONALIZER = {
             label: "approved",
             type: {
               displayName: ["bool"],
-              type: 12,
+              type: 13,
             },
           },
         ],
@@ -1204,7 +1486,7 @@ export const ABI_FRACTIONALIZER = {
             label: "value",
             type: {
               displayName: ["ink", "prelude", "string", "String"],
-              type: 23,
+              type: 26,
             },
           },
           {
@@ -1213,7 +1495,7 @@ export const ABI_FRACTIONALIZER = {
             label: "token_id",
             type: {
               displayName: ["TokenId"],
-              type: 7,
+              type: 6,
             },
           },
         ],
@@ -1223,7 +1505,7 @@ export const ABI_FRACTIONALIZER = {
     ],
     lang_error: {
       displayName: ["ink", "LangError"],
-      type: 6,
+      type: 8,
     },
     messages: [
       {
@@ -1232,7 +1514,7 @@ export const ABI_FRACTIONALIZER = {
             label: "nft_id",
             type: {
               displayName: ["u32"],
-              type: 7,
+              type: 6,
             },
           },
           {
@@ -1249,7 +1531,7 @@ export const ABI_FRACTIONALIZER = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 8,
+          type: 9,
         },
         selector: "0xbb1aafac",
       },
@@ -1259,7 +1541,7 @@ export const ABI_FRACTIONALIZER = {
             label: "token_id",
             type: {
               displayName: ["TokenId"],
-              type: 7,
+              type: 6,
             },
           },
           {
@@ -1276,7 +1558,7 @@ export const ABI_FRACTIONALIZER = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 8,
+          type: 9,
         },
         selector: "0xf07629e7",
       },
@@ -1286,7 +1568,7 @@ export const ABI_FRACTIONALIZER = {
             label: "token_id",
             type: {
               displayName: ["TokenId"],
-              type: 7,
+              type: 6,
             },
           },
         ],
@@ -1296,7 +1578,7 @@ export const ABI_FRACTIONALIZER = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 11,
+          type: 12,
         },
         selector: "0x3593f43d",
       },
@@ -1306,7 +1588,7 @@ export const ABI_FRACTIONALIZER = {
             label: "token_id",
             type: {
               displayName: ["TokenId"],
-              type: 7,
+              type: 6,
             },
           },
         ],
@@ -1316,9 +1598,29 @@ export const ABI_FRACTIONALIZER = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 13,
+          type: 14,
         },
         selector: "0x742cb68b",
+      },
+      {
+        args: [
+          {
+            label: "account",
+            type: {
+              displayName: ["AccountId"],
+              type: 0,
+            },
+          },
+        ],
+        docs: [],
+        label: "get_user_holdings",
+        mutates: false,
+        payable: false,
+        returnType: {
+          displayName: ["ink", "MessageResult"],
+          type: 16,
+        },
+        selector: "0x2d0e7cbf",
       },
       {
         args: [
@@ -1340,7 +1642,7 @@ export const ABI_FRACTIONALIZER = {
             label: "token_id",
             type: {
               displayName: ["TokenId"],
-              type: 7,
+              type: 6,
             },
           },
           {
@@ -1354,7 +1656,7 @@ export const ABI_FRACTIONALIZER = {
             label: "data",
             type: {
               displayName: ["Vec"],
-              type: 15,
+              type: 19,
             },
           },
         ],
@@ -1364,7 +1666,7 @@ export const ABI_FRACTIONALIZER = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 8,
+          type: 9,
         },
         selector: "0x5324d556",
       },
@@ -1388,21 +1690,21 @@ export const ABI_FRACTIONALIZER = {
             label: "token_ids",
             type: {
               displayName: ["Vec"],
-              type: 16,
+              type: 5,
             },
           },
           {
             label: "values",
             type: {
               displayName: ["Vec"],
-              type: 17,
+              type: 20,
             },
           },
           {
             label: "data",
             type: {
               displayName: ["Vec"],
-              type: 15,
+              type: 19,
             },
           },
         ],
@@ -1412,7 +1714,7 @@ export const ABI_FRACTIONALIZER = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 8,
+          type: 9,
         },
         selector: "0xf7f5fd62",
       },
@@ -1429,7 +1731,7 @@ export const ABI_FRACTIONALIZER = {
             label: "token_id",
             type: {
               displayName: ["TokenId"],
-              type: 7,
+              type: 6,
             },
           },
         ],
@@ -1439,7 +1741,7 @@ export const ABI_FRACTIONALIZER = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 18,
+          type: 21,
         },
         selector: "0x164b9ba0",
       },
@@ -1449,14 +1751,14 @@ export const ABI_FRACTIONALIZER = {
             label: "owners",
             type: {
               displayName: ["Vec"],
-              type: 19,
+              type: 22,
             },
           },
           {
             label: "token_ids",
             type: {
               displayName: ["Vec"],
-              type: 16,
+              type: 5,
             },
           },
         ],
@@ -1466,7 +1768,7 @@ export const ABI_FRACTIONALIZER = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 20,
+          type: 23,
         },
         selector: "0x221b4f73",
       },
@@ -1483,7 +1785,7 @@ export const ABI_FRACTIONALIZER = {
             label: "approved",
             type: {
               displayName: ["bool"],
-              type: 12,
+              type: 13,
             },
           },
         ],
@@ -1493,7 +1795,7 @@ export const ABI_FRACTIONALIZER = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 8,
+          type: 9,
         },
         selector: "0x332ba788",
       },
@@ -1520,7 +1822,7 @@ export const ABI_FRACTIONALIZER = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 11,
+          type: 12,
         },
         selector: "0x36034d3e",
       },
@@ -1544,7 +1846,7 @@ export const ABI_FRACTIONALIZER = {
             label: "_token_id",
             type: {
               displayName: ["TokenId"],
-              type: 7,
+              type: 6,
             },
           },
           {
@@ -1558,7 +1860,7 @@ export const ABI_FRACTIONALIZER = {
             label: "_data",
             type: {
               displayName: ["Vec"],
-              type: 15,
+              type: 19,
             },
           },
         ],
@@ -1568,7 +1870,7 @@ export const ABI_FRACTIONALIZER = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 21,
+          type: 24,
         },
         selector: "0xf23a6e61",
       },
@@ -1592,21 +1894,21 @@ export const ABI_FRACTIONALIZER = {
             label: "_token_ids",
             type: {
               displayName: ["Vec"],
-              type: 16,
+              type: 5,
             },
           },
           {
             label: "_values",
             type: {
               displayName: ["Vec"],
-              type: 17,
+              type: 20,
             },
           },
           {
             label: "_data",
             type: {
               displayName: ["Vec"],
-              type: 15,
+              type: 19,
             },
           },
         ],
@@ -1616,7 +1918,7 @@ export const ABI_FRACTIONALIZER = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 21,
+          type: 24,
         },
         selector: "0xbc197c81",
       },
@@ -1677,6 +1979,20 @@ export const ABI_FRACTIONALIZER = {
                 },
               },
               name: "token_supply",
+            },
+            {
+              layout: {
+                root: {
+                  layout: {
+                    leaf: {
+                      key: "0x2a2dc547",
+                      ty: 5,
+                    },
+                  },
+                  root_key: "0x2a2dc547",
+                },
+              },
+              name: "user_holdings",
             },
           ],
           name: "Contract",
@@ -1741,6 +2057,24 @@ export const ABI_FRACTIONALIZER = {
       id: 5,
       type: {
         def: {
+          sequence: {
+            type: 6,
+          },
+        },
+      },
+    },
+    {
+      id: 6,
+      type: {
+        def: {
+          primitive: "u32",
+        },
+      },
+    },
+    {
+      id: 7,
+      type: {
+        def: {
           variant: {
             variants: [
               {
@@ -1755,7 +2089,7 @@ export const ABI_FRACTIONALIZER = {
               {
                 fields: [
                   {
-                    type: 6,
+                    type: 8,
                   },
                 ],
                 index: 1,
@@ -1771,14 +2105,14 @@ export const ABI_FRACTIONALIZER = {
           },
           {
             name: "E",
-            type: 6,
+            type: 8,
           },
         ],
         path: ["Result"],
       },
     },
     {
-      id: 6,
+      id: 8,
       type: {
         def: {
           variant: {
@@ -1794,15 +2128,7 @@ export const ABI_FRACTIONALIZER = {
       },
     },
     {
-      id: 7,
-      type: {
-        def: {
-          primitive: "u32",
-        },
-      },
-    },
-    {
-      id: 8,
+      id: 9,
       type: {
         def: {
           variant: {
@@ -1810,7 +2136,7 @@ export const ABI_FRACTIONALIZER = {
               {
                 fields: [
                   {
-                    type: 9,
+                    type: 10,
                   },
                 ],
                 index: 0,
@@ -1819,7 +2145,7 @@ export const ABI_FRACTIONALIZER = {
               {
                 fields: [
                   {
-                    type: 6,
+                    type: 8,
                   },
                 ],
                 index: 1,
@@ -1831,18 +2157,18 @@ export const ABI_FRACTIONALIZER = {
         params: [
           {
             name: "T",
-            type: 9,
+            type: 10,
           },
           {
             name: "E",
-            type: 6,
+            type: 8,
           },
         ],
         path: ["Result"],
       },
     },
     {
-      id: 9,
+      id: 10,
       type: {
         def: {
           variant: {
@@ -1859,7 +2185,7 @@ export const ABI_FRACTIONALIZER = {
               {
                 fields: [
                   {
-                    type: 10,
+                    type: 11,
                   },
                 ],
                 index: 1,
@@ -1875,14 +2201,14 @@ export const ABI_FRACTIONALIZER = {
           },
           {
             name: "E",
-            type: 10,
+            type: 11,
           },
         ],
         path: ["Result"],
       },
     },
     {
-      id: 10,
+      id: 11,
       type: {
         def: {
           variant: {
@@ -1930,7 +2256,7 @@ export const ABI_FRACTIONALIZER = {
       },
     },
     {
-      id: 11,
+      id: 12,
       type: {
         def: {
           variant: {
@@ -1938,7 +2264,7 @@ export const ABI_FRACTIONALIZER = {
               {
                 fields: [
                   {
-                    type: 12,
+                    type: 13,
                   },
                 ],
                 index: 0,
@@ -1947,7 +2273,7 @@ export const ABI_FRACTIONALIZER = {
               {
                 fields: [
                   {
-                    type: 6,
+                    type: 8,
                   },
                 ],
                 index: 1,
@@ -1959,18 +2285,18 @@ export const ABI_FRACTIONALIZER = {
         params: [
           {
             name: "T",
-            type: 12,
+            type: 13,
           },
           {
             name: "E",
-            type: 6,
+            type: 8,
           },
         ],
         path: ["Result"],
       },
     },
     {
-      id: 12,
+      id: 13,
       type: {
         def: {
           primitive: "bool",
@@ -1978,7 +2304,7 @@ export const ABI_FRACTIONALIZER = {
       },
     },
     {
-      id: 13,
+      id: 14,
       type: {
         def: {
           variant: {
@@ -1986,7 +2312,7 @@ export const ABI_FRACTIONALIZER = {
               {
                 fields: [
                   {
-                    type: 14,
+                    type: 15,
                   },
                 ],
                 index: 0,
@@ -1995,7 +2321,7 @@ export const ABI_FRACTIONALIZER = {
               {
                 fields: [
                   {
-                    type: 6,
+                    type: 8,
                   },
                 ],
                 index: 1,
@@ -2007,18 +2333,18 @@ export const ABI_FRACTIONALIZER = {
         params: [
           {
             name: "T",
-            type: 14,
+            type: 15,
           },
           {
             name: "E",
-            type: 6,
+            type: 8,
           },
         ],
         path: ["Result"],
       },
     },
     {
-      id: 14,
+      id: 15,
       type: {
         def: {
           variant: {
@@ -2049,87 +2375,7 @@ export const ABI_FRACTIONALIZER = {
       },
     },
     {
-      id: 15,
-      type: {
-        def: {
-          sequence: {
-            type: 2,
-          },
-        },
-      },
-    },
-    {
       id: 16,
-      type: {
-        def: {
-          sequence: {
-            type: 7,
-          },
-        },
-      },
-    },
-    {
-      id: 17,
-      type: {
-        def: {
-          sequence: {
-            type: 3,
-          },
-        },
-      },
-    },
-    {
-      id: 18,
-      type: {
-        def: {
-          variant: {
-            variants: [
-              {
-                fields: [
-                  {
-                    type: 3,
-                  },
-                ],
-                index: 0,
-                name: "Ok",
-              },
-              {
-                fields: [
-                  {
-                    type: 6,
-                  },
-                ],
-                index: 1,
-                name: "Err",
-              },
-            ],
-          },
-        },
-        params: [
-          {
-            name: "T",
-            type: 3,
-          },
-          {
-            name: "E",
-            type: 6,
-          },
-        ],
-        path: ["Result"],
-      },
-    },
-    {
-      id: 19,
-      type: {
-        def: {
-          sequence: {
-            type: 0,
-          },
-        },
-      },
-    },
-    {
-      id: 20,
       type: {
         def: {
           variant: {
@@ -2146,7 +2392,7 @@ export const ABI_FRACTIONALIZER = {
               {
                 fields: [
                   {
-                    type: 6,
+                    type: 8,
                   },
                 ],
                 index: 1,
@@ -2162,10 +2408,48 @@ export const ABI_FRACTIONALIZER = {
           },
           {
             name: "E",
-            type: 6,
+            type: 8,
           },
         ],
         path: ["Result"],
+      },
+    },
+    {
+      id: 17,
+      type: {
+        def: {
+          sequence: {
+            type: 18,
+          },
+        },
+      },
+    },
+    {
+      id: 18,
+      type: {
+        def: {
+          tuple: [6, 3, 3],
+        },
+      },
+    },
+    {
+      id: 19,
+      type: {
+        def: {
+          sequence: {
+            type: 2,
+          },
+        },
+      },
+    },
+    {
+      id: 20,
+      type: {
+        def: {
+          sequence: {
+            type: 3,
+          },
+        },
       },
     },
     {
@@ -2177,7 +2461,7 @@ export const ABI_FRACTIONALIZER = {
               {
                 fields: [
                   {
-                    type: 15,
+                    type: 3,
                   },
                 ],
                 index: 0,
@@ -2186,7 +2470,7 @@ export const ABI_FRACTIONALIZER = {
               {
                 fields: [
                   {
-                    type: 6,
+                    type: 8,
                   },
                 ],
                 index: 1,
@@ -2198,11 +2482,11 @@ export const ABI_FRACTIONALIZER = {
         params: [
           {
             name: "T",
-            type: 15,
+            type: 3,
           },
           {
             name: "E",
-            type: 6,
+            type: 8,
           },
         ],
         path: ["Result"],
@@ -2210,6 +2494,96 @@ export const ABI_FRACTIONALIZER = {
     },
     {
       id: 22,
+      type: {
+        def: {
+          sequence: {
+            type: 0,
+          },
+        },
+      },
+    },
+    {
+      id: 23,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 20,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 8,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 20,
+          },
+          {
+            name: "E",
+            type: 8,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 24,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 19,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 8,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 19,
+          },
+          {
+            name: "E",
+            type: 8,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 25,
       type: {
         def: {
           variant: {
@@ -2240,7 +2614,7 @@ export const ABI_FRACTIONALIZER = {
       },
     },
     {
-      id: 23,
+      id: 26,
       type: {
         def: {
           primitive: "str",
@@ -2252,7 +2626,7 @@ export const ABI_FRACTIONALIZER = {
 };
 export const ABI_NFT_LENDING = {
   source: {
-    hash: "0x0e0dfdc0b7b5b0ce690deb29eefef66bddb4f27198bf683380e0ba5968f7a0af",
+    hash: "0x5487e6d5bc02830a7e0fdb10c2e0bc17d03e8ff134ae570303a34b077dc21e85",
     language: "ink! 4.0.0-rc",
     compiler: "rustc 1.67.0",
     build_info: {
@@ -2360,8 +2734,10 @@ export const ABI_NFT_LENDING = {
             },
           },
         ],
-        docs: [],
-        label: "on_received",
+        docs: [
+          " This contract supportz receiving single ERC1155 token transfer",
+        ],
+        label: "signal_erc1155_support",
         mutates: true,
         payable: false,
         returnType: {
@@ -2689,6 +3065,73 @@ export const ABI_NFT_LENDING = {
       {
         args: [
           {
+            label: "account",
+            type: {
+              displayName: ["AccountId"],
+              type: 0,
+            },
+          },
+        ],
+        docs: [],
+        label: "get_user_loans",
+        mutates: false,
+        payable: false,
+        returnType: {
+          displayName: ["ink", "MessageResult"],
+          type: 19,
+        },
+        selector: "0x62af3bd0",
+      },
+      {
+        args: [
+          {
+            label: "loan_id",
+            type: {
+              displayName: ["LoanId"],
+              type: 3,
+            },
+          },
+          {
+            label: "account",
+            type: {
+              displayName: ["AccountId"],
+              type: 0,
+            },
+          },
+        ],
+        docs: [],
+        label: "get_loan_offers",
+        mutates: false,
+        payable: false,
+        returnType: {
+          displayName: ["ink", "MessageResult"],
+          type: 19,
+        },
+        selector: "0xe200dc24",
+      },
+      {
+        args: [
+          {
+            label: "account",
+            type: {
+              displayName: ["AccountId"],
+              type: 0,
+            },
+          },
+        ],
+        docs: [],
+        label: "get_user_offers",
+        mutates: false,
+        payable: false,
+        returnType: {
+          displayName: ["ink", "MessageResult"],
+          type: 21,
+        },
+        selector: "0xd6692f17",
+      },
+      {
+        args: [
+          {
             label: "loan_id",
             type: {
               displayName: ["LoanId"],
@@ -2702,7 +3145,7 @@ export const ABI_NFT_LENDING = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 19,
+          type: 24,
         },
         selector: "0x07b38e35",
       },
@@ -2722,7 +3165,7 @@ export const ABI_NFT_LENDING = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 22,
+          type: 27,
         },
         selector: "0xbbd48be2",
       },
@@ -2828,7 +3271,7 @@ export const ABI_NFT_LENDING = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 27,
+          type: 32,
         },
         selector: "0xba3c5573",
       },
@@ -2848,7 +3291,7 @@ export const ABI_NFT_LENDING = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 30,
+          type: 34,
         },
         selector: "0x8a24ad50",
       },
@@ -3742,12 +4185,120 @@ export const ABI_NFT_LENDING = {
       id: 20,
       type: {
         def: {
+          sequence: {
+            type: 3,
+          },
+        },
+      },
+    },
+    {
+      id: 21,
+      type: {
+        def: {
           variant: {
             variants: [
               {
                 fields: [
                   {
-                    type: 21,
+                    type: 22,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 9,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 22,
+          },
+          {
+            name: "E",
+            type: 9,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 22,
+      type: {
+        def: {
+          sequence: {
+            type: 23,
+          },
+        },
+      },
+    },
+    {
+      id: 23,
+      type: {
+        def: {
+          tuple: [3, 3],
+        },
+      },
+    },
+    {
+      id: 24,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 25,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 9,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 25,
+          },
+          {
+            name: "E",
+            type: 9,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 25,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 26,
                   },
                 ],
                 index: 0,
@@ -3768,7 +4319,7 @@ export const ABI_NFT_LENDING = {
         params: [
           {
             name: "T",
-            type: 21,
+            type: 26,
           },
           {
             name: "E",
@@ -3779,7 +4330,7 @@ export const ABI_NFT_LENDING = {
       },
     },
     {
-      id: 21,
+      id: 26,
       type: {
         def: {
           composite: {
@@ -3823,187 +4374,6 @@ export const ABI_NFT_LENDING = {
           },
         },
         path: ["nft_lending", "nft_lending", "LoanMetadata"],
-      },
-    },
-    {
-      id: 22,
-      type: {
-        def: {
-          variant: {
-            variants: [
-              {
-                fields: [
-                  {
-                    type: 23,
-                  },
-                ],
-                index: 0,
-                name: "Ok",
-              },
-              {
-                fields: [
-                  {
-                    type: 9,
-                  },
-                ],
-                index: 1,
-                name: "Err",
-              },
-            ],
-          },
-        },
-        params: [
-          {
-            name: "T",
-            type: 23,
-          },
-          {
-            name: "E",
-            type: 9,
-          },
-        ],
-        path: ["Result"],
-      },
-    },
-    {
-      id: 23,
-      type: {
-        def: {
-          variant: {
-            variants: [
-              {
-                fields: [
-                  {
-                    type: 24,
-                  },
-                ],
-                index: 0,
-                name: "Ok",
-              },
-              {
-                fields: [
-                  {
-                    type: 14,
-                  },
-                ],
-                index: 1,
-                name: "Err",
-              },
-            ],
-          },
-        },
-        params: [
-          {
-            name: "T",
-            type: 24,
-          },
-          {
-            name: "E",
-            type: 14,
-          },
-        ],
-        path: ["Result"],
-      },
-    },
-    {
-      id: 24,
-      type: {
-        def: {
-          composite: {
-            fields: [
-              {
-                name: "start_timestamp",
-                type: 25,
-                typeName: "Option<Time>",
-              },
-              {
-                name: "raised",
-                type: 3,
-                typeName: "Balance",
-              },
-              {
-                name: "limit_left",
-                type: 3,
-                typeName: "Balance",
-              },
-              {
-                name: "interest",
-                type: 3,
-                typeName: "Balance",
-              },
-              {
-                name: "repaid",
-                type: 3,
-                typeName: "Balance",
-              },
-              {
-                name: "loan_status",
-                type: 26,
-                typeName: "LoanStatus",
-              },
-            ],
-          },
-        },
-        path: ["nft_lending", "nft_lending", "LoanStats"],
-      },
-    },
-    {
-      id: 25,
-      type: {
-        def: {
-          variant: {
-            variants: [
-              {
-                index: 0,
-                name: "None",
-              },
-              {
-                fields: [
-                  {
-                    type: 4,
-                  },
-                ],
-                index: 1,
-                name: "Some",
-              },
-            ],
-          },
-        },
-        params: [
-          {
-            name: "T",
-            type: 4,
-          },
-        ],
-        path: ["Option"],
-      },
-    },
-    {
-      id: 26,
-      type: {
-        def: {
-          variant: {
-            variants: [
-              {
-                index: 0,
-                name: "OPEN",
-              },
-              {
-                index: 1,
-                name: "ACTIVE",
-              },
-              {
-                index: 2,
-                name: "CLOSED",
-              },
-              {
-                index: 3,
-                name: "CANCELLED",
-              },
-            ],
-          },
-        },
-        path: ["nft_lending", "nft_lending", "LoanStatus"],
       },
     },
     {
@@ -4090,12 +4460,185 @@ export const ABI_NFT_LENDING = {
       id: 29,
       type: {
         def: {
-          tuple: [3, 3],
+          composite: {
+            fields: [
+              {
+                name: "start_timestamp",
+                type: 30,
+                typeName: "Option<Time>",
+              },
+              {
+                name: "raised",
+                type: 3,
+                typeName: "Balance",
+              },
+              {
+                name: "limit_left",
+                type: 3,
+                typeName: "Balance",
+              },
+              {
+                name: "interest",
+                type: 3,
+                typeName: "Balance",
+              },
+              {
+                name: "repaid",
+                type: 3,
+                typeName: "Balance",
+              },
+              {
+                name: "loan_status",
+                type: 31,
+                typeName: "LoanStatus",
+              },
+            ],
+          },
         },
+        path: ["nft_lending", "nft_lending", "LoanStats"],
       },
     },
     {
       id: 30,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                index: 0,
+                name: "None",
+              },
+              {
+                fields: [
+                  {
+                    type: 4,
+                  },
+                ],
+                index: 1,
+                name: "Some",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 4,
+          },
+        ],
+        path: ["Option"],
+      },
+    },
+    {
+      id: 31,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                index: 0,
+                name: "OPEN",
+              },
+              {
+                index: 1,
+                name: "ACTIVE",
+              },
+              {
+                index: 2,
+                name: "CLOSED",
+              },
+              {
+                index: 3,
+                name: "CANCELLED",
+              },
+            ],
+          },
+        },
+        path: ["nft_lending", "nft_lending", "LoanStatus"],
+      },
+    },
+    {
+      id: 32,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 33,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 9,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 33,
+          },
+          {
+            name: "E",
+            type: 9,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 33,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 23,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 14,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 23,
+          },
+          {
+            name: "E",
+            type: 14,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 34,
       type: {
         def: {
           variant: {
