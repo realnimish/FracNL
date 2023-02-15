@@ -50,7 +50,8 @@ export default function Homepage(props) {
       status: 0,
     },
   ]);
-  
+  // Create a new state to get nonce
+
   return (
     <Box sx={{ padding: "80px 0px", minHeight: "100%", height: "fit-content" }}>
       <Banner />
@@ -75,18 +76,26 @@ export default function Homepage(props) {
           Listings
         </Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap" }}>
-          {listings.map((listing, idx) => (
-            <Box sx={{ margin: "0 20px 60px 20px" }} key={idx}>
-              <Card
-                creatorAddress={listing.createAddress}
-                image={listing.image}
-                askValue={listing.askValue}
-                duration={listing.duration}
-                fraction={listing.fraction}
-                status={listing.status}
-              />
-            </Box>
-          ))}
+          {// loop through an array of length nonce and idx in reverse
+          // new Array(nonce).fill(0).map((val, idx) => { loanId = nonce - idx; return (Box);})
+          listings.map((listing, idx) => {
+            // states
+            // fetch tokenUri
+            // fetch loanMetadata
+            // fetch loan stats
+            return (
+              <Box sx={{ margin: "0 20px 60px 20px" }} key={idx}>
+                <Card
+                  creatorAddress={listing.createAddress}
+                  image={listing.image}
+                  askValue={listing.askValue}
+                  duration={listing.duration}
+                  fraction={listing.fraction}
+                  status={listing.status}
+                />
+              </Box>
+            );
+          })}
         </Box>
       </Box>
     </Box>

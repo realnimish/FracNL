@@ -4,9 +4,16 @@ import { useEffect, useState } from "react";
 export default function StatusAndTimer(props) {
   const [timer, setTimer] = useState(props.time);
   useEffect(() => {
-    const interval = setInterval(() => setTimer(timer - 1), 1000);
-    return () => clearInterval(interval);
+    if (timer > 0) {
+      const interval = setInterval(() => setTimer(timer - 1), 1000);
+      return () => clearInterval(interval);
+    }
   }, [timer]);
+
+  useEffect(() => {
+    console.log("Props: ", props.time, props.status);
+    setTimer(props.time);
+  }, [props.time]);
 
   return (
     <Box
@@ -22,7 +29,11 @@ export default function StatusAndTimer(props) {
       className={"statusAndTimer"}
     >
       <Typography
-        sx={{ color: "black", fontFamily: "'Ubuntu Condensed', sans-serif", marginRight: "20px" }}
+        sx={{
+          color: "black",
+          fontFamily: "'Ubuntu Condensed', sans-serif",
+          marginRight: "20px",
+        }}
         variant={"h6"}
       >
         {props.status}

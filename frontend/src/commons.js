@@ -53,7 +53,11 @@ export async function makeTransaction(
             res?.result?.toHuman(),
             res?.output?.toHuman()
           );
-          if (res.result?.toHuman()?.Err?.Module?.error) {
+          if(res.output?.toHuman()?.Ok?.Err) {
+            throw res.output?.toHuman()?.Ok?.Err;
+          } else if(res.output?.toHuman()?.Err) {
+            throw res.output?.toHuman()?.Err;
+          } else if (res.result?.toHuman()?.Err?.Module?.error) {
             throw new Error(
               res.result.toHuman().Err.Module.error === "0x04000000"
                 ? "TransferFailed"
@@ -77,21 +81,19 @@ export async function makeTransaction(
             callAfterTransactionSubmited();
           } else {
             console.log(res.Err);
-            throw new Error(res.Err);
+            throw res.Err;
           }
         })
         .catch((err) => {
           console.log("Caught error", err);
-          throw new Error(err);
+          throw err;
         });
     } catch (err) {
       console.log("Error caught", err);
-      throw new Error(err);
+      throw err;
     }
   } else {
-    throw new Error(
-      "Something is wrong with contracts or  contract or callerAddress"
-    );
+    throw "Something is wrong with contracts or  contract or callerAddress";
   }
 }
 

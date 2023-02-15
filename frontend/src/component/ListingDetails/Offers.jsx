@@ -20,6 +20,12 @@ export default function Offers(props) {
     },
   };
 
+  const makeOffer = async () => {
+  }
+
+  const withdrawOffer = async () => {
+  }
+
   return (
     <Box className="offers">
       <Typography

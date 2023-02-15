@@ -149,7 +149,7 @@ export default function ListNFT(props) {
           enqueueSnackbar("Transaction Finalized", {
             variant: "success",
           });
-          isApprovedFractionalizer();
+          isTokenIdApprovedForFractionalised();
         },
         () => {
           enqueueSnackbar("Transaction Submitted", {
@@ -737,6 +737,9 @@ export default function ListNFT(props) {
                         : "Approve for all"}
                     </div>
                   </Box>
+                  <Typography textAlign={"center"} sx={{marginTop: "20px", color: "gray"}}>
+                    {"Collateral required: " + collateralRequired/1000_000_000_000 + "TZERO"}
+                  </Typography>
                   <Box
                     sx={{
                       display: "flex",
