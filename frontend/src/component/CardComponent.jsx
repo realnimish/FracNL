@@ -8,6 +8,12 @@ export default function Card(props) {
     { color: "#69c46d", text: "Ongoing" },
     { color: "#f47068", text: "Ended" },
   ];
+  const loanStatus = {
+    OPEN: { text: "OPEN", color: "#daaa3f" },
+    ACIVE: { text: "ACTIVE", color: "#69c46d" },
+    CLOSED: { text: "CLOSED", color: "#f47068" },
+    CANCELLED: { text: "CANCELLED", color: "#f47068" },
+  };
   const TextRow = (props) => {
     return (
       <Box
@@ -87,8 +93,11 @@ export default function Card(props) {
           padding: "15px 0",
         }}
       >
-        <CircleIcon sx={{ color: status[props.status].color, fontSize: "18px" }} />
-        <Typography variant="subtitle2" sx={{ width: "30px", marginLeft: "10px" }}>{status[props.status].text}</Typography>
+        {props.status && <>
+          <CircleIcon sx={{ color: loanStatus[props.status].color, fontSize: "18px" }} />
+          <Typography variant="subtitle2" sx={{ width: "30px", marginLeft: "10px" }}>{loanStatus[props.status].text}</Typography></>
+
+        }
       </Box>
     </Box>
   );
