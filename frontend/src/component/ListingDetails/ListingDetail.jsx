@@ -22,7 +22,7 @@ export default function ListingDetail(props) {
     askAmount: "0",
     holding: "0",
     duration: "0",
-    securityDeposit: "0 ETH",
+    securityDeposit: "0",
     listingDate: new Date(),
     tokenId: null,
   });
@@ -98,12 +98,11 @@ export default function ListingDetail(props) {
             creatorAddress: data.borrower,
             askAmount:
               parseInt(data.amountAsked.replace(/,/g, "") / 1000_000) /
-                1000_000,
+              1000_000,
             holding: parseInt(data.sharesLocked.replace(/,/g, "") / 1000_000),
             securityDeposit:
               parseInt(data.securityDeposit.replace(/,/g, "") / 1000_000) /
-                1000_000 +
-              " TZERO",
+                1000_000,
             listingDate: new Date(
               parseInt(data.listingTimestamp.replace(/,/g, ""))
             ),
@@ -318,7 +317,11 @@ export default function ListingDetail(props) {
   };
 
   const getStatus = () => {
-    if(listingDetails.duration && listingDetails.listingDate.getTime() && loanStats.loanStatus) {
+    if (
+      listingDetails.duration &&
+      listingDetails.listingDate.getTime() &&
+      loanStats.loanStatus
+    ) {
       let duration = listingDetails.duration * 8640000;
       let listingTime = listingDetails.listingDate.getTime();
       let offerPhase = 3600000;
@@ -334,21 +337,27 @@ export default function ListingDetail(props) {
       } else if (loanStats.loanStatus == loanStatus.active) {
         setStatus("Active");
         setCountDown(duration - (now - startTime));
-      }else if(now - listingTime <= offerPhase)  {
+      } else if (now - listingTime <= offerPhase) {
         setStatus("Offer Phase");
         setCountDown(offerPhase - (now - listingTime));
-      } else if (now - listingTime > offerPhase && now - listingTime <= offerPhase + coolDownPeriod) {
+      } else if (
+        now - listingTime > offerPhase &&
+        now - listingTime <= offerPhase + coolDownPeriod
+      ) {
         setStatus("CoolDown Phase");
         setCountDown(coolDownPeriod - (now - listingTime - offerPhase));
-      } else if (now - listingTime > offerPhase + coolDownPeriod && loanStats.loanStatus == loanStatus.open) {
+      } else if (
+        now - listingTime > offerPhase + coolDownPeriod &&
+        loanStats.loanStatus == loanStatus.open
+      ) {
         setStatus("Pending action");
         setCountDown(0);
       }
-    } 
-  }
+    }
+  };
 
   useEffect(() => {
-    console.log("first useEffect", id, props.activeAccount)
+    console.log("first useEffect", id, props.activeAccount);
     getLoanMetadata();
     getLoanStats();
   }, [id, props.activeAccount]);
@@ -359,7 +368,11 @@ export default function ListingDetail(props) {
   }, [listingDetails.tokenId]);
 
   useEffect(() => {
-    if (listingDetails.askAmount && loanStats.interest && listingDetails.askAmount != 0) {
+    if (
+      listingDetails.askAmount &&
+      loanStats.interest &&
+      listingDetails.askAmount != 0
+    ) {
       setInterestRate(
         (parseFloat(loanStats.interest) /
           parseFloat(listingDetails.askAmount)) *
@@ -412,7 +425,7 @@ export default function ListingDetail(props) {
         </Box>
       ) : (
         <>
-          <StatusAndTimer status={status} time={countDown/1000} />
+          <StatusAndTimer status={status} time={countDown / 1000} />
           <Box className="detailBox">
             <Box className="detailBoxLeft">
               <img
@@ -516,7 +529,7 @@ export default function ListingDetail(props) {
                   Security deposit :{" "}
                 </Typography>
                 <Typography variant="body1" sx={{ marginTop: "5px" }}>
-                  {listingDetails.securityDeposit}
+                  {listingDetails.securityDeposit + " TZERO"}
                 </Typography>
               </Box>
               <Box
@@ -548,7 +561,7 @@ export default function ListingDetail(props) {
                 </Typography>
               </Box>
               <Box sx={{ width: "100%" }} className="buttonContainer">
-                {loanStats.loanStatus == loanStatus.open && (
+                {loanStats.loanStatus == loanStatus.open && listingDetails.creatorAddress === props.activeAccount.address && (
                   <div
                     className="btn btn-green"
                     tabIndex={1}
@@ -561,8 +574,8 @@ export default function ListingDetail(props) {
                     Start Loan
                   </div>
                 )}
-                {loanStats.loanStatus == loanStatus.active ||
-                  (loanStats.loanStatus == loanStatus.open && (
+                {(loanStats.loanStatus == loanStatus.active ||
+                  loanStats.loanStatus == loanStatus.open) && listingDetails.creatorAddress === props.activeAccount.address && (
                     <div
                       className="btn btn-red"
                       tabIndex={1}
@@ -571,7 +584,7 @@ export default function ListingDetail(props) {
                     >
                       Cancel Loan
                     </div>
-                  ))}
+                  )}
                 {loanStats.loanStatus == loanStatus.active &&
                   loanStats.startTimestamp &&
                   (
@@ -591,9 +604,36 @@ export default function ListingDetail(props) {
               </Box>
             </Box>
           </Box>
-          <Repay listingDetails={listingDetails} loanStats={loanStats}/>
-          <CreateOffer />
-          <Offers offers={offers} />
+          {["ACTIVE", "CLOSED", "CANCELLED"].includes(loanStats.loanStatus)&& <Repay
+            listingDetails={listingDetails}
+            loanStats={loanStats}
+            id={id}
+            activeAccount={props.activeAccount}
+            contracts={props.contracts}
+            api={props.api}
+            signer={props.signer}
+            getLoanStats={() => getLoanStats()}
+
+          />}
+          <CreateOffer
+            listingDetails={listingDetails}
+            loanStats={loanStats}
+            id={id}
+            activeAccount={props.activeAccount}
+            contracts={props.contracts}
+            api={props.api}
+            signer={props.signer}
+          />
+          <Offers
+            listingDetails={listingDetails}
+            loanStats={loanStats}
+            offers={offers}
+            activeAccount={props.activeAccount}
+            contracts={props.contracts}
+            api={props.api}
+            signer={props.signer}
+            id={id}
+          />
         </>
       )}
     </Box>

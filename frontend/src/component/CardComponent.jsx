@@ -2,15 +2,11 @@ import { Box, Typography } from "@mui/material";
 import nft from "../assets/nft.avif";
 import { cutAddress } from "../commons";
 import CircleIcon from "@mui/icons-material/Circle";
+import { Link } from "react-router-dom";
 export default function Card(props) {
-  const status = [
-    { color: "#daaa3f", text: "Offered" },
-    { color: "#69c46d", text: "Ongoing" },
-    { color: "#f47068", text: "Ended" },
-  ];
   const loanStatus = {
     OPEN: { text: "OPEN", color: "#daaa3f" },
-    ACIVE: { text: "ACTIVE", color: "#69c46d" },
+    ACTIVE: { text: "ACTIVE", color: "#69c46d" },
     CLOSED: { text: "CLOSED", color: "#f47068" },
     CANCELLED: { text: "CANCELLED", color: "#f47068" },
   };
@@ -49,8 +45,11 @@ export default function Card(props) {
       </Box>
     );
   };
+  console.log("Sttaus",props.status)
 
   return (
+    <Link to={props.link}           style={{ color: "white" }}
+    >
     <Box
       sx={{
         height: "500px",
@@ -77,6 +76,7 @@ export default function Card(props) {
       <img
         src={props.image}
         style={{ width: "100%", borderRadius: "30px", marginBottom: "15px" }}
+        onError={() => this.src="../assets/placeholder.jpg"}
       />
       <TextRow
         title={"Asker Address :"}
@@ -93,12 +93,21 @@ export default function Card(props) {
           padding: "15px 0",
         }}
       >
-        {props.status && <>
-          <CircleIcon sx={{ color: loanStatus[props.status].color, fontSize: "18px" }} />
-          <Typography variant="subtitle2" sx={{ width: "30px", marginLeft: "10px" }}>{loanStatus[props.status].text}</Typography></>
-
-        }
+        {props.status && (
+          <>
+            <CircleIcon
+              sx={{ color: loanStatus[props.status].color, fontSize: "18px" }}
+            />
+            <Typography
+              variant="subtitle2"
+              sx={{ width: "fit-content", marginLeft: "10px" }}
+            >
+              {loanStatus[props.status].text}
+            </Typography>
+          </>
+        )}
       </Box>
     </Box>
+    </Link>
   );
 }

@@ -66,7 +66,7 @@ export default function Homepage(props) {
         [],
         (val) => {
           console.log("Loan nonce: ", val);
-          setLoanNonce(val.Ok);
+          setLoanNonce(parseInt(val.Ok));
         }
       ).catch((err) => {
         console.log("getLoanNonce", err);
@@ -147,12 +147,12 @@ const BoxComponent = (props) => {
   };
 
   const getStatus = () => {
-    if(loanStats.loanStatus) {
-      if (loanStats.loanStatus == loanStatus.cancelled) {
+    if(loanStats) {
+      if (loanStats == loanStatus.cancelled) {
         setStatus("CANCELLED");
-      } else if (loanStats.loanStatus == loanStatus.closed) {
+      } else if (loanStats == loanStatus.closed) {
         setStatus("CLOSED");
-      } else if (loanStats.loanStatus == loanStatus.active) {
+      } else if (loanStats == loanStatus.active) {
         setStatus("ACTIVE");
       } else  {
         setStatus("OPEN");
@@ -199,7 +199,7 @@ const BoxComponent = (props) => {
           let data = val.Ok.Ok;
           setLoanMetadata({
             borrower: data.borrower,
-            tokenId: data.borrower,
+            tokenId: data.tokenId,
             sharesLocked: parseInt(data.sharesLocked.replace(/,/g, "") / 1000_000),
             amountAsked: parseInt(data.amountAsked.replace(/,/g, "") / 1000_000) / 1000_000,
             securityDeposit: parseInt(data.securityDeposit.replace(/,/g, "") / 1000_000) / 1000_000,
@@ -258,11 +258,12 @@ const BoxComponent = (props) => {
     <Box sx={{ margin: "0 20px 60px 20px" }} key={props.idx}>
       <Card
         creatorAddress={loanMetadata.borrower}
-        image={"https://ipfs.io/ipfs/" + tokenUri + "/nft.png"}
+        image={"https://ipfs.io/ipfs/" + tokenUri }
         askValue={loanMetadata.amountAsked + " TZERO"}
         duration={loanMetadata.loanPeriod + " Day(s)"}
         fraction={loanMetadata.sharesLocked / 1000_000 + "%"}
         status={status}
+        link={"/listing/"+props.loanId}
       />
     </Box>
   );

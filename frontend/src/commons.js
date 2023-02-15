@@ -53,9 +53,9 @@ export async function makeTransaction(
             res?.result?.toHuman(),
             res?.output?.toHuman()
           );
-          if(res.output?.toHuman()?.Ok?.Err) {
+          if (res.output?.toHuman()?.Ok?.Err) {
             throw res.output?.toHuman()?.Ok?.Err;
-          } else if(res.output?.toHuman()?.Err) {
+          } else if (res.output?.toHuman()?.Err) {
             throw res.output?.toHuman()?.Err;
           } else if (res.result?.toHuman()?.Err?.Module?.error) {
             throw new Error(
@@ -148,7 +148,7 @@ export const ERC721_ADDRESS =
 export const FRACTIONALIZER_ADDRESS =
   "5ChmsqYB4pVCtEfbwpKFcPNG5KpyrYKV1cTJN12fQ2hcNAgy";
 export const NFT_LENDING_ADDRESS =
-  "5HEf74dvPsTQAEixoYs9GpyC6Qgw8spjvUpZByrYL4hxW5Tj";
+  "5EyLusze73aNFNrifp32coWLzUphPmSRSAfZdZJNxdfrJ3FE";
 
 export const ABI_ERC721 = {
   source: {
@@ -2628,7 +2628,7 @@ export const ABI_FRACTIONALIZER = {
 };
 export const ABI_NFT_LENDING = {
   source: {
-    hash: "0x5487e6d5bc02830a7e0fdb10c2e0bc17d03e8ff134ae570303a34b077dc21e85",
+    hash: "0xaaf2d557c9374cf8b3bb8a6cffdb4e4cf7bfd62c0e3e10f4fe9d50bdef9f9fe5",
     language: "ink! 4.0.0-rc",
     compiler: "rustc 1.67.0",
     build_info: {
@@ -2692,7 +2692,32 @@ export const ABI_NFT_LENDING = {
       },
     ],
     docs: [],
-    events: [],
+    events: [
+      {
+        args: [
+          {
+            docs: [],
+            indexed: true,
+            label: "loan_id",
+            type: {
+              displayName: ["LoanId"],
+              type: 3,
+            },
+          },
+          {
+            docs: [],
+            indexed: true,
+            label: "borrower",
+            type: {
+              displayName: ["AccountId"],
+              type: 0,
+            },
+          },
+        ],
+        docs: [],
+        label: "NewLoanAd",
+      },
+    ],
     lang_error: {
       displayName: ["ink", "LangError"],
       type: 9,
@@ -3114,6 +3139,26 @@ export const ABI_NFT_LENDING = {
       {
         args: [
           {
+            label: "loan_id",
+            type: {
+              displayName: ["LoanId"],
+              type: 3,
+            },
+          },
+        ],
+        docs: [],
+        label: "get_all_offers",
+        mutates: false,
+        payable: false,
+        returnType: {
+          displayName: ["ink", "MessageResult"],
+          type: 21,
+        },
+        selector: "0xd2ce41dc",
+      },
+      {
+        args: [
+          {
             label: "account",
             type: {
               displayName: ["AccountId"],
@@ -3127,9 +3172,21 @@ export const ABI_NFT_LENDING = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 21,
+          type: 26,
         },
         selector: "0xd6692f17",
+      },
+      {
+        args: [],
+        docs: [],
+        label: "get_loan_nonce",
+        mutates: false,
+        payable: false,
+        returnType: {
+          displayName: ["ink", "MessageResult"],
+          type: 18,
+        },
+        selector: "0x6b700eb5",
       },
       {
         args: [
@@ -3147,7 +3204,7 @@ export const ABI_NFT_LENDING = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 24,
+          type: 29,
         },
         selector: "0x07b38e35",
       },
@@ -3167,9 +3224,83 @@ export const ABI_NFT_LENDING = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 27,
+          type: 32,
         },
         selector: "0xbbd48be2",
+      },
+      {
+        args: [
+          {
+            label: "loan_id",
+            type: {
+              displayName: ["LoanId"],
+              type: 3,
+            },
+          },
+        ],
+        docs: [],
+        label: "get_loan_details",
+        mutates: false,
+        payable: false,
+        returnType: {
+          displayName: ["ink", "MessageResult"],
+          type: 37,
+        },
+        selector: "0x3bf654f3",
+      },
+      {
+        args: [
+          {
+            label: "loan_id",
+            type: {
+              displayName: ["LoanId"],
+              type: 3,
+            },
+          },
+          {
+            label: "offer_id",
+            type: {
+              displayName: ["OfferId"],
+              type: 3,
+            },
+          },
+        ],
+        docs: [],
+        label: "get_offer_details",
+        mutates: false,
+        payable: false,
+        returnType: {
+          displayName: ["ink", "MessageResult"],
+          type: 40,
+        },
+        selector: "0x6468f5a3",
+      },
+      {
+        args: [
+          {
+            label: "loan_id",
+            type: {
+              displayName: ["LoanId"],
+              type: 3,
+            },
+          },
+          {
+            label: "account",
+            type: {
+              displayName: ["AccountId"],
+              type: 0,
+            },
+          },
+        ],
+        docs: [],
+        label: "get_active_offer_id",
+        mutates: false,
+        payable: false,
+        returnType: {
+          displayName: ["ink", "MessageResult"],
+          type: 12,
+        },
+        selector: "0x0d2ac432",
       },
       {
         args: [
@@ -3273,7 +3404,7 @@ export const ABI_NFT_LENDING = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 32,
+          type: 42,
         },
         selector: "0xba3c5573",
       },
@@ -3293,7 +3424,7 @@ export const ABI_NFT_LENDING = {
         payable: false,
         returnType: {
           displayName: ["ink", "MessageResult"],
-          type: 34,
+          type: 44,
         },
         selector: "0x8a24ad50",
       },
@@ -4247,7 +4378,7 @@ export const ABI_NFT_LENDING = {
       id: 23,
       type: {
         def: {
-          tuple: [3, 3],
+          tuple: [3, 24],
         },
       },
     },
@@ -4255,12 +4386,72 @@ export const ABI_NFT_LENDING = {
       id: 24,
       type: {
         def: {
+          composite: {
+            fields: [
+              {
+                name: "lender",
+                type: 0,
+                typeName: "AccountId",
+              },
+              {
+                name: "amount",
+                type: 3,
+                typeName: "Balance",
+              },
+              {
+                name: "interest",
+                type: 3,
+                typeName: "Balance",
+              },
+              {
+                name: "status",
+                type: 25,
+                typeName: "OfferStatus",
+              },
+            ],
+          },
+        },
+        path: ["nft_lending", "nft_lending", "OfferMetadata"],
+      },
+    },
+    {
+      id: 25,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                index: 0,
+                name: "PENDING",
+              },
+              {
+                index: 1,
+                name: "ACCEPTED",
+              },
+              {
+                index: 2,
+                name: "REJECTED",
+              },
+              {
+                index: 3,
+                name: "WITHDRAWN",
+              },
+            ],
+          },
+        },
+        path: ["nft_lending", "nft_lending", "OfferStatus"],
+      },
+    },
+    {
+      id: 26,
+      type: {
+        def: {
           variant: {
             variants: [
               {
                 fields: [
                   {
-                    type: 25,
+                    type: 27,
                   },
                 ],
                 index: 0,
@@ -4281,7 +4472,7 @@ export const ABI_NFT_LENDING = {
         params: [
           {
             name: "T",
-            type: 25,
+            type: 27,
           },
           {
             name: "E",
@@ -4292,7 +4483,25 @@ export const ABI_NFT_LENDING = {
       },
     },
     {
-      id: 25,
+      id: 27,
+      type: {
+        def: {
+          sequence: {
+            type: 28,
+          },
+        },
+      },
+    },
+    {
+      id: 28,
+      type: {
+        def: {
+          tuple: [3, 3],
+        },
+      },
+    },
+    {
+      id: 29,
       type: {
         def: {
           variant: {
@@ -4300,7 +4509,47 @@ export const ABI_NFT_LENDING = {
               {
                 fields: [
                   {
-                    type: 26,
+                    type: 30,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 9,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 30,
+          },
+          {
+            name: "E",
+            type: 9,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 30,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 31,
                   },
                 ],
                 index: 0,
@@ -4321,7 +4570,7 @@ export const ABI_NFT_LENDING = {
         params: [
           {
             name: "T",
-            type: 26,
+            type: 31,
           },
           {
             name: "E",
@@ -4332,7 +4581,7 @@ export const ABI_NFT_LENDING = {
       },
     },
     {
-      id: 26,
+      id: 31,
       type: {
         def: {
           composite: {
@@ -4376,187 +4625,6 @@ export const ABI_NFT_LENDING = {
           },
         },
         path: ["nft_lending", "nft_lending", "LoanMetadata"],
-      },
-    },
-    {
-      id: 27,
-      type: {
-        def: {
-          variant: {
-            variants: [
-              {
-                fields: [
-                  {
-                    type: 28,
-                  },
-                ],
-                index: 0,
-                name: "Ok",
-              },
-              {
-                fields: [
-                  {
-                    type: 9,
-                  },
-                ],
-                index: 1,
-                name: "Err",
-              },
-            ],
-          },
-        },
-        params: [
-          {
-            name: "T",
-            type: 28,
-          },
-          {
-            name: "E",
-            type: 9,
-          },
-        ],
-        path: ["Result"],
-      },
-    },
-    {
-      id: 28,
-      type: {
-        def: {
-          variant: {
-            variants: [
-              {
-                fields: [
-                  {
-                    type: 29,
-                  },
-                ],
-                index: 0,
-                name: "Ok",
-              },
-              {
-                fields: [
-                  {
-                    type: 14,
-                  },
-                ],
-                index: 1,
-                name: "Err",
-              },
-            ],
-          },
-        },
-        params: [
-          {
-            name: "T",
-            type: 29,
-          },
-          {
-            name: "E",
-            type: 14,
-          },
-        ],
-        path: ["Result"],
-      },
-    },
-    {
-      id: 29,
-      type: {
-        def: {
-          composite: {
-            fields: [
-              {
-                name: "start_timestamp",
-                type: 30,
-                typeName: "Option<Time>",
-              },
-              {
-                name: "raised",
-                type: 3,
-                typeName: "Balance",
-              },
-              {
-                name: "limit_left",
-                type: 3,
-                typeName: "Balance",
-              },
-              {
-                name: "interest",
-                type: 3,
-                typeName: "Balance",
-              },
-              {
-                name: "repaid",
-                type: 3,
-                typeName: "Balance",
-              },
-              {
-                name: "loan_status",
-                type: 31,
-                typeName: "LoanStatus",
-              },
-            ],
-          },
-        },
-        path: ["nft_lending", "nft_lending", "LoanStats"],
-      },
-    },
-    {
-      id: 30,
-      type: {
-        def: {
-          variant: {
-            variants: [
-              {
-                index: 0,
-                name: "None",
-              },
-              {
-                fields: [
-                  {
-                    type: 4,
-                  },
-                ],
-                index: 1,
-                name: "Some",
-              },
-            ],
-          },
-        },
-        params: [
-          {
-            name: "T",
-            type: 4,
-          },
-        ],
-        path: ["Option"],
-      },
-    },
-    {
-      id: 31,
-      type: {
-        def: {
-          variant: {
-            variants: [
-              {
-                index: 0,
-                name: "OPEN",
-              },
-              {
-                index: 1,
-                name: "ACTIVE",
-              },
-              {
-                index: 2,
-                name: "CLOSED",
-              },
-              {
-                index: 3,
-                name: "CANCELLED",
-              },
-            ],
-          },
-        },
-        path: ["nft_lending", "nft_lending", "LoanStatus"],
       },
     },
     {
@@ -4608,7 +4676,7 @@ export const ABI_NFT_LENDING = {
               {
                 fields: [
                   {
-                    type: 23,
+                    type: 34,
                   },
                 ],
                 index: 0,
@@ -4629,7 +4697,7 @@ export const ABI_NFT_LENDING = {
         params: [
           {
             name: "T",
-            type: 23,
+            type: 34,
           },
           {
             name: "E",
@@ -4641,6 +4709,355 @@ export const ABI_NFT_LENDING = {
     },
     {
       id: 34,
+      type: {
+        def: {
+          composite: {
+            fields: [
+              {
+                name: "start_timestamp",
+                type: 35,
+                typeName: "Option<Time>",
+              },
+              {
+                name: "raised",
+                type: 3,
+                typeName: "Balance",
+              },
+              {
+                name: "limit_left",
+                type: 3,
+                typeName: "Balance",
+              },
+              {
+                name: "interest",
+                type: 3,
+                typeName: "Balance",
+              },
+              {
+                name: "repaid",
+                type: 3,
+                typeName: "Balance",
+              },
+              {
+                name: "loan_status",
+                type: 36,
+                typeName: "LoanStatus",
+              },
+            ],
+          },
+        },
+        path: ["nft_lending", "nft_lending", "LoanStats"],
+      },
+    },
+    {
+      id: 35,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                index: 0,
+                name: "None",
+              },
+              {
+                fields: [
+                  {
+                    type: 4,
+                  },
+                ],
+                index: 1,
+                name: "Some",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 4,
+          },
+        ],
+        path: ["Option"],
+      },
+    },
+    {
+      id: 36,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                index: 0,
+                name: "OPEN",
+              },
+              {
+                index: 1,
+                name: "ACTIVE",
+              },
+              {
+                index: 2,
+                name: "CLOSED",
+              },
+              {
+                index: 3,
+                name: "CANCELLED",
+              },
+            ],
+          },
+        },
+        path: ["nft_lending", "nft_lending", "LoanStatus"],
+      },
+    },
+    {
+      id: 37,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 38,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 9,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 38,
+          },
+          {
+            name: "E",
+            type: 9,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 38,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 39,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 14,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 39,
+          },
+          {
+            name: "E",
+            type: 14,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 39,
+      type: {
+        def: {
+          tuple: [31, 34],
+        },
+      },
+    },
+    {
+      id: 40,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 41,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 9,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 41,
+          },
+          {
+            name: "E",
+            type: 9,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 41,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 24,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 14,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 24,
+          },
+          {
+            name: "E",
+            type: 14,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 42,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 43,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 9,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 43,
+          },
+          {
+            name: "E",
+            type: 9,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 43,
+      type: {
+        def: {
+          variant: {
+            variants: [
+              {
+                fields: [
+                  {
+                    type: 28,
+                  },
+                ],
+                index: 0,
+                name: "Ok",
+              },
+              {
+                fields: [
+                  {
+                    type: 14,
+                  },
+                ],
+                index: 1,
+                name: "Err",
+              },
+            ],
+          },
+        },
+        params: [
+          {
+            name: "T",
+            type: 28,
+          },
+          {
+            name: "E",
+            type: 14,
+          },
+        ],
+        path: ["Result"],
+      },
+    },
+    {
+      id: 44,
       type: {
         def: {
           variant: {

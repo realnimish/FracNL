@@ -1,5 +1,44 @@
 import { Box, Divider, Typography } from "@mui/material";
+import { useSnackbar } from "notistack";
+import { useState } from "react";
+import { makeTransaction } from "../../commons";
+import BN from "bn.js";
 export default function Repay(props) {
+  const [amount, setAmount] = useState(null);
+  const { enqueueSnackbar } = useSnackbar();
+
+  const handleAmountChange = (e) => {
+    setAmount(e.target.value);
+  };
+  const repayLoan = async () => {
+    if (!props.id && !amount) return;
+    try {
+      await makeTransaction(
+        props.api,
+        props.contracts,
+        props.activeAccount,
+        "nftLending",
+        "repayLoan",
+        props.signer,
+        new BN(amount * 1000_000_000_000),
+        [props.id],
+        (val) => {
+          enqueueSnackbar("Transaction Finalized", { variant: "success" });
+          props.getLoanStats();
+        },
+        () => {
+          enqueueSnackbar("Transaction Submitted", {
+            variant: "info",
+          });
+        }
+      ).catch((err) => {
+        enqueueSnackbar("" + err, { variant: "error" });
+      });
+    } catch (err) {
+      enqueueSnackbar(err, { variant: "error" });
+    }
+  };
+
   return (
     <Box className="repay">
       <Typography
@@ -14,7 +53,6 @@ export default function Repay(props) {
         Close Loan
       </Typography>
       <Box className="repayContainer">
-        
         <Box
           sx={{
             width: "100%",
@@ -23,10 +61,18 @@ export default function Repay(props) {
             padding: " 0 40px 40px 40px",
           }}
         >
-          <Typography textAlign={"left"} variant="h6" sx={{ width: "100%", marginTop: "10px" }}>
+          <Typography
+            textAlign={"left"}
+            variant="h6"
+            sx={{ width: "100%", marginTop: "10px" }}
+          >
             Details
           </Typography>
-          <Divider sx={{background: "#3b3a3a", width: "100%", marginTop: "7px"}} orientation="horizontal" light={true}/>
+          <Divider
+            sx={{ background: "#3b3a3a", width: "100%", marginTop: "7px" }}
+            orientation="horizontal"
+            light={true}
+          />
           <Box
             sx={{ width: "200px", height: "fit-content" }}
             className="detailItem"
@@ -98,44 +144,51 @@ export default function Repay(props) {
             </Typography>
           </Box>
         </Box>
-        <Box
-          className="inputContainer"
-          sx={{ width: "45%", marginTop: "15px" }}
-        >
-          <label
-            className="inputLabel"
-            style={{
-              fontFamily: "'Ubuntu Condensed', sans-serif",
-              color: "gray",
-            }}
-          >
-            {"Amount (TZERO)"}
-          </label>
-          <input
-            type="text"
-            className="input"
-            placeholder="Enter repayment amount"
-          />
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            margin: "44px 0 30px 0",
-          }}
-        >
-          <Box sx={{ width: "100%", display: "flex" }}>
-            <div
-              className="btn btn-blue"
-              tabIndex={1}
-              style={{
-                fontFamily: "'Ubuntu Condensed', sans-serif",
+        {props.loanStats.loanStatus === "ACTIVE" && (
+          <>
+            <Box
+              className="inputContainer"
+              sx={{ width: "45%", marginTop: "15px" }}
+            >
+              <label
+                className="inputLabel"
+                style={{
+                  fontFamily: "'Ubuntu Condensed', sans-serif",
+                  color: "gray",
+                }}
+              >
+                {"Amount (TZERO)"}
+              </label>
+              <input
+                type="text"
+                className="input"
+                placeholder="Enter repayment amount"
+                value={amount}
+                onChange={(e) => handleAmountChange(e)}
+              />
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                margin: "44px 0 30px 0",
               }}
             >
-              Repay
-            </div>
-          </Box>
-        </Box>
+              <Box sx={{ width: "100%", display: "flex" }}>
+                <div
+                  className="btn btn-blue"
+                  tabIndex={1}
+                  style={{
+                    fontFamily: "'Ubuntu Condensed', sans-serif",
+                  }}
+                  onClick={() => repayLoan()}
+                >
+                  Repay
+                </div>
+              </Box>
+            </Box>
+          </>
+        )}
       </Box>
     </Box>
   );

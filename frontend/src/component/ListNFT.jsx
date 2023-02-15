@@ -394,21 +394,20 @@ export default function ListNFT(props) {
           new BN(parseInt(userInput.duration * 1000) * 86400),
         ],
         (val) => {
-          // enqueueSnackbar(
-          //   <span
-          //     onClick={() =>
-          //       navigate("/canvas/" + val.contractEvents[0].args[0].toHuman())
-          //     }
-          //     style={{ textDecoration: "none", color: "white" }}
-          //   >
-          //     {" Transaction Finalized, Click to go to ad details #" +
-          //       val.contractEvents[0].args[0].toHuman()}
-          //   </span>,
-          //   {
-          //     variant: "success",
-          //   }
-          // );
-          enqueueSnackbar("Transaction Finalized", {variant: "success"});
+          enqueueSnackbar(
+            <span
+              onClick={() =>
+                navigate("/listing/" + val.contractEvents[0].args[0].toHuman())
+              }
+              style={{ textDecoration: "none", color: "white", cursor: "pointer" }}
+            >
+              {" Transaction Finalized, Click to go to ad details #" +
+                val.contractEvents[0].args[0].toHuman()}
+            </span>,
+            {
+              variant: "success",
+            }
+          );
           isApprovedForNFT();
           setUserInput({
             amount: "",
