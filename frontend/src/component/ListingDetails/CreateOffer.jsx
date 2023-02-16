@@ -174,6 +174,7 @@ export default function CreateOffer(props) {
   };
 
   useEffect(() => {
+    setOfferId(null);
     getActiveOfferId();
   }, [props.id, props.activeAccount]);
 

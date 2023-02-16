@@ -5,6 +5,7 @@ import { cutAddress, makeQuery, makeTransaction } from "../../commons";
 import Identicon from "@polkadot/react-identicon";
 import { useEffect, useState } from "react";
 import { useSnackbar } from "notistack";
+import { Link } from "react-router-dom";
 export default function Offers(props) {
   const { enqueueSnackbar } = useSnackbar();
   const Status = {
@@ -220,9 +221,11 @@ const OfferRow = (props) => {
             >
               Lender Address :
             </Typography>
-            <Typography variant="subtitle1" sx={{ color: "#b1b1b1" }}>
-              {cutAddress(props.offer.lenderAddress, 15, 15)}
-            </Typography>
+            <Link to={"/profile/" + props.offer.lenderAddress}>
+              <Typography variant="subtitle1" sx={{ color: "#b1b1b1" }}>
+                {cutAddress(props.offer.lenderAddress, 15, 15)}
+              </Typography>
+            </Link>
           </Box>
           <Box
             sx={{

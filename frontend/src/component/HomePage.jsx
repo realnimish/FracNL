@@ -91,7 +91,7 @@ export default function Homepage(props) {
             marginTop: "200px",
             width: "100%",
             display: "flex",
-            justifyContent: "center"
+            justifyContent: "center",
           }}
         >
           <Typography
@@ -115,7 +115,6 @@ export default function Homepage(props) {
       ) : (
         <>
           <Banner />
-
           <Box
             sx={{
               margin: "80px 0",
@@ -137,6 +136,31 @@ export default function Homepage(props) {
               Listings
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap" }}>
+              {loanNonce === 0 && (
+                <Box
+                  sx={{
+                    marginTop: "100px",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontFamily: "'Ubuntu Condensed', sans-serif",
+                      height: "100px",
+                      width: "300px",
+                      color: "white",
+                      background: "#0d0d0d",
+                      boxShadow: "0px 0px 5px #232323",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    variant={"h6"}
+                    textAlign={"center"}
+                  >
+                    No loans yet
+                  </Typography>{" "}
+                </Box>
+              )}
               {
                 // loop through an array of length nonce and idx in reverse
                 new Array(loanNonce).fill(0).map((val, idx) => (

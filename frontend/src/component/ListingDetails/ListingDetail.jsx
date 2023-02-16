@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { cutAddress, makeQuery, makeTransaction } from "../../commons";
 import CreateOffer from "./CreateOffer";
 import Offers from "./Offers";
@@ -408,12 +408,14 @@ export default function ListingDetail(props) {
               >
                 Owner Address :{" "}
               </Typography>
-              <Typography
-                variant="h6"
-                sx={{ marginTop: "5px", textShadow: "0px 2px 3px white" }}
-              >
-                {cutAddress(listingDetails.creatorAddress, 10, 11)}
-              </Typography>
+              <Link to={"/profile/" + listingDetails.creatorAddress} style={{color: "white"}}>
+                <Typography
+                  variant="h6"
+                  sx={{ marginTop: "5px", textShadow: "0px 2px 3px white" }}
+                >
+                  {cutAddress(listingDetails.creatorAddress, 10, 11)}
+                </Typography>
+              </Link>
             </Box>
             <Box className="detailBoxRight">
               <Box
@@ -585,15 +587,17 @@ export default function ListingDetail(props) {
               getLoanStats={() => getLoanStats()}
             />
           )}
-          <CreateOffer
-            listingDetails={listingDetails}
-            loanStats={loanStats}
-            id={id}
-            activeAccount={props.activeAccount}
-            contracts={props.contracts}
-            api={props.api}
-            signer={props.signer}
-          />
+          {props.activeAccount.address !== listingDetails.creatorAddress && (
+            <CreateOffer
+              listingDetails={listingDetails}
+              loanStats={loanStats}
+              id={id}
+              activeAccount={props.activeAccount}
+              contracts={props.contracts}
+              api={props.api}
+              signer={props.signer}
+            />
+          )}
           <Offers
             listingDetails={listingDetails}
             loanStats={loanStats}

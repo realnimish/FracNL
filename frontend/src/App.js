@@ -118,8 +118,30 @@ function App() {
               />
             }
           />
-          <Route exact path="/fractionalise" element={<Fractionalise />} />
-          <Route exact path="/profile/:address" element={<Profile />} />
+          <Route
+            exact
+            path="/fractionalise"
+            element={
+              <Fractionalise
+                activeAccount={activeAccount}
+                contracts={contracts}
+                api={api}
+                signer={signer}
+              />
+            }
+          />
+          <Route
+            exact
+            path="/profile/:address"
+            element={
+              <Profile
+                activeAccount={activeAccount}
+                contracts={contracts}
+                api={api}
+                signer={signer}
+              />
+            }
+          />
           <Route
             exact
             path="/listing/:id"
