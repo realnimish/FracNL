@@ -555,6 +555,18 @@ mod nft_lending {
         }
 
         #[ink(message)]
+        pub fn get_all_loans(&self) -> Vec<(LoanId, LoanMetadata, LoanStats)> {
+            (1..=self.loan_nonce)
+                .into_iter()
+                .map(|loan_id| {
+                    let loan_metadata = self.ref_get_loan_metadata(&loan_id).expect("Infallible");
+                    let loan_stats = self.ref_get_loan_stats(&loan_id).expect("Infallible");
+                    (loan_id, loan_metadata, loan_stats)
+                })
+                .collect()
+        }
+
+        #[ink(message)]
         pub fn get_all_offers(&self, loan_id: LoanId) -> Vec<(OfferId, OfferMetadata)> {
             let offer_nonce = self.get_offer_nonce_or_default(&loan_id);
             (0..offer_nonce)
@@ -704,6 +716,40 @@ mod nft_lending {
         #[ink(message)]
         pub fn get_credit_score(&self, account: AccountId) -> CreditScore {
             self.get_credit_score_or_default(&account)
+        }
+
+        /// [total_raised, total_lended, total_interest]
+        #[ink(message)]
+        pub fn get_user_stats(&self, account: AccountId) -> (Balance, Balance, Balance) {
+            let mut total_raised = 0;
+            let mut total_lended = 0;
+            let mut total_interest = 0;
+
+            (1..=self.loan_nonce).into_iter().for_each(|loan_id| {
+                let loan_stats = self.ref_get_loan_stats(&loan_id).expect("Infallible");
+
+                if loan_stats.loan_status == LoanStatus::ACTIVE
+                    || loan_stats.loan_status == LoanStatus::CLOSED
+                {
+                    let loan_metadata = self.ref_get_loan_metadata(&loan_id).expect("Infallible");
+
+                    if loan_metadata.borrower == account {
+                        total_raised += loan_stats.raised;
+                    }
+
+                    if let Ok(offer_id) = self.ref_get_active_offer_id(&loan_id, &account) {
+                        let offer = self
+                            .ref_get_offer_details(&loan_id, &offer_id)
+                            .expect("Infallible");
+                        total_lended += offer.amount;
+                        total_interest += self
+                            .get_lenders_settlement(loan_id, offer_id)
+                            .unwrap_or_default()
+                            .0;
+                    }
+                }
+            });
+            (total_raised, total_lended, total_interest)
         }
 
         // HELPER FUNCTIONS
