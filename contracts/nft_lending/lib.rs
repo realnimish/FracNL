@@ -920,8 +920,7 @@ mod nft_lending {
             let interest_repaid = loan_stats.repaid - principal_repaid;
 
             // Include security-deposit incase complete principle in not repaid by the borrower
-            let mut principal_repaid =
-                principal_repaid - interest_repaid + loan_metadata.security_deposit;
+            let mut principal_repaid = principal_repaid + loan_metadata.security_deposit;
             if loan_stats.raised < principal_repaid {
                 principal_repaid = loan_stats.raised;
             }
