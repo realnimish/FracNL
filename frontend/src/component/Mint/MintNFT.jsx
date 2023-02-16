@@ -10,8 +10,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import * as React from "react";
 import { useSnackbar } from "notistack";
 import { makeTransaction } from "../../commons";
-import CircularProgress from '@mui/material/CircularProgress';
-
+import CircularProgress from "@mui/material/CircularProgress";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -28,7 +27,7 @@ export default function MintNFT(props) {
     token:
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweEI5MzJjM2FmOWE4QUI1NzlFOEI1NUZBNjNEYUVmZjQ4MDliM0I4NmUiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2NzU3NjU4NjA1MDIsIm5hbWUiOiJoYWNrYXRob24ifQ.uwT-Wz-HsXrOK-Q_bpa07jbe_BF_Wbv5uP-sJU26Cp4",
   });
-  //const { mutateAsync: upload } = useStorageUpload();
+
   const [file, setFile] = useState(null);
 
   const handleClick = () => {
@@ -56,6 +55,7 @@ export default function MintNFT(props) {
   );
 
   const uploadToIpfs = async () => {
+    console.log("Upload Called");
     const rootCid = await client.put(file.files, {
       name: "nft image",
       maxRetries: 3,
@@ -78,11 +78,17 @@ export default function MintNFT(props) {
           "mint",
           props.signer,
           0,
-          [CID+"/"+selectedImage.name],
-          () => {
-            enqueueSnackbar("Transaction Finalized", {
-              variant: "success",
-            });
+          [CID + "/" + selectedImage.name],
+          (val) => {
+            enqueueSnackbar(
+              "Transaction Finalized: Token Id : " +
+                val.contractEvents[0].args[2].toHuman() +
+                " minted",
+              {
+                variant: "success",
+              }
+            );
+            console.log(val.contractEvents[0].args[2].toHuman());
           },
           () => {
             enqueueSnackbar("Transaction Submitted", {
@@ -90,12 +96,13 @@ export default function MintNFT(props) {
             });
             setCID("");
             setUploadImageClicked(false);
+            setImageUrl(null);
           }
         ).catch((err) => {
           enqueueSnackbar("" + err, { variant: "error" });
         });
-      } catch(err) {
-        enqueueSnackbar(err, { variant: "error" });        
+      } catch (err) {
+        enqueueSnackbar(err, { variant: "error" });
       }
     } else {
       console.log("Nothing to mint: CID is empty!!");
@@ -182,6 +189,7 @@ export default function MintNFT(props) {
               id="UploadImage"
               style={{ display: "none" }}
               onChange={(e) => {
+                setCID("");
                 setSelectedImage(e.target.files[0]);
                 setFile(document.querySelector('input[type="file"]'));
                 setUploadImageClicked(true);
@@ -194,7 +202,9 @@ export default function MintNFT(props) {
             style={{
               fontFamily: "'Ubuntu Condensed', sans-serif",
             }}
-            onClick={(e) => {mintNFT();}}
+            onClick={(e) => {
+              mintNFT();
+            }}
           >
             Mint NFT
           </div>
@@ -233,14 +243,14 @@ export default function MintNFT(props) {
       )}
       {CID === "" && uploadImageClicked && (
         <Box
-         component="div"
-         sx={{
-          margin: "50px 0",
-          display: "flex",
-          justifyContent: "center",
-          flexDirection: "column",
-          alignItems: "center",
-         }}
+          component="div"
+          sx={{
+            margin: "50px 0",
+            display: "flex",
+            justifyContent: "center",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
         >
           <CircularProgress />
         </Box>
@@ -249,7 +259,7 @@ export default function MintNFT(props) {
         open={open}
         autoHideDuration={6000}
         onClose={handleClose}
-        anchorOrigin={{vertical: "bottom", horizontal: "right"}}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
         <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
           Image succesfully uploaded to IPFS!

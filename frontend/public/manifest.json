@@ -1,9 +1,9 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "FracNL",
+  "name": "FracNL",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "fracNL.gif",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },

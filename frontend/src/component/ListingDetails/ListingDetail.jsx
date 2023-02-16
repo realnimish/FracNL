@@ -52,33 +52,7 @@ export default function ListingDetail(props) {
 
   const [score, setScore] = useState(0);
 
-  const [offers, setOffers] = useState([
-    {
-      lenderAddress: "5EZb1KFFkvZC2HiJrPj81TuUg1hEwQ1FMS2D5t8XrR4dYnbz",
-      amount: "500 ETH",
-      interest: "50% APY",
-    },
-    {
-      lenderAddress: "5EZb1KFFkvZC2HiJrPj81TuUg1hEwQ1FMS2D5t8XrR4dYnbz",
-      amount: "500 ETH",
-      interest: "50% APY",
-    },
-    {
-      lenderAddress: "5EZb1KFFkvZC2HiJrPj81TuUg1hEwQ1FMS2D5t8XrR4dYnbz",
-      amount: "500 ETH",
-      interest: "50% APY",
-    },
-    {
-      lenderAddress: "5EZb1KFFkvZC2HiJrPj81TuUg1hEwQ1FMS2D5t8XrR4dYnbz",
-      amount: "500 ETH",
-      interest: "50% APY",
-    },
-    {
-      lenderAddress: "5EZb1KFFkvZC2HiJrPj81TuUg1hEwQ1FMS2D5t8XrR4dYnbz",
-      amount: "500 ETH",
-      interest: "50% APY",
-    },
-  ]);
+  
 
   const getLoanMetadata = async () => {
     if (!id) return;
@@ -574,8 +548,7 @@ export default function ListingDetail(props) {
                     Start Loan
                   </div>
                 )}
-                {(loanStats.loanStatus == loanStatus.active ||
-                  loanStats.loanStatus == loanStatus.open) && listingDetails.creatorAddress === props.activeAccount.address && (
+                {(loanStats.loanStatus == loanStatus.open) && (
                     <div
                       className="btn btn-red"
                       tabIndex={1}
@@ -585,13 +558,13 @@ export default function ListingDetail(props) {
                       Cancel Loan
                     </div>
                   )}
-                {loanStats.loanStatus == loanStatus.active &&
+                {(loanStats.loanStatus == loanStatus.active &&
                   loanStats.startTimestamp &&
                   (
                     loanStats.startTimestamp +
                       86400000 * listingDetails.duration <
                     Date.now()
-                  )(
+                  )) && (
                     <div
                       className="btn btn-red"
                       tabIndex={1}
@@ -627,7 +600,6 @@ export default function ListingDetail(props) {
           <Offers
             listingDetails={listingDetails}
             loanStats={loanStats}
-            offers={offers}
             activeAccount={props.activeAccount}
             contracts={props.contracts}
             api={props.api}
