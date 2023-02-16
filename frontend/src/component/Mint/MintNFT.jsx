@@ -8,6 +8,10 @@ import MuiAlert from "@mui/material/Alert";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import * as React from "react";
+import { useSnackbar } from "notistack";
+import { makeTransaction } from "../../commons";
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -18,6 +22,8 @@ export default function MintNFT(props) {
   const [imageUrl, setImageUrl] = useState(null);
   const [CID, setCID] = useState("");
   const [open, setOpen] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
+  const [uploadImageClicked, setUploadImageClicked] = useState(false);
   const client = new Web3Storage({
     token:
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweEI5MzJjM2FmOWE4QUI1NzlFOEI1NUZBNjNEYUVmZjQ4MDliM0I4NmUiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2NzU3NjU4NjA1MDIsIm5hbWUiOiJoYWNrYXRob24ifQ.uwT-Wz-HsXrOK-Q_bpa07jbe_BF_Wbv5uP-sJU26Cp4",
@@ -55,8 +61,46 @@ export default function MintNFT(props) {
       maxRetries: 3,
     });
     setCID(rootCid);
+    setUploadImageClicked(false);
     console.log("CID of uploaded file", rootCid);
     handleClick();
+  };
+
+  const mintNFT = async () => {
+    console.log("Calling to mint NFT");
+    if (CID !== "") {
+      try {
+        await makeTransaction(
+          props.api,
+          props.contracts,
+          props.activeAccount,
+          "erc721",
+          "mint",
+          props.signer,
+          0,
+          [CID+"/"+selectedImage.name],
+          () => {
+            enqueueSnackbar("Transaction Finalized", {
+              variant: "success",
+            });
+          },
+          () => {
+            enqueueSnackbar("Transaction Submitted", {
+              variant: "info",
+            });
+            setCID("");
+            setUploadImageClicked(false);
+          }
+        ).catch((err) => {
+          enqueueSnackbar("" + err, { variant: "error" });
+        });
+      } catch(err) {
+        enqueueSnackbar(err, { variant: "error" });        
+      }
+    } else {
+      console.log("Nothing to mint: CID is empty!!");
+      enqueueSnackbar("CID Empty", { variant: "error" });
+    }
   };
 
   useEffect(() => {
@@ -140,6 +184,7 @@ export default function MintNFT(props) {
               onChange={(e) => {
                 setSelectedImage(e.target.files[0]);
                 setFile(document.querySelector('input[type="file"]'));
+                setUploadImageClicked(true);
               }}
             />
           </div>
@@ -149,6 +194,7 @@ export default function MintNFT(props) {
             style={{
               fontFamily: "'Ubuntu Condensed', sans-serif",
             }}
+            onClick={(e) => {mintNFT();}}
           >
             Mint NFT
           </div>
@@ -183,6 +229,20 @@ export default function MintNFT(props) {
             {"Image uploaded to IPFS with CID: "}
           </Typography>
           <Typography sx={{ fontSize: "12px" }}>{CID}</Typography>
+        </Box>
+      )}
+      {CID === "" && uploadImageClicked && (
+        <Box
+         component="div"
+         sx={{
+          margin: "50px 0",
+          display: "flex",
+          justifyContent: "center",
+          flexDirection: "column",
+          alignItems: "center",
+         }}
+        >
+          <CircularProgress />
         </Box>
       )}
       <Snackbar

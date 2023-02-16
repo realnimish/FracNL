@@ -1,8 +1,12 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Snackbar, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
 import TextField from "@mui/material/TextField";
+import { useSnackbar } from "notistack";
 
 export default function Fractionalise(props) {
+  const { enqueueSnackbar } = useSnackbar();
+  const [tokenList, setTokensList] = useState([]);
+  const [selectedToken, setSelectedToken] = useState(null);
   useEffect(() => {
     const tabs = document.querySelector(".tabs");
     const tabButton = document.querySelectorAll(".navTab");
