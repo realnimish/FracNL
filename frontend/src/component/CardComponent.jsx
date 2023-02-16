@@ -45,7 +45,7 @@ export default function Card(props) {
       </Box>
     );
   };
-  console.log("Sttaus",props.status)
+  console.log("Sttaus",props.link)
 
   return (
     <Link to={props.link}           style={{ color: "white" }}

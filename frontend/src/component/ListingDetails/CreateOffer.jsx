@@ -362,7 +362,7 @@ export default function CreateOffer(props) {
                 variant="body2"
                 sx={{ marginTop: "20px", color: "gray" }}
               >
-                {"Expected Amount(current):"}
+                {"Expected Return(current):"}
               </Typography>
               <Typography variant="body1" sx={{ marginTop: "5px" }}>
                 {parseInt(settlement.returned / 1000_000) / 1000_000 + " TZERO"}

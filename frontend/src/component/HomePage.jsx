@@ -70,7 +70,7 @@ export default function Homepage(props) {
         }
       ).catch((err) => {
         console.log("getLoanNonce", err);
-      })
+      });
     } catch (err) {
       console.log("getLoanNonce", err);
     }
@@ -80,50 +80,84 @@ export default function Homepage(props) {
     getLoanNonce();
     const interval = setInterval(() => getLoanNonce(), 20000);
     return () => clearInterval(interval);
-  }, [props.activeAccount])
+  }, [props.activeAccount]);
 
   return (
     <Box sx={{ padding: "80px 0px", minHeight: "100%", height: "fit-content" }}>
-      <Banner />
-      <Box
-        sx={{
-          margin: "80px 0",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: "0 80px",
-        }}
-      >
-        <Typography
-          className="title"
+      {!props.activeAccount ? (
+        <Box
           sx={{
-            fontFamily: "'Ubuntu Condensed', sans-serif",
-            letterSpacing: "1.5px",
-            marginBottom: "90px",
+            marginTop: "200px",
+            width: "100%",
+            display: "flex",
+            justifyContent: "center"
           }}
-          variant="h4"
         >
-          Listings
-        </Typography>
-        <Box sx={{ display: "flex", flexWrap: "wrap" }}>
-          {// loop through an array of length nonce and idx in reverse
-            new Array(loanNonce).fill(0).map((val, idx) => 
-            <BoxComponent 
-              idx={idx} 
-              loanNonce={loanNonce} 
-              activeAccount={props.activeAccount}
-              contracts={props.contracts}
-              api={props.api}
-              signer={props.signer} />)
-          }
+          <Typography
+            sx={{
+              fontFamily: "'Ubuntu Condensed', sans-serif",
+              height: "100px",
+              width: "300px",
+              color: "white",
+              background: "#0d0d0d",
+              boxShadow: "0px 0px 5px #232323",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            variant={"h6"}
+            textAlign={"center"}
+          >
+            Connect your wallet
+          </Typography>{" "}
         </Box>
-      </Box>
+      ) : (
+        <>
+          <Banner />
+
+          <Box
+            sx={{
+              margin: "80px 0",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              padding: "0 80px",
+            }}
+          >
+            <Typography
+              className="title"
+              sx={{
+                fontFamily: "'Ubuntu Condensed', sans-serif",
+                letterSpacing: "1.5px",
+                marginBottom: "90px",
+              }}
+              variant="h4"
+            >
+              Listings
+            </Typography>
+            <Box sx={{ display: "flex", flexWrap: "wrap" }}>
+              {
+                // loop through an array of length nonce and idx in reverse
+                new Array(loanNonce).fill(0).map((val, idx) => (
+                  <BoxComponent
+                    idx={idx}
+                    loanNonce={loanNonce}
+                    activeAccount={props.activeAccount}
+                    contracts={props.contracts}
+                    api={props.api}
+                    signer={props.signer}
+                  />
+                ))
+              }
+            </Box>
+          </Box>
+        </>
+      )}
     </Box>
   );
 }
 
 const BoxComponent = (props) => {
-
   let loanId = props.loanNonce - props.idx;
   const [tokenUri, setTokenUri] = useState("");
   const [loanMetadata, setLoanMetadata] = useState({
@@ -147,18 +181,18 @@ const BoxComponent = (props) => {
   };
 
   const getStatus = () => {
-    if(loanStats) {
+    if (loanStats) {
       if (loanStats == loanStatus.cancelled) {
         setStatus("CANCELLED");
       } else if (loanStats == loanStatus.closed) {
         setStatus("CLOSED");
       } else if (loanStats == loanStatus.active) {
         setStatus("ACTIVE");
-      } else  {
+      } else {
         setStatus("OPEN");
       }
-    } 
-  }
+    }
+  };
 
   // Fetch function here
   const getTokenURI = async () => {
@@ -200,9 +234,15 @@ const BoxComponent = (props) => {
           setLoanMetadata({
             borrower: data.borrower,
             tokenId: data.tokenId,
-            sharesLocked: parseInt(data.sharesLocked.replace(/,/g, "") / 1000_000),
-            amountAsked: parseInt(data.amountAsked.replace(/,/g, "") / 1000_000) / 1000_000,
-            securityDeposit: parseInt(data.securityDeposit.replace(/,/g, "") / 1000_000) / 1000_000,
+            sharesLocked: parseInt(
+              data.sharesLocked.replace(/,/g, "") / 1000_000
+            ),
+            amountAsked:
+              parseInt(data.amountAsked.replace(/,/g, "") / 1000_000) /
+              1000_000,
+            securityDeposit:
+              parseInt(data.securityDeposit.replace(/,/g, "") / 1000_000) /
+              1000_000,
             loanPeriod: parseInt(data.loanPeriod.replace(/,/g, "") / 86400000),
             listingTimestamp: new Date(
               parseInt(data.listingTimestamp.replace(/,/g, ""))
@@ -252,20 +292,19 @@ const BoxComponent = (props) => {
 
   useEffect(() => {
     getStatus();
-  }, [loanStats])
+  }, [loanStats]);
 
   return (
     <Box sx={{ margin: "0 20px 60px 20px" }} key={props.idx}>
       <Card
         creatorAddress={loanMetadata.borrower}
-        image={"https://ipfs.io/ipfs/" + tokenUri }
+        image={"https://ipfs.io/ipfs/" + tokenUri}
         askValue={loanMetadata.amountAsked + " TZERO"}
         duration={loanMetadata.loanPeriod + " Day(s)"}
         fraction={loanMetadata.sharesLocked / 1000_000 + "%"}
         status={status}
-        link={"/listing/"+props.loanId}
+        link={"/listing/" + loanId}
       />
     </Box>
   );
-
-}
+};

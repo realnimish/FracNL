@@ -6,8 +6,9 @@ import {
   Menu,
   MenuItem,
   SwipeableDrawer,
+  Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../index.js";
 import Logo from "./Logo.jsx";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
@@ -19,9 +20,10 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ChooseAccount from "./ChooseAccount.jsx";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-
+import BN from "bn.js";
 function ConnectButton(props) {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [balance, setBalance] = useState(0);
   const openMenu = Boolean(anchorEl);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -29,6 +31,19 @@ function ConnectButton(props) {
   const handleClose = () => {
     setAnchorEl(null);
   };
+  useEffect(() => {
+    const getBalance = async () => {
+      if (props.activeAccount && props.api) {
+        const { data: balance } = await props.api.query.system.account(
+          props.activeAccount.address
+        );
+        setBalance(parseInt(balance.free / 1000_000_000_000));
+      }
+    };
+    getBalance();
+    const id = setInterval(() => getBalance(), 5000);
+    return () => clearInterval(id);
+  }, [props.activeAccount]);
   return (
     <>
       <Box
@@ -97,7 +112,14 @@ function ConnectButton(props) {
             value={props.activeAccount?.address}
           />
         </Box>
-        {cutAddress(props.activeAccount?.address)}
+        <Box>
+          <Typography sx={{ fontSize: "13px" }}>
+            {cutAddress(props.activeAccount?.address)}
+          </Typography>
+          <Typography sx={{ fontSize: "10px", color: "gray" }}>
+            {"Bal: " + balance + " TZERO"}
+          </Typography>
+        </Box>
         {!openMenu ? (
           <KeyboardArrowDownIcon sx={{ marginLeft: "10px" }} />
         ) : (
@@ -231,6 +253,7 @@ export default function NavBar(props) {
           handleOpen={() => handleChooseAccOpen()}
           setActiveAccount={(acc) => props.setActiveAccount(acc)}
           activeAccount={props.activeAccount}
+          api={props.api}
         />
       </Box>
       <Box
@@ -334,6 +357,7 @@ export default function NavBar(props) {
             activeAccount={props.activeAccount}
             handleOpen={() => handleChooseAccOpen()}
             setActiveAccount={(acc) => props.setActiveAccount(acc)}
+            api={props.api}
           />
         </Box>
       </Drawer>

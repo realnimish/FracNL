@@ -1,10 +1,11 @@
 import { Box, Divider, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
-import { useState } from "react";
-import { makeTransaction } from "../../commons";
+import { useEffect, useState } from "react";
+import { makeQuery, makeTransaction } from "../../commons";
 import BN from "bn.js";
 export default function Repay(props) {
   const [amount, setAmount] = useState(null);
+  const [settlement, setSettlement] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
 
   const handleAmountChange = (e) => {
@@ -38,6 +39,33 @@ export default function Repay(props) {
       enqueueSnackbar(err, { variant: "error" });
     }
   };
+  const getBorrowersSettlement = async () => {
+    if (!props.id ) return;
+    try {
+      await makeQuery(
+        props.api,
+        props.contracts,
+        props.activeAccount,
+        "nftLending",
+        "getBorrowersSettlement",
+        0,
+        [props.id],
+        (val) => {
+          console.log("Borrower Settlement : ", val);
+          let data = val.Ok.Ok;
+          setSettlement(parseInt(data.replace(/,/g, "")/1000_000));
+        }
+      ).catch((err) => {
+        console.log("Borrower settlement : ", err);
+      });
+    } catch (err) {
+      console.log("Borrower settlement : ", err);
+    }
+  };
+
+  useEffect(() => {
+    getBorrowersSettlement();
+  },[props.id]);
 
   return (
     <Box className="repay">
@@ -84,7 +112,7 @@ export default function Repay(props) {
               Total Interest Amount:
             </Typography>
             <Typography variant="body1" sx={{ marginTop: "5px" }}>
-              {"500 ETH"}
+              {props.loanStats.interest + " TZERO"}
             </Typography>
           </Box>
           <Box
@@ -98,7 +126,7 @@ export default function Repay(props) {
               Interest paid:
             </Typography>
             <Typography variant="body1" sx={{ marginTop: "5px" }}>
-              {"500 ETH"}
+              {Math.min(props.loanStats.repaid, props.loanStats.interest) + " TZERO"}
             </Typography>
           </Box>
           <Box
@@ -109,10 +137,10 @@ export default function Repay(props) {
               variant="body2"
               sx={{ marginTop: "20px", color: "gray" }}
             >
-              Principal Amount paid:
+              Amount Raised:
             </Typography>
             <Typography variant="body1" sx={{ marginTop: "5px" }}>
-              {"500 ETH"}
+              {props.loanStats.raised + " TZERO"}
             </Typography>
           </Box>
           <Box
@@ -123,10 +151,10 @@ export default function Repay(props) {
               variant="body2"
               sx={{ marginTop: "20px", color: "gray" }}
             >
-              Fraction Release:
+              Principal Amount Repaid:
             </Typography>
             <Typography variant="body1" sx={{ marginTop: "5px" }}>
-              {"11%"}
+              {Math.min(props.loanStats.raised,props.loanStats.repaid - Math.min(props.loanStats.repaid, props.loanStats.interest)) + " TZERO"}
             </Typography>
           </Box>
           <Box
@@ -137,10 +165,24 @@ export default function Repay(props) {
               variant="body2"
               sx={{ marginTop: "20px", color: "gray" }}
             >
-              Security Deposit Release:
+              Fraction Release(current):
             </Typography>
             <Typography variant="body1" sx={{ marginTop: "5px" }}>
-              {"Not release"}
+              {settlement/1000_000 + "%"}
+            </Typography>
+          </Box>
+          <Box
+            sx={{ width: "200px", height: "fit-content" }}
+            className="detailItem"
+          >
+            <Typography
+              variant="body2"
+              sx={{ marginTop: "20px", color: "gray" }}
+            >
+              Security Deposit Refund:
+            </Typography>
+            <Typography variant="body1" sx={{ marginTop: "5px" }}>
+              {(props.loanStats.loanStatus === "CANCELLED" ? props.listingDetails.securityDeposit: "0") + " TZERO"}
             </Typography>
           </Box>
         </Box>

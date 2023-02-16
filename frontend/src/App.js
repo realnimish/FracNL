@@ -77,6 +77,9 @@ function App() {
         <NavBar
           activeAccount={activeAccount}
           setActiveAccount={(acc) => setActiveAccount(acc)}
+          contracts={contracts}
+          api={api}
+          signer={signer}
         />
         <Routes>
           <Route
