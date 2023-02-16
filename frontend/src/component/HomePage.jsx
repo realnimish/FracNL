@@ -78,6 +78,7 @@ export default function Homepage(props) {
 
   useEffect(() => {
     getLoanNonce();
+    getLoanNonce();
     const interval = setInterval(() => getLoanNonce(), 20000);
     return () => clearInterval(interval);
   }, [props.activeAccount]);

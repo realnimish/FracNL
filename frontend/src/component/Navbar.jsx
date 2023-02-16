@@ -174,16 +174,12 @@ function ConnectButton(props) {
 export default function NavBar(props) {
   const location = useLocation();
   const navItems = [
-    { text: "Home", link: "/" },
+    { text: "Home", link: "/", exact: true },
     { text: "Fractionalise", link: "/fractionalise" },
     { text: "Mint", link: "/mint" },
     { text: "Create an Ad", link: "/list" },
   ];
-  const [activeTab, setActiveTab] = useState(
-    navItems.filter((item) => {
-      return location.pathname === item.link;
-    })[0]?.text
-  );
+  const [activeTab, setActiveTab] = useState("");
   const [openDrawer, setOpenDrawer] = useState(false);
   const [openChooseAccount, setOpenChooseAccount] = useState(false);
   const setSelectedAccount = (acc) => {
@@ -205,6 +201,20 @@ export default function NavBar(props) {
   const toggleDrawer = () => {
     setOpenDrawer(!openDrawer);
   };
+
+  useEffect(() => {
+    let match = navItems.filter((item) => {
+      return location.pathname === item.link;
+    })[0]?.text;
+    setActiveTab(match);
+    console.log(navItems.filter((item) => {
+      return location.pathname === item.link ;
+    }))
+    console.log("Match" , navItems.filter((item) => {
+      return location.pathname === item.link;
+    }));
+  }, [location.pathname]);
+
   return (
     <AppBar
       component="nav"

@@ -20,7 +20,6 @@ export default function CarouselComponent(props) {
         break;
       }
     }
-    console.log("targetEl", targetEl);
     targetEl = targetEl.getElementsByClassName("carouselBodyContainer")[0];
     targetEl.scroll({ left: targetEl.scrollLeft + val, behavior: "smooth" });
   };
@@ -85,15 +84,18 @@ export default function CarouselComponent(props) {
       >
         {props.items?.map((item, idx) => (
           <Box sx={{ margin: "0 40px" }} key={idx}>
-            <Card
-              creatorAddress={item.createAddress}
-              image={item.image}
-              askValue={item.askValue}
-              duration={item.duration}
-              fraction={item.fraction}
-              status={item.status}
-              key={idx}
-            />
+            {props.isLoan && (
+              <Card
+                creatorAddress={item.createAddress}
+                image={item.image}
+                askValue={item.askValue}
+                duration={item.duration}
+                fraction={item.fraction}
+                status={"CANCELLED"}
+                key={idx}
+                link={"/listing/" }
+              />
+            )}
           </Box>
         ))}
       </Box>

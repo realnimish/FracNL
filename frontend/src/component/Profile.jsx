@@ -28,6 +28,11 @@ export default function Profile(props) {
     setOpen(true);
   };
 
+  // all loans
+  // stats
+  // tokens
+  // frac tokens
+
   const items = [
     {
       createAddress: "5Gs5gfzHkBsRt97qgmvBW2qX6M7FPXP8cJkAj7T7kNFbGVvG",
@@ -239,7 +244,7 @@ export default function Profile(props) {
         </Box>
       </Box>
       <Box>
-        <CarouselComponent items={items} title={"Created Ads"} />
+        <CarouselComponent items={items} title={"Created Ads"} isLoan={true}/>
       </Box>
     </Box>
   );

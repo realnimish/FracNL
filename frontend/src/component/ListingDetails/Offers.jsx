@@ -62,7 +62,7 @@ export default function Offers(props) {
   };
 
   const respondToOffer = async (loanId, offerId, response) => {
-    if (!loanId || !offerId ) return;
+    if (!loanId || !offerId) return;
     try {
       await makeTransaction(
         props.api,
@@ -92,6 +92,8 @@ export default function Offers(props) {
 
   useEffect(() => {
     getAllOffers();
+    const interval = setInterval(() => getAllOffers(), 20000);
+    return () => clearInterval(interval);
   }, [props.id, props.activeAccount]);
   console.log(props.loanStats);
 
@@ -158,7 +160,6 @@ const OfferRow = (props) => {
   });
   const getLendersSettlement = async () => {
     if (!props.id && !props.offer.offerId) return;
-    console.log(props.id, props.offer.offerId);
     try {
       await makeQuery(
         props.api,
@@ -187,8 +188,6 @@ const OfferRow = (props) => {
   useEffect(() => {
     getLendersSettlement();
   }, [props.id, props.offer.offerId]);
-
-  console.log("Details: ", props);
 
   return (
     <>
@@ -275,28 +274,42 @@ const OfferRow = (props) => {
                 className="returns"
                 sx={{ fontFamily: "'Courgette', cursive" }}
               >
-                {parseInt(settlement.returned / 1000_000) / 1000_000 +
+                {parseInt(settlement.returned / 1000_000_000) / 1000 +
                   " TZERO " +
-                  settlement.nftHolding !==
-                0
-                  ? settlement.nftHolding
-                  : ""}
+                  (settlement.nftHolding !== 0
+                    ? "  &  " + settlement.nftHolding + "%"
+                    : "")}
               </Typography>
             </Box>
-          ) : (props.loanStats.loanStatus === "OPEN" &&
+          ) : props.loanStats.loanStatus === "OPEN" &&
             props.offer.status.text === "PENDING" &&
             props.listingDetails.creatorAddress ===
-              props.activeAccount.address )? (
+              props.activeAccount.address ? (
             <>
-              <Box className="offerAcceptBtn" tabIndex={1} onClick={() => props.respondToOffer(props.id, props.offer.offerId, true)}>
+              <Box
+                className="offerAcceptBtn"
+                tabIndex={1}
+                onClick={() =>
+                  props.respondToOffer(props.id, props.offer.offerId, true)
+                }
+              >
                 <DoneIcon className="greenColor" />
               </Box>
-              <Box className="offerRejectBtn" tabIndex={1} onClick={() => props.respondToOffer(props.id, props.offer.offerId, false)}>
+              <Box
+                className="offerRejectBtn"
+                tabIndex={1}
+                onClick={() =>
+                  props.respondToOffer(props.id, props.offer.offerId, false)
+                }
+              >
                 <CloseIcon className="redColor" />
               </Box>
             </>
           ) : (
-            <Typography variant="body1" sx={{ color: props.offer.status.color }} >
+            <Typography
+              variant="body1"
+              sx={{ color: props.offer.status.color }}
+            >
               {props.offer.status.text}
             </Typography>
           )}

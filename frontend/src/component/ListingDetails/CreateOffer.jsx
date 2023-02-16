@@ -162,7 +162,7 @@ export default function CreateOffer(props) {
           let data = val.Ok.Ok;
           setSettlement({
             returned: parseInt(data[0].replace(/,/g, "")),
-            nftHolding: data[1].replace(/,/g, "") / 1000_000_000_000,
+            nftHolding: parseInt(data[1].replace(/,/g, "") / 1000_000) / 1000_000,
           });
         }
       ).catch((err) => {
@@ -182,16 +182,16 @@ export default function CreateOffer(props) {
     getOfferDetails();
   }, [offerId]);
 
-  useEffect(() => {
-    if (offerDetails.amount !== "0" && offerDetails.interest !== "0") {
-      setAmount(parseInt(offerDetails.amount / 1000_000) / 1000_000);
-      setInterest(
-        (parseFloat(offerDetails.interest / 1000_000) /
-          parseFloat(offerDetails.amount / 1000_000)) *
-          100
-      );
-    }
-  }, [offerDetails]);
+  // useEffect(() => {
+  //   if (offerDetails.amount !== "0" && offerDetails.interest !== "0") {
+  //     setAmount(parseInt(offerDetails.amount / 1000_000) / 1000_000);
+  //     setInterest(
+  //       (parseFloat(offerDetails.interest / 1000_000) /
+  //         parseFloat(offerDetails.amount / 1000_000)) *
+  //         100
+  //     );
+  //   }
+  // }, [offerDetails]);
 
   return (
     <Box className="createOffer">

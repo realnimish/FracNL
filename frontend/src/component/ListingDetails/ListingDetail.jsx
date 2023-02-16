@@ -52,8 +52,6 @@ export default function ListingDetail(props) {
 
   const [score, setScore] = useState(0);
 
-  
-
   const getLoanMetadata = async () => {
     if (!id) return;
     try {
@@ -76,12 +74,11 @@ export default function ListingDetail(props) {
             holding: parseInt(data.sharesLocked.replace(/,/g, "") / 1000_000),
             securityDeposit:
               parseInt(data.securityDeposit.replace(/,/g, "") / 1000_000) /
-                1000_000,
+              1000_000,
             listingDate: new Date(
               parseInt(data.listingTimestamp.replace(/,/g, ""))
             ),
-            duration:
-              parseInt(data.loanPeriod.replace(/,/g, "") / 86400) / 1000,
+            duration: data.loanPeriod.replace(/,/g, "") / 86400 / 1000,
             tokenId: data.tokenId,
           });
         }
@@ -296,7 +293,7 @@ export default function ListingDetail(props) {
       listingDetails.listingDate.getTime() &&
       loanStats.loanStatus
     ) {
-      let duration = listingDetails.duration * 8640000;
+      let duration = listingDetails.duration * 86400000;
       let listingTime = listingDetails.listingDate.getTime();
       let offerPhase = 3600000;
       let coolDownPeriod = 360000;
@@ -318,7 +315,7 @@ export default function ListingDetail(props) {
         now - listingTime > offerPhase &&
         now - listingTime <= offerPhase + coolDownPeriod
       ) {
-        setStatus("CoolDown Phase");
+        setStatus("Cooldown Phase");
         setCountDown(coolDownPeriod - (now - listingTime - offerPhase));
       } else if (
         now - listingTime > offerPhase + coolDownPeriod &&
@@ -331,9 +328,10 @@ export default function ListingDetail(props) {
   };
 
   useEffect(() => {
-    console.log("first useEffect", id, props.activeAccount);
     getLoanMetadata();
     getLoanStats();
+    const interval = setInterval(() => getLoanStats(), 20000);
+    return () => clearInterval(interval);
   }, [id, props.activeAccount]);
 
   useEffect(() => {
@@ -348,9 +346,7 @@ export default function ListingDetail(props) {
       listingDetails.askAmount != 0
     ) {
       setInterestRate(
-        (parseFloat(loanStats.interest) /
-          parseFloat(listingDetails.askAmount)) *
-          100
+        (parseFloat(loanStats.interest) / parseFloat(loanStats.raised)) * 100
       );
     }
   }, [listingDetails.askAmount, loanStats.interest]);
@@ -517,7 +513,7 @@ export default function ListingDetail(props) {
                   Avg Interest Rate :{" "}
                 </Typography>
                 <Typography variant="body1" sx={{ marginTop: "5px" }}>
-                  {interestRate + "%"}
+                  {parseFloat(interestRate).toPrecision(6) + "%"}
                 </Typography>
               </Box>
               <Box
@@ -535,36 +531,36 @@ export default function ListingDetail(props) {
                 </Typography>
               </Box>
               <Box sx={{ width: "100%" }} className="buttonContainer">
-                {loanStats.loanStatus == loanStatus.open && listingDetails.creatorAddress === props.activeAccount.address && (
-                  <div
-                    className="btn btn-green"
-                    tabIndex={1}
-                    style={{
-                      fontFamily: "'Ubuntu Condensed', sans-serif",
-                      marginRight: "40px",
-                    }}
-                    onClick={() => startLoan()}
-                  >
-                    Start Loan
-                  </div>
-                )}
-                {(loanStats.loanStatus == loanStatus.open) && (
+                {loanStats.loanStatus == loanStatus.open &&
+                  listingDetails.creatorAddress ===
+                    props.activeAccount.address && (
                     <div
-                      className="btn btn-red"
+                      className="btn btn-green"
                       tabIndex={1}
-                      style={{ fontFamily: "'Ubuntu Condensed', sans-serif" }}
-                      onClick={() => cancelLoan()}
+                      style={{
+                        fontFamily: "'Ubuntu Condensed', sans-serif",
+                        marginRight: "40px",
+                      }}
+                      onClick={() => startLoan()}
                     >
-                      Cancel Loan
+                      Start Loan
                     </div>
                   )}
-                {(loanStats.loanStatus == loanStatus.active &&
+                {loanStats.loanStatus == loanStatus.open && (
+                  <div
+                    className="btn btn-red"
+                    tabIndex={1}
+                    style={{ fontFamily: "'Ubuntu Condensed', sans-serif" }}
+                    onClick={() => cancelLoan()}
+                  >
+                    Cancel Loan
+                  </div>
+                )}
+                {loanStats.loanStatus == loanStatus.active &&
                   loanStats.startTimestamp &&
-                  (
-                    loanStats.startTimestamp +
-                      86400000 * listingDetails.duration <
-                    Date.now()
-                  )) && (
+                  loanStats.startTimestamp +
+                    86400000 * listingDetails.duration <
+                    Date.now() && (
                     <div
                       className="btn btn-red"
                       tabIndex={1}
@@ -577,17 +573,18 @@ export default function ListingDetail(props) {
               </Box>
             </Box>
           </Box>
-          {["ACTIVE", "CLOSED", "CANCELLED"].includes(loanStats.loanStatus)&& <Repay
-            listingDetails={listingDetails}
-            loanStats={loanStats}
-            id={id}
-            activeAccount={props.activeAccount}
-            contracts={props.contracts}
-            api={props.api}
-            signer={props.signer}
-            getLoanStats={() => getLoanStats()}
-
-          />}
+          {["ACTIVE", "CLOSED", "CANCELLED"].includes(loanStats.loanStatus) && (
+            <Repay
+              listingDetails={listingDetails}
+              loanStats={loanStats}
+              id={id}
+              activeAccount={props.activeAccount}
+              contracts={props.contracts}
+              api={props.api}
+              signer={props.signer}
+              getLoanStats={() => getLoanStats()}
+            />
+          )}
           <CreateOffer
             listingDetails={listingDetails}
             loanStats={loanStats}

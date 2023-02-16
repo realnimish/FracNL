@@ -45,69 +45,67 @@ export default function Card(props) {
       </Box>
     );
   };
-  console.log("Sttaus",props.link)
 
   return (
-    <Link to={props.link}           style={{ color: "white" }}
-    >
-    <Box
-      sx={{
-        height: "500px",
-        width: "300px",
-        padding: "20px",
-        cursor: "pointer",
-        borderRadius: "50px",
-      }}
-      tabIndex={1}
-      className="card"
-    >
+    <Link to={props.link} style={{ color: "white" }}>
       <Box
         sx={{
           height: "500px",
           width: "300px",
-          borderRadius: "50px",
-          position: "absolute",
-          top: "0",
-          right: "0",
           padding: "20px",
+          cursor: "pointer",
+          borderRadius: "50px",
         }}
-        className="cardClone"
-      ></Box>
-      <img
-        src={props.image}
-        style={{ width: "100%", borderRadius: "30px", marginBottom: "15px" }}
-        onError={() => this.src="../assets/placeholder.jpg"}
-      />
-      <TextRow
-        title={"Asker Address :"}
-        value={cutAddress(props.creatorAddress, 7, 6)}
-      />
-      <TextRow title={"Ask Amount :"} value={props.askValue} />
-      <TextRow title={"NFT Fraction :"} value={props.fraction} />
-      <TextRow title={"Duration :"} value={props.duration} />
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "15px 0",
-        }}
+        tabIndex={1}
+        className="card"
       >
-        {props.status && (
-          <>
-            <CircleIcon
-              sx={{ color: loanStatus[props.status].color, fontSize: "18px" }}
-            />
-            <Typography
-              variant="subtitle2"
-              sx={{ width: "fit-content", marginLeft: "10px" }}
-            >
-              {loanStatus[props.status].text}
-            </Typography>
-          </>
-        )}
+        <Box
+          sx={{
+            height: "500px",
+            width: "300px",
+            borderRadius: "50px",
+            position: "absolute",
+            top: "0",
+            right: "0",
+            padding: "20px",
+          }}
+          className="cardClone"
+        ></Box>
+        <img
+          src={props.image}
+          style={{ width: "100%", borderRadius: "30px", marginBottom: "15px" }}
+          onError={() => (this.src = "../assets/placeholder.jpg")}
+        />
+        <TextRow
+          title={"Asker Address :"}
+          value={cutAddress(props.creatorAddress, 7, 6)}
+        />
+        <TextRow title={"Ask Amount :"} value={props.askValue} />
+        <TextRow title={"NFT Fraction :"} value={props.fraction} />
+        <TextRow title={"Duration :"} value={props.duration} />
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: "15px 0",
+          }}
+        >
+          {props.status && (
+            <>
+              <CircleIcon
+                sx={{ color: loanStatus[props.status].color, fontSize: "18px" }}
+              />
+              <Typography
+                variant="subtitle2"
+                sx={{ width: "fit-content", marginLeft: "10px" }}
+              >
+                {loanStatus[props.status].text}
+              </Typography>
+            </>
+          )}
+        </Box>
       </Box>
-    </Box>
     </Link>
   );
 }

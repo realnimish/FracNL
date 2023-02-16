@@ -566,7 +566,7 @@ export default function ListNFT(props) {
                   }}
                   variant={"subtitle1"}
                 >
-                  Give contract access to fractionalise your NFT
+                  Give access to fractionalise your NFT
                 </Typography>
                 <div
                   className={
@@ -717,7 +717,7 @@ export default function ListNFT(props) {
                       }}
                       variant={"subtitle1"}
                     >
-                      Give contract access to operate on your fractionalised NFT
+                      Give access to operate on your fractionalised NFT
                     </Typography>
                     <div
                       className={

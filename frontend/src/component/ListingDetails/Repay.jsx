@@ -40,7 +40,7 @@ export default function Repay(props) {
     }
   };
   const getBorrowersSettlement = async () => {
-    if (!props.id ) return;
+    if (!props.id) return;
     try {
       await makeQuery(
         props.api,
@@ -53,7 +53,7 @@ export default function Repay(props) {
         (val) => {
           console.log("Borrower Settlement : ", val);
           let data = val.Ok.Ok;
-          setSettlement(parseInt(data.replace(/,/g, "")/1000_000));
+          setSettlement(parseInt(data.replace(/,/g, "") / 1000_000));
         }
       ).catch((err) => {
         console.log("Borrower settlement : ", err);
@@ -64,8 +64,10 @@ export default function Repay(props) {
   };
 
   useEffect(() => {
+    const interval = setInterval(() => getBorrowersSettlement(), 20000);
     getBorrowersSettlement();
-  },[props.id]);
+    return () => clearInterval(interval);
+  }, [props.id]);
 
   return (
     <Box className="repay">
@@ -126,7 +128,8 @@ export default function Repay(props) {
               Interest paid:
             </Typography>
             <Typography variant="body1" sx={{ marginTop: "5px" }}>
-              {Math.min(props.loanStats.repaid, props.loanStats.interest) + " TZERO"}
+              {Math.min(props.loanStats.repaid, props.loanStats.interest) +
+                " TZERO"}
             </Typography>
           </Box>
           <Box
@@ -154,7 +157,11 @@ export default function Repay(props) {
               Principal Amount Repaid:
             </Typography>
             <Typography variant="body1" sx={{ marginTop: "5px" }}>
-              {Math.min(props.loanStats.raised,props.loanStats.repaid - Math.min(props.loanStats.repaid, props.loanStats.interest)) + " TZERO"}
+              {Math.min(
+                props.loanStats.raised,
+                props.loanStats.repaid -
+                  Math.min(props.loanStats.repaid, props.loanStats.interest)
+              ) + " TZERO"}
             </Typography>
           </Box>
           <Box
@@ -168,7 +175,7 @@ export default function Repay(props) {
               Fraction Release(current):
             </Typography>
             <Typography variant="body1" sx={{ marginTop: "5px" }}>
-              {settlement/1000_000 + "%"}
+              {settlement / 1000_000 + "%"}
             </Typography>
           </Box>
           <Box
@@ -182,7 +189,9 @@ export default function Repay(props) {
               Security Deposit Refund:
             </Typography>
             <Typography variant="body1" sx={{ marginTop: "5px" }}>
-              {(props.loanStats.loanStatus === "CANCELLED" ? props.listingDetails.securityDeposit: "0") + " TZERO"}
+              {(props.loanStats.loanStatus === "CANCELLED"
+                ? props.listingDetails.securityDeposit
+                : "0") + " TZERO"}
             </Typography>
           </Box>
         </Box>
