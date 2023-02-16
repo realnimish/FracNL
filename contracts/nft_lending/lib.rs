@@ -105,7 +105,6 @@ mod nft_lending {
         loan_nonce: LoanId,
         offer_phase_duration: Time,
         cooldown_phase_duration: Time,
-        time_factor: Time,
 
         credit_score: Mapping<AccountId, CreditScore>,
         loans: Mapping<LoanId, LoanMetadata>,
@@ -148,20 +147,13 @@ mod nft_lending {
             fractionalizer: AccountId,
             offer_phase_duration: Time,
             cooldown_phase_duration: Time,
-            time_factor: Time,
         ) -> Self {
-            let time_factor = match time_factor {
-                0 => 1,
-                _ => time_factor,
-            };
-
             Self {
                 admin: Self::env().caller(),
                 fractionalizer,
                 loan_nonce: Default::default(),
                 offer_phase_duration,
                 cooldown_phase_duration,
-                time_factor,
                 credit_score: Default::default(),
                 loans: Default::default(),
                 loan_stats: Default::default(),
@@ -499,10 +491,10 @@ mod nft_lending {
 
             const DECIMALS: Balance = 10000;
             const PER_DAY_CHARGE: Balance = 1; // 1/10000 unit => 0.01% per day
-            let day = 86400 * self.time_factor as u128;
+            const DAY: u128 = 86_400_000; // in milliseconds
 
             let borrow_percent: Balance = (100 * (4000 - 3 * credit_score) / credit_score).into();
-            let period_percent = (loan_period as u128) * PER_DAY_CHARGE / day;
+            let period_percent = (loan_period as u128) * PER_DAY_CHARGE / DAY;
 
             // @discuss: Should we put an upper bound on it?
             let total_percent = borrow_percent + period_percent;
