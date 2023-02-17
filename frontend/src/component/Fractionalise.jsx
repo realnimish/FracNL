@@ -1,6 +1,5 @@
 import { Box, Snackbar, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
-import TextField from "@mui/material/TextField";
 import { useSnackbar } from "notistack";
 import { FRACTIONALIZER_ADDRESS, makeQuery, makeTransaction } from "../commons";
 import BN from "bn.js";
@@ -26,7 +25,7 @@ export default function Fractionalise(props) {
   const [selectedErcToken, setSelectedErcToken] = useState(null);
   const [selectedFracToken, setSelectedFracToken] = useState(null);
   const [isApprovedFractionalizer, setIsApprovedFractionalizer] =
-  useState(false);
+    useState(false);
   const [isFractionalized, setIsFractionalized] = useState(false);
   const handleErcTokenChange = (e) => {
     setSelectedErcToken(e.target.value);
@@ -121,7 +120,7 @@ export default function Fractionalise(props) {
   };
 
   const fetchDefracTabData = () => {
-    getUserFractionHolding(); 
+    getUserFractionHolding();
   };
 
   const getErcTokens = async () => {
@@ -254,7 +253,6 @@ export default function Fractionalise(props) {
     }
   };
 
-
   const fractionaliseNFT = async () => {
     console.log("Fractionalise Called");
     try {
@@ -282,7 +280,7 @@ export default function Fractionalise(props) {
         }
       ).catch((err) => {
         enqueueSnackbar("" + err, { variant: "error" });
-       });
+      });
     } catch (err) {
       enqueueSnackbar(err, { variant: "error" });
     }
@@ -316,7 +314,8 @@ export default function Fractionalise(props) {
     console.log("defractionlize called");
     console.log("selected Frac Token: ", selectedFracToken);
     console.log("address: ", props.activeAccount.address);
-    if (selectedFracToken === null || !props.activeAccount.address) return false;
+    if (selectedFracToken === null || !props.activeAccount.address)
+      return false;
     try {
       await makeTransaction(
         props.api,
@@ -337,11 +336,11 @@ export default function Fractionalise(props) {
         () => {
           enqueueSnackbar("Transaction submitted", {
             variant: "info",
-          });          
+          });
         }
       ).catch((err) => {
         enqueueSnackbar("" + err, { variant: "error" });
-       });
+      });
     } catch (err) {
       enqueueSnackbar(err, { variant: "error" });
     }
@@ -349,7 +348,7 @@ export default function Fractionalise(props) {
 
   return (
     <div class="wrapper">
-      (<div class="tabs">
+      <div class="tabs">
         <button
           class="navTab active"
           data-toggle="frac"
@@ -357,7 +356,9 @@ export default function Fractionalise(props) {
             fontFamily: "'Ubuntu Condensed', sans-serif",
             borderTopLeftRadius: "30px",
           }}
-          onClick={() => {getErcTokens()}}
+          onClick={() => {
+            getErcTokens();
+          }}
         >
           Fractionalize
         </button>
@@ -368,7 +369,9 @@ export default function Fractionalise(props) {
             fontFamily: "'Ubuntu Condensed', sans-serif",
             borderTopRightRadius: "30px",
           }}
-          onClick={() => {getFracTokens()}}
+          onClick={() => {
+            getFracTokens();
+          }}
         >
           Defractionalize
         </button>
@@ -433,20 +436,24 @@ export default function Fractionalise(props) {
             </Typography>
             <div
               className={
-                "btn " + 
+                "btn " +
                 (isFractionalized || isApprovedFractionalizer
-                 ? "btn-done"
-                 : "btn-green")
-                }
+                  ? "btn-done"
+                  : "btn-green")
+              }
               tabIndex={1}
               style={{
                 fontFamily: "'Ubuntu Condensed', sans-serif",
               }}
-              onClick={() => !isFractionalized && !isApprovedFractionalizer && approveFractionalised()}
+              onClick={() =>
+                !isFractionalized &&
+                !isApprovedFractionalizer &&
+                approveFractionalised()
+              }
             >
               {isFractionalized || isApprovedFractionalizer
-               ? "Approved"
-               : "Approve"}
+                ? "Approved"
+                : "Approve"}
             </div>
           </Box>
           <Box
@@ -459,9 +466,7 @@ export default function Fractionalise(props) {
             className="buttonContainer"
           >
             <div
-              className={
-                "btn " + (isFractionalized ? "btn-done" : "btn-green")
-              }
+              className={"btn " + (isFractionalized ? "btn-done" : "btn-green")}
               tabIndex={1}
               style={{
                 fontFamily: "'Ubuntu Condensed', sans-serif",

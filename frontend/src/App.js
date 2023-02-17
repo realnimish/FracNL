@@ -1,5 +1,5 @@
 import "./App.css";
-import { Box, List } from "@mui/material";
+import { Box, List, Typography } from "@mui/material";
 import NavBar from "./component/Navbar";
 import { useState, useEffect } from "react";
 import { web3FromSource } from "@polkadot/extension-dapp";
@@ -122,12 +122,41 @@ function App() {
             exact
             path="/fractionalise"
             element={
-              <Fractionalise
-                activeAccount={activeAccount}
-                contracts={contracts}
-                api={api}
-                signer={signer}
-              />
+              !activeAccount ? (
+                <Box
+                  sx={{
+                    marginTop: "350px",
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontFamily: "'Ubuntu Condensed', sans-serif",
+                      height: "100px",
+                      width: "300px",
+                      color: "white",
+                      background: "#0d0d0d",
+                      boxShadow: "0px 0px 5px #232323",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    variant={"h6"}
+                    textAlign={"center"}
+                  >
+                    Connect your wallet
+                  </Typography>{" "}
+                </Box>
+              ) : (
+                <Fractionalise
+                  activeAccount={activeAccount}
+                  contracts={contracts}
+                  api={api}
+                  signer={signer}
+                />
+              )
             }
           />
           <Route

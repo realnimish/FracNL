@@ -144,11 +144,11 @@ export async function makeQuery(
 
 export const NETWORK_ENDPOINT = "wss://aleph-zero-testnet-rpc.dwellir.com";
 export const ERC721_ADDRESS =
-  "5H6c9nBe9CjfWuJRG9bs1hCauutvSVoUpXzeDdTWyorFAe2y";
+  "5CP32T4iEE2RdneJpy2oDMRKtQyQBJ1udzM6aJjaENpgPpWQ";
 export const FRACTIONALIZER_ADDRESS =
-  "5GqzsUfZoo5kdkm5V25vbbL1DB4KUjYbtLgan5ySYEDBzGcW";
+  "5H7ykdx3ssNEMXKw6K9th4jiTQ8kWYiCJjV24SJGYpxd378f";
 export const NFT_LENDING_ADDRESS =
-  "5GofZJ1YWGa4UJnNH2RCM1uxiZjvrECRJawvvGRX3jJzVZmu";
+  "5Cj5FxECJAN3YZJ4rAecwREiz4mXwt7ZKBVLaNgVLQQznqZf";
 
 export const ABI_ERC721 = {
   source: {
