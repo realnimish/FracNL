@@ -6,21 +6,13 @@ The borrower doesn't lose complete ownership of their collateral in case the loa
 
 ## Project Flow
 
-TODO
+### Borrowers' user flow
 
-### Mint NFT
+![borrower-user-flow](./user_flow_borrower.png)
 
-### List F-NFT for loan
+### Lenders' user flow
 
-### Open-Loan ohase
-
-#### Offer phase
-
-#### Cooldown phase
-
-### Active-Loan ohase
-
-### Loan settlement
+![lender-user-flow](./user_flow_lender.png)
 
 ## Economic Model
 
@@ -37,17 +29,18 @@ TODO
 
 ## Technical complexity
 
-### Smart Contract
+There are three contracts in our project:
 
-TODO
+* NFT contract (ERC721 compliant):
+A demo erc721 contract which accepts URI field during mint.
 
-### Frontend
+* NFT Fractionalizer contract (ERC1155 compliant):
+The contract allows to fractionalize multiple NFTs in a single contract because of the ERC1155 standard. The contract additionally implements `fractionalizer`, `defractionalizer`and `total_supply`.
 
-TODO
+* NFT Lending contract (supports ERC1155TokenReceiver):
+This is the main contract which deals with loan creation, offer management & loan settlement.
 
-### Integration
-
-TODO
+We need to use low-level call-builder to do cross-contract calls as there were events in all the contracts so we couldn't directly include the depenedant contract in the other one.
 
 ## Daily/mass usability
 
@@ -57,7 +50,11 @@ The platform can possibly be extended to allow lenders to access/rent the locked
 
 ## Impact of project
 
-TODO
+* The project is build using ink v4 which utilises both NFT & DeFi specs. It also makes use of advance feature like low-level cross-contract calls. Therefore, We believe that our project will act as a great source of reference for future builders and projects utilizing the given tech stack.
+
+* Never seen before features(1-to-many relation, borrower protection) have been introduced in our F-NFT Lending platform.
+
+* Develop the NFT & DeFi space in the polkadot ecosystem
 
 ## Future work
 
