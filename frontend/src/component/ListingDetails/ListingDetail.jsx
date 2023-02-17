@@ -349,7 +349,7 @@ export default function ListingDetail(props) {
           (parseFloat(loanStats.interest) / parseFloat(loanStats.raised)) * 100
         );
     }
-  }, [listingDetails.askAmount, loanStats.interest]);
+  }, [loanStats.raised, loanStats.interest]);
 
   useEffect(() => {
     getCreditScore();
