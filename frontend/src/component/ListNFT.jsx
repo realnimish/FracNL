@@ -51,13 +51,13 @@ export default function ListNFT(props) {
   }, [selectedToken]);
 
   useEffect(() => {
-      let erc = ercTokens.map((token) => {
-        return {
-          tokenId: token,
-          fractionalized: false,
-          ownership: "100%",
-        };
-      });
+    let erc = ercTokens.map((token) => {
+      return {
+        tokenId: token,
+        fractionalized: false,
+        ownership: "100%",
+      };
+    });
 
     let frac = fracTokens.map((token) => {
       return {
@@ -399,7 +399,11 @@ export default function ListNFT(props) {
               onClick={() =>
                 navigate("/listing/" + val.contractEvents[0].args[0].toHuman())
               }
-              style={{ textDecoration: "none", color: "white", cursor: "pointer" }}
+              style={{
+                textDecoration: "none",
+                color: "white",
+                cursor: "pointer",
+              }}
             >
               {" Transaction Finalized, Click to go to ad details #" +
                 val.contractEvents[0].args[0].toHuman()}
@@ -528,7 +532,7 @@ export default function ListNFT(props) {
                 {tokensList.map((token, idx) => (
                   <option value={token.tokenId} key={idx}>
                     {"Token Id : " +
-                      token.tokenId +
+                      (token.tokenId ? token.tokenId : "Not selected") +
                       (token.fractionalized
                         ? " (Fractionalized) (Ownership " +
                           token.ownership +
@@ -736,8 +740,13 @@ export default function ListNFT(props) {
                         : "Approve for all"}
                     </div>
                   </Box>
-                  <Typography textAlign={"center"} sx={{marginTop: "20px", color: "gray"}}>
-                    {"Collateral required: " + collateralRequired/1000_000_000_000 + "TZERO"}
+                  <Typography
+                    textAlign={"center"}
+                    sx={{ marginTop: "20px", color: "gray" }}
+                  >
+                    {"Collateral required: " +
+                      collateralRequired / 1000_000_000_000 +
+                      "TZERO"}
                   </Typography>
                   <Box
                     sx={{

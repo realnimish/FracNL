@@ -26,6 +26,74 @@ export default function CarouselComponent(props) {
     targetEl.scroll({ left: targetEl.scrollLeft + val, behavior: "smooth" });
   };
   const [loans, setLoans] = useState([]);
+  const [fracTokens, setFracTokens] = useState([]);
+  const [ercTokens, setErcTokens] = useState([]);
+  const [tokensList, setTokensList] = useState([]);
+
+  const getUserTokens = async () => {
+    try {
+      // Get from ERC721
+      await makeQuery(
+        props.api,
+        props.contracts,
+        props.activeAccount,
+        "erc721",
+        "getUserTokens",
+        0,
+        [props.activeAccount?.address],
+        (val) => {
+          console.log("getUserTokens erc : ", val);
+          setErcTokens(val.Ok);
+        }
+      ).catch((err) => {
+        console.log("getUserTokens erc", err);
+      });
+      // Get from fractionalised
+      await makeQuery(
+        props.api,
+        props.contracts,
+        props.activeAccount,
+        "fractionalizer",
+        "getUserHoldings",
+        0,
+        [props.activeAccount?.address],
+        (val) => {
+          console.log("getUserTokens frac : ", val);
+          setFracTokens(val.Ok);
+        },
+        (val) => {
+          console.log("Error on getUserTokens frac", val);
+        }
+      ).catch((err) => {
+        console.log("getUserTokens frac", err);
+      });
+    } catch (err) {
+      console.log("getUserTokens", err);
+    }
+  };
+
+  useEffect(() => {
+    let erc = ercTokens.map((token) => {
+      return {
+        tokenId: token,
+        fractionalized: false,
+        ownership: "100%",
+      };
+    });
+
+    let frac = fracTokens.map((token) => {
+      return {
+        tokenId: token[0],
+        fractionalized: true,
+        ownership:
+          (token[1].replace(/,/g, "") * 100) / token[2].replace(/,/g, "") + "%",
+      };
+    });
+
+    console.log("List ", erc, frac);
+    setTokensList([...erc, ...frac]);
+  }, [ercTokens, fracTokens]);
+
   const getUserLoans = async () => {
     if (!props.address) return;
     try {
@@ -51,6 +119,7 @@ export default function CarouselComponent(props) {
 
   useEffect(() => {
     props.isLoan && getUserLoans();
+    props.isNFT && getUserTokens();
   }, [props.address]);
 
   console.log("loans", loans);
@@ -114,6 +183,35 @@ export default function CarouselComponent(props) {
           marginTop: "45px",
         }}
       >
+        {((props.isLoan && loans.length === 0) ||
+          (props.isNFT && tokensList.length === 0)) && (
+          <Box
+            sx={{
+              marginTop: "50px",
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: "'Ubuntu Condensed', sans-serif",
+                height: "100px",
+                width: "300px",
+                color: "white",
+                background: "#0d0d0d",
+                boxShadow: "0px 0px 5px #232323",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              variant={"h6"}
+              textAlign={"center"}
+            >
+              No items to show
+            </Typography>{" "}
+          </Box>
+        )}
         {loans?.map((item, idx) => {
           return (
             props.isLoan && (
@@ -128,10 +226,105 @@ export default function CarouselComponent(props) {
             )
           );
         })}
+        {tokensList?.map((item, idx) => {
+          return (
+            props.isNFT && (
+              <RenderNFTItem
+                item={item}
+                activeAccount={props.activeAccount}
+                contracts={props.contracts}
+                api={props.api}
+                signer={props.signer}
+                key={idx}
+              />
+            )
+          );
+        })}
       </Box>
     </Box>
   );
 }
+
+const RenderNFTItem = (props) => {
+  const [imageUrl, setImageUrl] = useState("");
+  const getTokenURI = async () => {
+    if (!props?.item?.tokenId) return;
+    try {
+      await makeQuery(
+        props.api,
+        props.contracts,
+        props.activeAccount,
+        "erc721",
+        "getTokenUri",
+        0,
+        [props.item.tokenId],
+        (val) => {
+          console.log("getTokenURI : ", val);
+          setImageUrl(val.Ok);
+        }
+      ).catch((err) => {
+        console.log("getTokenURI", err);
+      });
+    } catch (err) {
+      console.log("getTokenURI", err);
+    }
+  };
+  useEffect(() => {
+    getTokenURI();
+  }, [props.item.tokenId]);
+
+  console.log("image URL", imageUrl);
+
+  return (
+    <Box sx={{ margin: "0 40px" }}>
+      <Box
+        sx={{
+          height: "fit-content",
+          width: "300px",
+          padding: "20px",
+          cursor: "pointer",
+          borderRadius: "50px",
+        }}
+        tabIndex={1}
+        className="card"
+      >
+        <Box
+          sx={{
+            height: "calc(100% - 40px)",
+            width: "300px",
+            borderRadius: "50px",
+            position: "absolute",
+            top: "0",
+            right: "0",
+            padding: "20px",
+          }}
+          className="cardClone"
+        ></Box>
+        <img
+          src={"https://ipfs.io/ipfs/" + imageUrl}
+          style={{ width: "100%", borderRadius: "30px", marginBottom: "15px" }}
+        />
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <Typography variant="body1" sx={{ marginTop: "5px", color: "gray", marginRight: "5px"}}>
+            Token Id:{" "}
+          </Typography>
+          <Typography variant="body1" sx={{ marginTop: "5px" }}>
+            {props.item.tokenId}{" "}
+          </Typography>
+        </Box>
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <Typography variant="body1" sx={{ marginTop: "5px", color: "gray", marginRight: "5px"}}>
+            Fractionalised: 
+          </Typography>
+          <Typography variant="body1" sx={{ marginTop: "5px" }}>
+
+            {!props.item.fractionalized ? "NO": props.item.ownership}
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
 
 const RenderLoanItem = (props) => {
   console.log("RenderLoanItem");
@@ -273,7 +466,7 @@ const RenderLoanItem = (props) => {
 
   useEffect(() => {
     getTokenURI();
-  },[listingDetails.tokenId]);
+  }, [listingDetails.tokenId]);
 
   return (
     <Box sx={{ margin: "0 40px" }}>
@@ -282,9 +475,9 @@ const RenderLoanItem = (props) => {
         image={"https://ipfs.io/ipfs/" + imageUrl}
         askValue={listingDetails.askAmount + "TZERO"}
         duration={listingDetails.duration + "Day(s)"}
-        fraction={listingDetails.holding/1000_000 + "%"}
+        fraction={listingDetails.holding / 1000_000 + "%"}
         status={status}
-        link={"/listing/"+props.loanId}
+        link={"/listing/" + props.loanId}
       />
     </Box>
   );
