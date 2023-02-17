@@ -97,6 +97,7 @@ export default function MintNFT(props) {
             setCID("");
             setUploadImageClicked(false);
             setImageUrl(null);
+            setFile(null);
           }
         ).catch((err) => {
           enqueueSnackbar("" + err, { variant: "error" });
@@ -120,7 +121,7 @@ export default function MintNFT(props) {
     if (file) {
       uploadToIpfs();
     }
-  }, [file]);
+  }, [selectedImage?.name]);
 
   return (
     <Box
@@ -222,6 +223,7 @@ export default function MintNFT(props) {
                   id="UploadImage"
                   style={{ display: "none" }}
                   onChange={(e) => {
+                    setFile(null);
                     setCID("");
                     setSelectedImage(e.target.files[0]);
                     setFile(document.querySelector('input[type="file"]'));
