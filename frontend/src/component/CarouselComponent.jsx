@@ -40,7 +40,7 @@ export default function CarouselComponent(props) {
         "erc721",
         "getUserTokens",
         0,
-        [props.activeAccount?.address],
+        [props.address],
         (val) => {
           console.log("getUserTokens erc : ", val);
           setErcTokens(val.Ok);
@@ -56,7 +56,7 @@ export default function CarouselComponent(props) {
         "fractionalizer",
         "getUserHoldings",
         0,
-        [props.activeAccount?.address],
+        [props.address],
         (val) => {
           console.log("getUserTokens frac : ", val);
           setFracTokens(val.Ok);
@@ -302,7 +302,7 @@ const RenderNFTItem = (props) => {
         ></Box>
         <img
           src={"https://ipfs.io/ipfs/" + imageUrl}
-          style={{ width: "100%", borderRadius: "30px", marginBottom: "15px" }}
+          style={{ width: "100%", borderRadius: "30px", marginBottom: "15px", minHeight: "300px" }}
         />
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
           <Typography variant="body1" sx={{ marginTop: "5px", color: "gray", marginRight: "5px"}}>

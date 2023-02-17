@@ -7,6 +7,8 @@ export default function StatusAndTimer(props) {
     if (timer > 0) {
       const interval = setInterval(() => setTimer(timer - 1), 1000);
       return () => clearInterval(interval);
+    } else if(timer < 0) {
+      setTimer(0);
     }
   }, [timer]);
 

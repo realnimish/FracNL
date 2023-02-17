@@ -43,7 +43,7 @@ export default function ListingDetail(props) {
   const [interestRate, setInterestRate] = useState(0);
 
   const [imageUrl, setImageUrl] = useState(
-    "bafybeigibdc4ee4kgnpyfdx4r5k6fcyxtdhv73zmzobrab4rkcueoywcsm/mftimg1.png"
+    "bafybeiav6tzqsax6oj5fxj664krgwf3gruwyvh34kpkwu6cp4wtb4qe3wu/placeholder.jpeg"
   );
 
   const [status, setStatus] = useState("");

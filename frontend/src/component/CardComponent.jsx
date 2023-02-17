@@ -73,7 +73,7 @@ export default function Card(props) {
         ></Box>
         <img
           src={props.image}
-          style={{ width: "100%", borderRadius: "30px", marginBottom: "15px" }}
+          style={{ width: "100%", borderRadius: "30px", marginBottom: "15px", minHeight:"300px" }}
           onError={() => (this.src = "../assets/placeholder.jpg")}
         />
         <TextRow
