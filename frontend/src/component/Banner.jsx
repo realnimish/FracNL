@@ -22,7 +22,7 @@ export default function Banner(props) {
         </Typography>
       </Box>
       <Box className="container">
-        {new Array(150).fill(0).map((item, idx) => {
+        {new Array(250).fill(0).map((item, idx) => {
           return <div key={idx}></div>;
         })}
       </Box>
