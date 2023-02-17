@@ -51,13 +51,13 @@ export default function ListNFT(props) {
   }, [selectedToken]);
 
   useEffect(() => {
-    let erc = ercTokens.map((token) => {
-      return {
-        tokenId: token,
-        fractionalized: false,
-        ownership: "100%",
-      };
-    });
+      let erc = ercTokens.map((token) => {
+        return {
+          tokenId: token,
+          fractionalized: false,
+          ownership: "100%",
+        };
+      });
 
     let frac = fracTokens.map((token) => {
       return {
