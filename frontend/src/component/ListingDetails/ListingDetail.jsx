@@ -341,13 +341,13 @@ export default function ListingDetail(props) {
 
   useEffect(() => {
     if (
-      listingDetails.askAmount &&
+      loanStats &&
       loanStats.interest &&
-      listingDetails.askAmount != 0
+      loanStats.raised != 0
     ) {
-      setInterestRate(
-        (parseFloat(loanStats.interest) / parseFloat(loanStats.raised)) * 100
-      );
+        setInterestRate(
+          (parseFloat(loanStats.interest) / parseFloat(loanStats.raised)) * 100
+        );
     }
   }, [listingDetails.askAmount, loanStats.interest]);
 
@@ -408,7 +408,10 @@ export default function ListingDetail(props) {
               >
                 Owner Address :{" "}
               </Typography>
-              <Link to={"/profile/" + listingDetails.creatorAddress} style={{color: "white"}}>
+              <Link
+                to={"/profile/" + listingDetails.creatorAddress}
+                style={{ color: "white" }}
+              >
                 <Typography
                   variant="h6"
                   sx={{ marginTop: "5px", textShadow: "0px 2px 3px white" }}
