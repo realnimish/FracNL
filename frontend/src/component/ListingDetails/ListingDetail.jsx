@@ -551,7 +551,7 @@ export default function ListingDetail(props) {
                       Start Loan
                     </div>
                   )}
-                {loanStats.loanStatus == loanStatus.open && (
+                {loanStats.loanStatus == loanStatus.open && props.activeAccount.address === listingDetails.creatorAddress && (
                   <div
                     className="btn btn-red"
                     tabIndex={1}
