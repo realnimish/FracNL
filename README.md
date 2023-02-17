@@ -36,7 +36,19 @@ TODO
 
 ### Frontend
 
-TODO
+## Setup
+For setting up the frontend, move to `frontend` directory.  
+```bash
+cd frontend
+```
+Install the dependencies by running  
+```bash
+npm install
+```
+Run the following command to build the frontend in the local machine
+```bash
+npm start
+```
 
 ### Integration
 
