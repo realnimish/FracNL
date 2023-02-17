@@ -1,6 +1,8 @@
-# FracNL
+# FracNL (Fractional NFT Lending)
 
-TODO
+FracNL [(https://fracnl.vercel.app)](https://fracnl.vercel.app) is a DeFi NFT lending platform where borrowers can lock some fraction of their NFTs as collateral and multiple users can participate as lender against any given listing.  
+The platform maintains a credit score system for borrowers and requires them to submit some additional tokens (amount based on their credit score) as security during the listing. The security is used to pay the lenders incase of a default, otherwise it goes to the platform as fees if the loan is executed.  
+The borrower doesn't lose complete ownership of their collateral in case the loan is defaulted, they get back some amount of their locked shares back based on the percentage of principal amount returned (only after full interest is paid within the loan period).
 
 ## Project Flow
 
@@ -22,11 +24,16 @@ TODO
 
 ## Economic Model
 
-TODO
+* Borrowers pays a security fee during loan listing, This value depends on the loan-amount, loan-period, & credit score.
+* If the loan is cancelled, Platform charges a flat cancellation fee and remaining collateral is released.
+* If the loan is executed, The security fee is used as a collateral in case of default and the remaining amount is charged as the platform handling fees.
+* A credit score is maintained which tells the lender about the borrowers' creditability and impacts the security fee charged during loan listing.
 
 ## Novelty/Originality
   
-TODO
+* FracNL provides one of a kind lending platform for fractional NFTs
+* Multiple lenders can jointly lend in a single listing with their own expected returns.
+* Borrower doesn't lose complete ownership of their collateral on partial repayment of principal loan.
 
 ## Technical complexity
 
@@ -36,19 +43,7 @@ TODO
 
 ### Frontend
 
-## Setup
-For setting up the frontend, move to `frontend` directory.  
-```bash
-cd frontend
-```
-Install the dependencies by running  
-```bash
-npm install
-```
-Run the following command to build the frontend in the local machine
-```bash
-npm start
-```
+TODO
 
 ### Integration
 
@@ -56,7 +51,9 @@ TODO
 
 ## Daily/mass usability
 
-TODO
+Our project widens the scope of DeFi with the introduction of fractional NFT lending with unique features like 1-to-many relation between borrower and lenders, collateral protection for borrowers on partial repayment; protection of lenders on loan default.
+
+The platform can possibly be extended to allow lenders to access/rent the locked collateral during the loan period and benefit from the given NFT's utility (e.g. equipable game items).
 
 ## Impact of project
 
@@ -72,7 +69,7 @@ TODO
 
     * Refine the frontend & Improve the UX.
     * Search and sort feature for finding listed loans.
-    * Add off-chain notification system to notify users on update.
+    * Add off-chain notification system to notify users on updates.
     * Improved analytics
 
     and many more…
