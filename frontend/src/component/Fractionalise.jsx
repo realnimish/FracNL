@@ -115,6 +115,15 @@ export default function Fractionalise(props) {
     getUserFractionHolding();
   }, [selectedFracToken]);
 
+  const fetchFracTabData = () => {
+    getIsFractionalised();
+    isTokenIdApprovedForFractionalised();
+  };
+
+  const fetchDefracTabData = () => {
+    getUserFractionHolding(); 
+  };
+
   const getErcTokens = async () => {
     try {
       // get from ERC 721
@@ -245,6 +254,7 @@ export default function Fractionalise(props) {
     }
   };
 
+
   const fractionaliseNFT = async () => {
     console.log("Fractionalise Called");
     try {
@@ -263,6 +273,7 @@ export default function Fractionalise(props) {
           });
           getIsFractionalised();
           getUserFractionHolding();
+          setSelectedErcToken(null);
         },
         () => {
           enqueueSnackbar("Transaction submitted", {
@@ -301,9 +312,44 @@ export default function Fractionalise(props) {
     }
   };
 
+  const defractionaliseNFT = async () => {
+    console.log("defractionlize called");
+    console.log("selected Frac Token: ", selectedFracToken);
+    console.log("address: ", props.activeAccount.address);
+    if (selectedFracToken === null || !props.activeAccount.address) return false;
+    try {
+      await makeTransaction(
+        props.api,
+        props.contracts,
+        props.activeAccount,
+        "fractionalizer",
+        "defractionlize",
+        props.signer,
+        0,
+        [selectedFracToken, props.activeAccount.address],
+        () => {
+          enqueueSnackbar("Transaction Finalized", {
+            variant: "Success",
+          });
+          getFracTokens();
+          setSelectedFracToken(null);
+        },
+        () => {
+          enqueueSnackbar("Transaction submitted", {
+            variant: "info",
+          });          
+        }
+      ).catch((err) => {
+        enqueueSnackbar("" + err, { variant: "error" });
+       });
+    } catch (err) {
+      enqueueSnackbar(err, { variant: "error" });
+    }
+  };
+
   return (
     <div class="wrapper">
-      <div class="tabs">
+      (<div class="tabs">
         <button
           class="navTab active"
           data-toggle="frac"
@@ -311,6 +357,7 @@ export default function Fractionalise(props) {
             fontFamily: "'Ubuntu Condensed', sans-serif",
             borderTopLeftRadius: "30px",
           }}
+          onClick={() => {getErcTokens()}}
         >
           Fractionalize
         </button>
@@ -321,6 +368,7 @@ export default function Fractionalise(props) {
             fontFamily: "'Ubuntu Condensed', sans-serif",
             borderTopRightRadius: "30px",
           }}
+          onClick={() => {getFracTokens()}}
         >
           Defractionalize
         </button>
@@ -360,7 +408,7 @@ export default function Fractionalise(props) {
               {ercTokensList.map((token, idx) => (
                 <option value={token.tokenId} key={idx}>
                   {"Token Id : " +
-                    token.tokenId +
+                    (token.tokenId ? token.tokenId : "Not Selected") +
                     (token.fractionalized
                       ? " (Fractionalized) (Ownership " + token.ownership + ")"
                       : "")}
@@ -456,38 +504,13 @@ export default function Fractionalise(props) {
               {fracTokensList.map((token, idx) => (
                 <option value={token.tokenId} key={idx}>
                   {"Token Id: " +
-                    token.tokenId +
+                    (token.tokenId ? token.tokenId : "Not Selected") +
                     (token.fractionalized
                       ? " (Fractionalized) (Ownership " + token.ownership + ")"
                       : "")}
                 </option>
               ))}
             </select>
-          </Box>
-          <Box
-            component="div"
-            sx={{
-              display: "flex",
-              marginLeft: "15%",
-              marginBottom: "50px",
-            }}
-          >
-            <Typography
-              variant="subtitle2"
-              sx={{ color: "#404258", marginRight: "30px" }}
-            >
-              {" "}
-              * Disapprove your ERC 721 NFT
-            </Typography>
-            <div
-              className="btn btn-red"
-              tabIndex={1}
-              style={{
-                fontFamily: "'Ubuntu Condensed', sans-serif",
-              }}
-            >
-              Disapprove
-            </div>
           </Box>
           <Box
             sx={{
@@ -504,8 +527,9 @@ export default function Fractionalise(props) {
               style={{
                 fontFamily: "'Ubuntu Condensed', sans-serif",
               }}
+              onClick={() => defractionaliseNFT()}
             >
-              Defractionalize your NFT
+              Defractionalize NFT
             </div>
           </Box>
         </div>
