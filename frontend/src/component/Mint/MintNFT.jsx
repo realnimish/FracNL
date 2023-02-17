@@ -81,9 +81,9 @@ export default function MintNFT(props) {
           [CID + "/" + selectedImage.name],
           (val) => {
             enqueueSnackbar(
-              "Transaction Finalized: Token Id : " +
-                val.contractEvents[0].args[2].toHuman() +
-                " minted",
+              "Transaction Finalized: Minted Token Id " +
+                val.contractEvents[0].args[2].toHuman() 
+                ,
               {
                 variant: "success",
               }
