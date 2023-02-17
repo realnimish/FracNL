@@ -280,7 +280,7 @@ const OfferRow = (props) => {
                 {parseInt(settlement.returned / 1000_000_000) / 1000 +
                   " TZERO " +
                   (settlement.nftHolding !== 0
-                    ? "  &  " + settlement.nftHolding + "%"
+                    ? "  &  " + parseFloat(settlement.nftHolding).toPrecision(4) + "%"
                     : "")}
               </Typography>
             </Box>

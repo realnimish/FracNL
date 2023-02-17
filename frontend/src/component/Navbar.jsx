@@ -175,9 +175,9 @@ export default function NavBar(props) {
   const location = useLocation();
   const navItems = [
     { text: "Home", link: "/", exact: true },
-    { text: "Fractionalise", link: "/fractionalise" },
     { text: "Mint", link: "/mint" },
-    { text: "Create an Ad", link: "/list" },
+    { text: "Fractionalise", link: "/fractionalise" },
+    { text: "Create a listing", link: "/list" },
   ];
   const [activeTab, setActiveTab] = useState("");
   const [openDrawer, setOpenDrawer] = useState(false);

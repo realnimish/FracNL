@@ -12,6 +12,7 @@ import { makeQuery } from "../commons";
 
 export default function Profile(props) {
   let { address } = useParams();
+
   const copyToClipboard = async () => {
     handleTooltipOpen();
     if ("clipboard" in navigator) {
@@ -20,13 +21,16 @@ export default function Profile(props) {
       return document.execCommand("copy", true, address);
     }
   };
+
   const [open, setOpen] = useState(false);
+
   const [stats, setStats] = useState({
     totalRaised: "0",
     totalOffered: "0",
     totalInterest: "0",
   });
   const [score, setScore] = useState(null);
+
   const handleTooltipClose = () => {
     setOpen(false);
   };
@@ -35,10 +39,6 @@ export default function Profile(props) {
     setOpen(true);
   };
 
-  // all loans
-  // stats
-  // tokens
-  // frac tokens
   const getUserStats = async () => {
     if (!address) return;
     try {
@@ -323,8 +323,19 @@ export default function Profile(props) {
           </Box>
           <Box>
             <CarouselComponent
-              title={"Created Ads"}
+              title={"Created listings"}
               isLoan={true}
+              activeAccount={props.activeAccount}
+              contracts={props.contracts}
+              api={props.api}
+              signer={props.signer}
+              address={address}
+            />
+          </Box>
+          <Box>
+            <CarouselComponent
+              title={"Your NFTs"}
+              isNFT={true}
               activeAccount={props.activeAccount}
               contracts={props.contracts}
               api={props.api}
